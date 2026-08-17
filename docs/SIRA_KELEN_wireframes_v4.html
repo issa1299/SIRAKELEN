@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIRA KELEN — Wireframes v4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1D1D1B; --ink-soft:#54524C; --muted:#8A877E; --faint:#C3C0B6;
+  --line:#D8D5CA; --line-soft:#E9E7DF; --panel:#EFEDE5; --panel-2:#E2DFD3; --bg:#F6F5F0; --white:#fff;
+  --font:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+  --r-s:8px; --r-m:14px; --r-l:20px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);padding:56px 24px 100px;color:var(--ink);-webkit-font-smoothing:antialiased}
+svg.ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.icondefs{position:absolute;width:0;height:0;overflow:hidden}
+
+.page-header{max-width:1220px;margin:0 auto 8px;text-align:center}
+.eyebrow{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:2.4px;text-transform:uppercase;color:var(--muted)}
+.page-header h1{font-size:29px;font-weight:700;margin-top:10px;letter-spacing:-.4px}
+.page-header p{color:var(--ink-soft);font-size:14px;margin-top:10px;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.6}
+
+.changelog{max-width:660px;margin:24px auto 0;background:var(--white);border:1px solid var(--line);border-radius:var(--r-m);padding:16px 20px}
+.changelog .t{font-family:var(--mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px}
+.changelog ul{padding-left:18px;font-size:12.5px;line-height:1.65;color:var(--ink-soft)}
+.changelog li{margin-bottom:3px}
+
+.click-summary{max-width:640px;margin:22px auto 0;background:var(--white);border:1px solid var(--line);border-radius:var(--r-m);padding:14px 18px;display:flex;gap:22px;justify-content:center;flex-wrap:wrap}
+.click-summary .item{text-align:center}
+.click-summary .num{font-family:var(--mono);font-size:21px;font-weight:700}
+.click-summary .lbl{font-size:10.5px;color:var(--muted);margin-top:2px}
+
+.section-row{max-width:1220px;margin:64px auto 22px;display:flex;align-items:baseline;gap:13px}
+.section-row .tag{font-family:var(--mono);font-size:10.5px;font-weight:700;background:var(--ink);color:#fff;padding:3px 9px;border-radius:5px;letter-spacing:.5px}
+.section-row h2{font-size:16px;font-weight:700}
+.section-row .sub{font-size:12px;color:var(--muted)}
+.section-row .line{flex:1;height:1px;background:var(--line)}
+
+.pair{max-width:1220px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:36px}
+.unit{display:flex;flex-direction:column;align-items:center}
+.state-label{font-family:var(--mono);font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:1.1px;color:var(--muted);margin-bottom:13px;text-align:center}
+
+/* PHONE FRAME */
+.wf-frame{width:298px;border:1.5px solid var(--ink);border-radius:26px;background:var(--white);overflow:hidden;box-shadow:0 1px 2px rgba(29,29,27,.04), 0 16px 32px -18px rgba(29,29,27,.18)}
+.wf-status{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 6px;font-family:var(--mono);font-size:11px;font-weight:600}
+.wf-status .dots{display:flex;gap:3px;align-items:center}
+.wf-status .dots span{width:3px;height:3px;border-radius:50%;background:var(--ink)}
+.wf-nav{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 13px;border-bottom:1px solid var(--line-soft);gap:8px}
+.wf-nav .btn-round{width:28px;height:28px;border:1.3px solid var(--line);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.wf-nav .btn-round svg{width:14px;height:14px}
+.wf-nav .ttl{font-size:13.5px;font-weight:700}
+.wf-nav .spacer{width:28px;flex-shrink:0}
+.wf-content{padding:15px;min-height:530px;display:flex;flex-direction:column}
+
+.ann{display:inline-flex;width:16px;height:16px;border-radius:50%;background:var(--ink);color:#fff;font-size:9px;font-weight:700;align-items:center;justify-content:center;flex-shrink:0;margin-right:6px}
+.ann.new{background:#8A5A1E}
+
+.ph-box{background:repeating-linear-gradient(135deg,var(--panel-2),var(--panel-2) 5px,var(--panel) 5px,var(--panel) 10px);border:1.3px dashed var(--faint);border-radius:var(--r-m)}
+
+.wf-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:11px;padding:20px 8px}
+.wf-empty .icon-ph{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--panel);border:1.3px solid var(--line)}
+.wf-empty .icon-ph svg{width:24px;height:24px;color:var(--faint)}
+.wf-empty h3{font-size:14.5px;font-weight:700}
+.wf-empty p{font-size:11.5px;color:var(--muted);max-width:205px;line-height:1.55}
+
+.wf-btn{background:var(--ink);color:#fff;border:none;border-radius:var(--r-s);padding:12px 18px;font-size:12.5px;font-weight:700;width:100%;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px}
+.wf-btn-outline{background:#fff;border:1.3px solid var(--ink);border-radius:var(--r-s);padding:11px 18px;font-size:12px;font-weight:700;width:100%;text-align:center}
+.wf-btn-ghost{background:transparent;border:none;color:var(--ink-soft);font-size:11.5px;font-weight:600;padding:9px;width:100%;text-align:center}
+.wf-btn-new{background:#fff;border:1.3px solid #8A5A1E;color:#8A5A1E;border-radius:var(--r-s);padding:11px 18px;font-size:12.5px;font-weight:700;width:100%;text-align:center}
+.wf-btn-quiet{background:#fff;border:1.3px solid var(--line);color:var(--ink-soft);border-radius:var(--r-s);padding:10px 18px;font-size:11.5px;font-weight:700;width:100%;text-align:center}
+
+.mine-card{border:1.3px solid var(--ink);border-radius:var(--r-m);padding:12px 13px;margin-bottom:14px}
+.mine-card .row-t{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.mine-card .row-t .lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;display:flex;align-items:center}
+.mine-card .route{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:6px}
+.mine-card .route svg{width:13px;height:13px;color:var(--faint)}
+.mine-card .meta{font-size:10.5px;color:var(--muted);margin-top:4px}
+.mine-card .edit{width:24px;height:24px;border:1.3px solid var(--line);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.mine-card .edit svg{width:12px;height:12px}
+
+.list-label{font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--ink-soft);margin-bottom:9px;display:flex;align-items:center;text-transform:uppercase;letter-spacing:.5px}
+
+.match-card{border:1.3px solid var(--line);border-radius:var(--r-m);padding:11px 12px;margin-bottom:9px;display:flex;gap:10px;align-items:flex-start}
+.match-card .avatar-ph{width:34px;height:34px;border-radius:50%;background:var(--panel-2);border:1.3px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.match-card .avatar-ph svg{width:16px;height:16px;color:var(--faint)}
+.match-card .info{flex:1}
+.match-card .name{font-size:12.5px;font-weight:700}
+.match-card .route-s{font-size:11px;color:var(--ink-soft);margin-top:2px}
+.level-pill{font-family:var(--mono);font-size:9px;font-weight:700;border:1.2px solid var(--ink);border-radius:20px;padding:2.5px 8px;white-space:nowrap;margin-top:6px;display:inline-block}
+.level-fill{background:var(--ink);color:#fff;border-color:var(--ink)}
+.level-half{background:var(--panel-2)}
+
+.field-lbl{font-size:10px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;letter-spacing:.2px;display:flex;align-items:center}
+.field-ph{border:1.3px solid var(--line);border-radius:var(--r-s);padding:11px 12px;font-size:12px;color:var(--ink-soft);margin-bottom:11px;display:flex;align-items:center;gap:8px}
+.field-ph svg{width:14px;height:14px;color:var(--faint);flex-shrink:0}
+.field-row{display:flex;gap:8px}
+.field-row .field-ph{flex:1}
+.field-ph.new{border-color:#8A5A1E;color:var(--ink)}
+.seg-row{display:flex;gap:6px;margin-bottom:11px}
+.seg{flex:1;border:1.3px solid var(--line);border-radius:var(--r-s);text-align:center;padding:9px 4px;font-size:11px;font-weight:700}
+.seg.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+.recap-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:11.5px}
+.recap-row:last-child{border-bottom:none}
+.recap-row .k{color:var(--muted);display:flex;align-items:center;gap:6px}
+.recap-row .k svg{width:13px;height:13px}
+.recap-row .v{font-weight:700}
+.recap-row.new .v{color:#8A5A1E}
+
+.map-ph{height:104px;margin-bottom:12px;position:relative}
+.map-ph .metric{position:absolute;bottom:8px;left:8px;background:#fff;border:1.3px solid var(--ink);border-radius:7px;padding:5px 9px;font-size:10.5px;font-weight:700}
+
+/* MES AD LIST */
+.ad-item{border:1.3px solid var(--line);border-radius:var(--r-m);padding:12px;margin-bottom:10px}
+.ad-item.organized{opacity:.55}
+.ad-item.cancelled{opacity:.42}
+.ad-row-t{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.status-chip{font-family:var(--mono);font-size:9.5px;font-weight:700;border:1.2px solid var(--ink);border-radius:20px;padding:3px 9px;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.status-chip svg{width:10px;height:10px}
+.status-chip.finalizing{border-style:dashed}
+.status-chip.organized{background:var(--ink);color:#fff}
+.status-chip.cancelled{border-color:var(--faint);color:var(--faint)}
+.ad-route{font-size:13px;font-weight:700}
+.ad-route.strike{text-decoration:line-through;text-decoration-color:var(--faint)}
+.ad-meta{font-size:10.5px;color:var(--muted);margin-top:3px}
+.banner{margin-top:8px;border:1.2px dashed var(--ink-soft);border-radius:7px;padding:7px 9px;font-size:10.5px;font-weight:700;text-align:center;color:var(--ink-soft)}
+
+/* REQUEST / RESPONSE CARDS */
+.resp-card{border:1.3px solid var(--line);border-radius:var(--r-m);padding:12px;margin-bottom:10px}
+.resp-card .top{display:flex;gap:10px;align-items:center;margin-bottom:9px}
+.resp-card .avatar-ph{width:38px;height:38px;border-radius:50%;background:var(--panel-2);border:1.3px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.resp-card .avatar-ph svg{width:18px;height:18px;color:var(--faint)}
+.resp-card .name{font-size:12.5px;font-weight:700}
+.resp-card .dist{font-size:10.5px;color:var(--muted);margin-top:1px}
+.resp-actions{display:flex;gap:8px}
+.resp-actions .wf-btn,.resp-actions .wf-btn-outline{padding:9px}
+
+/* PROFIL */
+.profile-head{display:flex;flex-direction:column;align-items:center;text-align:center;padding:6px 0 18px}
+.profile-avatar{width:66px;height:66px;border-radius:50%;background:var(--panel-2);border:1.3px solid var(--line);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.profile-avatar svg{width:28px;height:28px;color:var(--faint)}
+.profile-head h3{font-size:17px;font-weight:700}
+.profile-head .phone{font-size:11.5px;color:var(--muted);margin-top:3px}
+.verify-chip{margin-top:10px;font-family:var(--mono);font-size:9.5px;font-weight:700;border:1.2px solid var(--ink);border-radius:20px;padding:3px 10px;display:inline-flex;align-items:center;gap:5px}
+.verify-chip svg{width:11px;height:11px}
+.stat-row{display:flex;gap:9px;margin-top:16px;margin-bottom:16px}
+.stat-block{flex:1;border:1.3px solid var(--line);border-radius:var(--r-m);padding:12px 8px;text-align:center}
+.stat-block .num{font-family:var(--mono);font-size:17px;font-weight:700}
+.stat-block .lbl{font-size:9.5px;color:var(--muted);margin-top:2px;font-weight:600}
+.menu-row{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--line-soft);text-align:left}
+.menu-row:last-child{border-bottom:none}
+.menu-row .l{display:flex;align-items:center;gap:11px;font-size:12.5px;font-weight:600}
+.menu-row .l svg{width:16px;height:16px;color:var(--ink-soft)}
+.menu-row.danger .l{color:#A3392F}
+.menu-row.danger .l svg{color:#A3392F}
+.menu-row .chev{width:14px;height:14px;color:var(--faint)}
+
+/* NOTIFICATIONS */
+.notif-row{display:flex;gap:11px;padding:12px 0;border-bottom:1px solid var(--line-soft)}
+.notif-row:last-child{border-bottom:none}
+.notif-ico{width:34px;height:34px;border-radius:10px;background:var(--panel);border:1.3px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notif-ico svg{width:16px;height:16px;color:var(--ink-soft)}
+.notif-row h4{font-size:12.5px;font-weight:700}
+.notif-row p{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}
+.notif-time{font-size:10px;color:var(--faint);white-space:nowrap;font-family:var(--mono)}
+
+.tabbar{display:flex;border-top:1.3px solid var(--line);margin-top:auto;padding-top:2px}
+.tabbar .tab{flex:1;text-align:center;padding:9px 0 8px;font-size:9.5px;font-weight:700;color:var(--faint);display:flex;flex-direction:column;align-items:center;gap:4px}
+.tabbar .tab svg{width:18px;height:18px}
+.tabbar .tab.on{color:var(--ink)}
+
+.legend{max-width:300px;margin-top:16px;list-style:none}
+.legend li{display:flex;align-items:flex-start;gap:0;font-size:11.5px;color:var(--ink-soft);line-height:1.55;margin-bottom:8px}
+.legend li .ann{margin-top:1px}
+
+.footer-note{max-width:1220px;margin:70px auto 0;text-align:center;padding:22px;border-top:1px solid var(--line)}
+.footer-note p{font-size:12px;color:var(--muted)}
+
+/* SPLASH & OTP */
+.splash-content{flex:1;display:flex;flex-direction:column;padding:6px 3px}
+.splash-mark{width:52px;height:52px;border:1.3px solid var(--ink);border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:auto}
+.splash-mark svg{width:24px;height:24px}
+.splash-mid{margin:20px 0 28px}
+.splash-mid h1{font-size:23px;font-weight:700;line-height:1.25;letter-spacing:-.3px}
+.splash-mid p{font-size:12.5px;color:var(--ink-soft);margin-top:10px;line-height:1.55;max-width:220px}
+.splash-link{text-align:center;font-size:11.5px;color:var(--ink-soft);margin-top:12px}
+.splash-link b{color:var(--ink)}
+.otp-row{display:flex;gap:9px;justify-content:center;margin:20px 0 8px}
+.otp-box{width:44px;height:52px;border:1.3px solid var(--line);border-radius:var(--r-s);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:18px;font-weight:700}
+.otp-box.on{border-color:var(--ink)}
+.steps-row{display:flex;gap:5px;margin-bottom:16px}
+.step-seg{flex:1;height:3px;border-radius:2px;background:var(--line-soft)}
+.step-seg.done{background:var(--ink)}
+</style>
+</head>
+<body>
+
+<!-- ICON LIBRARY -->
+<div class="icondefs">
+<svg xmlns="http://www.w3.org/2000/svg">
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M4 12L12 5l8 7"/><path d="M6 11v8a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-8"/><path d="M10 20v-5h4v5"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.2" r="3.3"/><path d="M5 20c0-3.6 3.1-6.2 7-6.2s7 2.6 7 6.2"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 15.3v-3.8a6 6 0 0 0-12 0v3.8l-2 2.8h16z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.7 7-11.8A7 7 0 0 0 5 9.2C5 14.3 12 21 12 21z"/><circle cx="12" cy="9.3" r="2.4"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><polyline points="12 7.6 12 12 15.4 14"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5.3" width="16" height="15" rx="2.6"/><line x1="4" y1="9.8" x2="20" y2="9.8"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.4" r="3"/><path d="M3.3 20c0-3.1 2.6-5.5 5.7-5.5s5.7 2.4 5.7 5.5"/><circle cx="17.3" cy="9.6" r="2.3"/><path d="M15.8 14.6c2.5.4 4.3 2.4 4.3 4.9"/></symbol>
+<symbol id="i-chevl" viewBox="0 0 24 24"><polyline points="15 5 8 12 15 19"/></symbol>
+<symbol id="i-chevr" viewBox="0 0 24 24"><polyline points="9 5 16 12 9 19"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><polyline points="5 12.5 9.5 17 19 7"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="M14.5 4.5l5 5L8 21H3v-5z"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.2l6.8 2.7v6c0 4.9-2.9 7.8-6.8 8.9-3.9-1.1-6.8-4-6.8-8.9v-6z"/><polyline points="8.6 12.2 10.9 14.5 15.5 9.7"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3.5h8l4 4v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-16a1 1 0 0 1 1-1z"/><path d="M14 3.5v4h4"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><circle cx="14.5" cy="7" r="2.1"/><line x1="4" y1="12.5" x2="20" y2="12.5"/><circle cx="8.5" cy="12.5" r="2.1"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="16" cy="18" r="2.1"/></symbol>
+<symbol id="i-logout" viewBox="0 0 24 24"><path d="M9.5 4.3H6.3a2 2 0 0 0-2 2v11.4a2 2 0 0 0 2 2h3.2"/><polyline points="14.5 15.5 18.3 12 14.5 8.5"/><line x1="18.3" y1="12" x2="9.3" y2="12"/></symbol>
+<symbol id="i-msg" viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8A2.5 2.5 0 0 1 17.5 17H10l-4.5 4v-4H6.5A2.5 2.5 0 0 1 4 14.5z"/></symbol>
+<symbol id="i-check-c" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="8 12.4 11 15.4 16 9.2"/></symbol>
+<symbol id="i-route" viewBox="0 0 24 24"><path d="M4 19c3-6 3.5-11 8-11s5 5 8 11"/><circle cx="12" cy="8" r="2.2"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3L20 8"/><polyline points="20 3 20 8 15 8"/><path d="M20 12a8 8 0 0 1-14 5.3L4 16"/><polyline points="4 21 4 16 9 16"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5L2.5 20.5h19z"/><line x1="12" y1="9.5" x2="12" y2="14"/><circle cx="12" cy="17.2" r=".3" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.6 3.5l3 1.4a1.3 1.3 0 0 1 .6 1.7l-1 2.1a1.3 1.3 0 0 0 .3 1.5l4.3 4.3a1.3 1.3 0 0 0 1.5.3l2.1-1a1.3 1.3 0 0 1 1.7.6l1.4 3a1.3 1.3 0 0 1-.4 1.6c-.9.7-2.1 1.1-3.4.8-4.8-1-9.6-5.8-10.6-10.6-.3-1.3.1-2.5.8-3.4a1.3 1.3 0 0 1 1.6-.4z"/></symbol>
+<symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 3.5v17"/><path d="M6 5c4-2.5 8 2.5 12 0v7c-4 2.5-8-2.5-12 0"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3.5L10.5 14.5"/><path d="M21 3.5l-7 17-3.5-6.5L4 10.5z"/></symbol>
+<symbol id="i-archive" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="4" rx="1.5"/><path d="M5 8.5V19a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19V8.5"/><line x1="10" y1="12.5" x2="14" y2="12.5"/></symbol>
+<symbol id="i-history" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 2.3 5.7"/><polyline points="4 12 7 12 7 8"/><polyline points="12 7.5 12 12 15.5 14"/></symbol>
+</svg>
+</div>
+
+<div class="page-header">
+  <div class="eyebrow">Phase 2 — UX · Wireframes v4</div>
+  <h1>SIRA KELEN — Wireframes basse/moyenne fidélité</h1>
+  <p>Complément à la v3 : le parcours côté demandeur (demander à rejoindre, suivi de la demande), l'écran de connexion existant, la confirmation de publication, l'historique archivé, le profil d'un autre utilisateur et les états vides manquants. Toujours en niveaux de gris : le style de marque arrive à l'étape suivante.</p>
+</div>
+<div class="changelog">
+  <div class="t">Ce qui change par rapport à la v3</div>
+  <ul>
+    <li><strong>Nouvel écran — Connexion</strong> : le lien « Se connecter » de la v3 n'avait pas d'écran dédié. Connexion par numéro + code SMS uniquement (conforme à l'Architecture v1.1) — pas de Google/iCloud au MVP.</li>
+    <li><strong>Nouvel écran — Confirmation de publication</strong> : « AD publié » avec boutons d'action (voir compatibilités / modifier), la boucle de publication est fermée.</li>
+    <li><strong>Nouvel écran — Découvrir & demander</strong> : la vue côté demandeur qui manquait — voir l'AD d'un autre, vérifier l'itinéraire, envoyer la demande.</li>
+    <li><strong>Nouvel écran — Demande envoyée</strong> : confirmation de l'envoi + bouton « Annuler ma demande ».</li>
+    <li><strong>Nouvel écran — Mes demandes envoyées</strong> : suivi des statuts (En attente / Acceptée / Refusée / Annulée), annulation possible.</li>
+    <li><strong>Nouvel écran — Profil d'un autre utilisateur</strong> : badge « vérifié », quartier, stats, contact d'urgence, bouton Signaler — répond à l'inquiétude sécurité (51%).</li>
+    <li><strong>Nouvel écran — Historique des AD archivés</strong> : l'historique personnel prévu par l'Architecture (UC5), absent en v3.</li>
+    <li><strong>États vides ajoutés</strong> : aucune compatibilité trouvée, aucune notification, aucune demande envoyée.</li>
+  </ul>
+</div>
+
+<div class="click-summary">
+  <div class="item"><div class="num">3</div><div class="lbl">taps pour publier un AD</div></div>
+  <div class="item"><div class="num">3</div><div class="lbl">onglets seulement</div></div>
+  <div class="item"><div class="num">0</div><div class="lbl">écran de paiement</div></div>
+  <div class="item"><div class="num">4</div><div class="lbl">écrans côté demandeur</div></div>
+  <div class="item"><div class="num">1</div><div class="lbl">connexion : numéro + SMS</div></div>
+</div>
+
+<!-- ================= INSCRIPTION & CONNEXION ================= -->
+<div class="section-row"><span class="tag">00</span><h2>Inscription & connexion</h2><span class="sub">nouvel écran — manquait entièrement</span><div class="line"></div></div>
+<div class="pair">
+
+  <div class="unit">
+    <div class="state-label">Bienvenue — nouvel utilisateur</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-content">
+        <div class="splash-content">
+          <div class="splash-mark"><svg class="ic" style="width:24px;height:24px"><use href="#i-route"/></svg></div>
+          <div class="splash-mid">
+            <h1><span class="ann">1</span>Partagez la route. Partagez le coût.</h1>
+            <p>Trouvez un trajet compatible avec le vôtre, près de chez vous, pour un déplacement quotidien.</p>
+          </div>
+          <button class="wf-btn"><span class="ann" style="background:#fff;color:#000">2</span>Créer mon compte</button>
+          <div class="splash-link">Déjà membre ? <b>Se connecter</b></div>
+        </div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann">1</span>Premier écran vu par tout nouvel utilisateur — avant, il n'y avait aucune façon de créer un compte.</li>
+      <li><span class="ann">2</span>Deux chemins dès le départ : « Créer un compte » pour un nouvel arrivant, « Se connecter » pour un utilisateur existant.</li>
+    </ol>
+  </div>
+
+  <div class="unit">
+    <div class="state-label">Inscription — numéro de téléphone</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Créer mon compte</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div class="steps-row"><div class="step-seg done"></div><div class="step-seg"></div><div class="step-seg"></div></div>
+        <div class="field-lbl"><span class="ann">3</span>Numéro de téléphone</div>
+        <div class="field-row">
+          <div style="flex:0 0 64px"><div class="field-ph" style="justify-content:center">+223</div></div>
+          <div style="flex:1"><div class="field-ph">70 12 34 56</div></div>
+        </div>
+        <div style="font-size:10.5px;color:var(--muted);margin:-2px 0 16px;line-height:1.5">Un code de vérification par SMS sera envoyé à ce numéro.</div>
+        <button class="wf-btn" style="margin-top:auto">Recevoir le code</button>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann">3</span>Le numéro de téléphone est l'identifiant unique du compte — c'est aussi lui qui devient « vérifié » sur le profil.</li>
+    </ol>
+  </div>
+</div>
+
+<div class="pair" style="margin-top:36px">
+
+  <div class="unit">
+    <div class="state-label">Vérification du code reçu par SMS</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Vérification</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div class="steps-row"><div class="step-seg done"></div><div class="step-seg done"></div><div class="step-seg"></div></div>
+        <div style="text-align:center;padding:6px 0 4px">
+          <div style="font-size:12px;color:var(--ink-soft)"><span class="ann">4</span>Code envoyé au</div>
+          <div style="font-size:13.5px;font-weight:700;margin-top:3px">+223 70 12 34 56</div>
+        </div>
+        <div class="otp-row">
+          <div class="otp-box on">2</div><div class="otp-box on">8</div><div class="otp-box">5</div><div class="otp-box"></div>
+        </div>
+        <div style="text-align:center;font-size:10.5px;color:var(--muted);margin-bottom:16px">Code valide encore 02:30</div>
+        <button class="wf-btn">Confirmer</button>
+        <div class="splash-link">Rien reçu ? <b>Renvoyer le code</b></div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann">4</span>Vérification par SMS plutôt que par email : plus fiable dans un contexte où le numéro de téléphone est la donnée de confiance la plus fiable.</li>
+    </ol>
+  </div>
+
+  <div class="unit">
+    <div class="state-label">Création du profil (dernier pas avant l'app)</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Votre profil</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div class="steps-row"><div class="step-seg done"></div><div class="step-seg done"></div><div class="step-seg done"></div></div>
+        <div class="field-lbl">Prénom</div>
+        <div class="field-ph">Moussa</div>
+        <div class="field-lbl">Nom</div>
+        <div class="field-ph">Diallo</div>
+        <div class="field-lbl"><span class="ann">5</span>Quartier principal</div>
+        <div class="field-ph"><svg><use href="#i-pin"/></svg>Kalaban Coro</div>
+        <button class="wf-btn" style="margin-top:auto">Terminer <svg class="ic" style="width:14px;height:14px"><use href="#i-chevr"/></svg></button>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann">5</span>Seuls 3 champs obligatoires (prénom, nom, quartier) — la photo de profil reste facultative, ajoutable plus tard depuis « Modifier mon profil ».</li>
+      <li>Une fois ce pas terminé, l'utilisateur arrive directement sur l'Accueil, section 01 ci-dessous, en état vide.</li>
+    </ol>
+  </div>
+</div>
+
+<div class="pair" style="margin-top:36px">
+  <div class="unit" style="grid-column:1/-1;max-width:320px;margin:0 auto">
+    <div class="state-label">Juste après la création du profil — recommandé, non bloquant</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="spacer"></div><div class="ttl">Contact d'urgence</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div class="splash-content">
+          <div class="splash-mark"><svg class="ic" style="width:24px;height:24px"><use href="#i-phone"/></svg></div>
+          <div class="splash-mid">
+            <h1><span class="ann new">14</span>Un proche à prévenir en cas d'imprévu</h1>
+            <p>Si un accident ou un imprévu survient sur la route, votre partenaire de trajet confirmé pourra joindre directement cette personne depuis l'app. Vous pourrez l'ajouter ou le modifier plus tard depuis votre profil.</p>
+          </div>
+          <div class="field-lbl">Nom du contact</div>
+          <div class="field-ph new">Aïcha Diallo</div>
+          <div class="field-lbl">Numéro de téléphone</div>
+          <div class="field-ph new">70 98 76 54</div>
+          <div class="field-lbl">Lien (facultatif)</div>
+          <div class="field-ph">Sœur</div>
+          <button class="wf-btn" style="margin-top:8px">Ajouter maintenant</button>
+          <button class="wf-btn-ghost">Plus tard</button>
+        </div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann new">14</span>Écran séparé de l'inscription (Proposition B) : le compte se crée sans ce champ, mais le sujet est mis en avant tout de suite, pas caché dans un sous-menu. La donnée n'est <b>pas privée</b> : elle sert précisément à être transmise à un partenaire de trajet confirmé en cas de pépin — voir section 03. Un utilisateur qui choisit « Plus tard » retrouvera un rappel discret sur son Profil (section 05) tant que le champ reste vide.</li>
+    </ol>
+  </div>
+</div>
+
+<div class="pair" style="margin-top:36px">
+  <div class="unit" style="grid-column:1/-1;max-width:320px;margin:0 auto">
+    <div class="state-label">Connexion — utilisateur existant (lien « Se connecter »)</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Se connecter</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div style="margin-bottom:18px">
+          <div style="font-size:19px;font-weight:700;line-height:1.3">Bon retour !</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.55">Saisissez votre numéro pour recevoir un code de connexion.</div>
+        </div>
+        <div class="field-lbl"><span class="ann new">17</span>Numéro de téléphone</div>
+        <div class="field-row">
+          <div style="flex:0 0 64px"><div class="field-ph" style="justify-content:center">+223</div></div>
+          <div style="flex:1"><div class="field-ph new">70 12 34 56</div></div>
+        </div>
+        <div class="otp-row" style="margin-top:16px">
+          <div class="otp-box on">4</div><div class="otp-box on">1</div><div class="otp-box">2</div><div class="otp-box"></div>
+        </div>
+        <div style="text-align:center;font-size:10.5px;color:var(--muted);margin-bottom:16px">Code envoyé par SMS · valide encore 01:45</div>
+        <button class="wf-btn" style="margin-top:auto">Se connecter</button>
+        <div class="splash-link">Nouveau ici ? <b>Créer mon compte</b></div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann new">17</span>La connexion reprend exactement le même principe que l'inscription : numéro + code SMS. <b>Pas de Google ni d'iCloud au MVP</b> — le numéro de téléphone est l'identifiant unique (Architecture v1.1). Les connexions sociales pourront être étudiées en v2/v3.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ================= ACCUEIL ================= -->
+<div class="section-row"><span class="tag">01</span><h2>Écran d'accueil</h2><div class="line"></div></div>
+<div class="pair">
+
+  <div class="unit">
+    <div class="state-label">État initial — aucun AD publié</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav">
+        <div><div style="font-size:10px;color:var(--muted);font-weight:700">Bonjour</div><div class="ttl">Moussa</div></div>
+        <div class="btn-round"><svg class="ic"><use href="#i-bell"/></svg></div>
+      </div>
+      <div class="wf-content">
+        <div class="wf-empty">
+          <div class="icon-ph"><svg><use href="#i-route"/></svg></div>
+          <h3><span class="ann">1</span>Aucun trajet publié</h3>
+          <p>Publiez votre premier Avis de Déplacement pour découvrir des trajets compatibles près de chez vous.</p>
+          <button class="wf-btn" style="margin-top:6px"><span class="ann" style="background:#fff;color:#000">2</span>Publier un AD</button>
+        </div>
+        <div class="tabbar">
+          <div class="tab on"><svg class="ic"><use href="#i-home"/></svg>Accueil</div>
+          <div class="tab"><svg class="ic"><use href="#i-plus"/></svg>Publier</div>
+          <div class="tab"><svg class="ic"><use href="#i-user"/></svg>Profil</div>
+        </div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann">1</span>Un seul message, une seule action possible : impossible de se perdre car il n'y a rien d'autre à faire ici.</li>
+      <li><span class="ann">2</span>Le CTA de l'état vide et l'onglet « Publier » mènent au même écran — deux chemins, une seule destination.</li>
+    </ol>
+  </div>
+
+  <div class="unit">
+    <div class="state-label">État actif — AD publié, compatibilités trouvées</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav">
+        <div><div style="font-size:10px;color:var(--muted);font-weight:700">Bonjour</div><div class="ttl">Moussa</div></div>
+        <div class="btn-round" style="position:relative"><svg class="ic"><use href="#i-bell"/></svg><span style="position:absolute;top:-3px;right:-3px;width:14px;height:14px;border-radius:50%;background:var(--ink);color:#fff;font-size:8px;display:flex;align-items:center;justify-content:center;font-weight:700">2</span></div>
+      </div>
+      <div class="wf-content">
+        <div class="mine-card">
+          <div class="row-t"><span class="lbl"><span class="ann">3</span>Mon AD actif</span><div class="edit"><svg class="ic"><use href="#i-edit"/></svg></div></div>
+          <div class="route"><svg><use href="#i-route"/></svg>Kalaban Coro → FST</div>
+          <div class="meta">Aujourd'hui, 07:30 · 3 places</div>
+        </div>
+        <div class="list-label"><span class="ann">4</span>3 compatibilités trouvées</div>
+        <div class="match-card">
+          <div class="avatar-ph"><svg><use href="#i-user"/></svg></div>
+          <div class="info">
+            <div class="name">Amadou K.</div>
+            <div class="route-s">Golf → FST, 07:20</div>
+            <span class="level-pill level-fill">Fort</span>
+          </div>
+        </div>
+        <div class="match-card">
+          <div class="avatar-ph"><svg><use href="#i-user"/></svg></div>
+          <div class="info">
+            <div class="name">Salimata T.</div>
+            <div class="route-s">Kalaban → Badalabougou, 07:45</div>
+            <span class="level-pill level-half">Moyen</span>
+          </div>
+        </div>
+        <div class="match-card">
+          <div class="avatar-ph"><svg><use href="#i-user"/></svg></div>
+          <div class="info">
+            <div class="name">Ibrahim S.</div>
+            <div class="route-s">Sabalibougou → FST, 08:00</div>
+            <span class="level-pill">Faible</span>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab on"><svg class="ic"><use href="#i-home"/></svg>Accueil</div>
+          <div class="tab"><svg class="ic"><use href="#i-plus"/></svg>Publier</div>
+          <div class="tab"><svg class="ic"><use href="#i-user"/></svg>Profil</div>
+        </div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann">3</span>La carte « Mon AD » reste épinglée en haut : on modifie ou suspend le trajet sans changer d'écran.</li>
+      <li><span class="ann">4</span>Une carte de compatibilité mène au Détail AD, où se trouve la vraie action (voir section 03).</li>
+    </ol>
+  </div>
+</div>
+
+<div class="pair" style="margin-top:36px">
+  <div class="unit" style="grid-column:1/-1;max-width:320px;margin:0 auto">
+    <div class="state-label">État vide — AD publié mais aucune compatibilité trouvée</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav">
+        <div><div style="font-size:10px;color:var(--muted);font-weight:700">Bonjour</div><div class="ttl">Moussa</div></div>
+        <div class="btn-round"><svg class="ic"><use href="#i-bell"/></svg></div>
+      </div>
+      <div class="wf-content">
+        <div class="mine-card">
+          <div class="row-t"><span class="lbl">Mon AD actif</span><div class="edit"><svg class="ic"><use href="#i-edit"/></svg></div></div>
+          <div class="route"><svg><use href="#i-route"/></svg>Kalaban Coro → FST</div>
+          <div class="meta">Aujourd'hui, 07:30 · 3 places</div>
+        </div>
+        <div class="wf-empty" style="border:1.3px dashed var(--line);border-radius:var(--r-m)">
+          <div class="icon-ph"><svg><use href="#i-refresh"/></svg></div>
+          <h3><span class="ann new">19</span>Aucune compatibilité pour l'instant</h3>
+          <p>Votre AD reste actif. Vous serez prévenu dès qu'un trajet compatible est trouvé.</p>
+          <button class="wf-btn-outline" style="margin-top:6px">Modifier mon AD</button>
+        </div>
+        <div class="tabbar">
+          <div class="tab on"><svg class="ic"><use href="#i-home"/></svg>Accueil</div>
+          <div class="tab"><svg class="ic"><use href="#i-plus"/></svg>Publier</div>
+          <div class="tab"><svg class="ic"><use href="#i-user"/></svg>Profil</div>
+        </div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann new">19</span>Même avec 0 résultat, l'utilisateur n'est pas bloqué : son AD reste actif, il peut le modifier, et les notifications le préviendront plus tard.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ================= PUBLICATION AD ================= -->
+<div class="section-row"><span class="tag">02</span><h2>Publication d'un AD</h2><div class="line"></div></div>
+<div class="pair">
+
+  <div class="unit">
+    <div class="state-label">Étape 1 — Formulaire (tap 1)</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Nouvel Avis de Déplacement</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div class="field-lbl">Départ</div>
+        <div class="field-ph"><svg><use href="#i-pin"/></svg>Kalaban Coro</div>
+        <div class="field-lbl">Destination</div>
+        <div class="field-ph"><svg><use href="#i-pin"/></svg>FST — Faculté des Sciences</div>
+        <div class="field-lbl"><span class="ann new">5</span>Date du déplacement</div>
+        <div class="seg-row">
+          <div class="seg on">Aujourd'hui</div>
+          <div class="seg">Demain</div>
+          <div class="seg">Calendrier</div>
+        </div>
+        <div class="field-row">
+          <div style="flex:1"><div class="field-lbl">Heure</div><div class="field-ph"><svg><use href="#i-clock"/></svg>07:30</div></div>
+          <div style="flex:1"><div class="field-lbl">Transport</div><div class="field-ph">Voiture</div></div>
+        </div>
+        <div class="field-lbl">Places disponibles</div>
+        <div class="field-ph">3</div>
+        <button class="wf-btn" style="margin-top:auto"><span class="ann" style="background:#fff;color:#000">6</span>Voir l'aperçu</button>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann new">5</span>Sélecteur à 3 options plutôt qu'un calendrier par défaut : couvre le cas le plus fréquent en un tap.</li>
+      <li><span class="ann">6</span>Tous les champs sur un seul écran ; ce bouton ne publie rien, il mène à une vérification.</li>
+    </ol>
+  </div>
+
+  <div class="unit">
+    <div class="state-label">Étape 2 — Aperçu & publication (taps 2–3)</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Aperçu de l'AD</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div class="ph-box map-ph">
+          <div class="metric"><span class="ann">7</span>6,2 km · 18 min</div>
+        </div>
+        <div class="recap-row"><span class="k"><svg><use href="#i-route"/></svg>Trajet</span><span class="v">Kalaban Coro → FST</span></div>
+        <div class="recap-row new"><span class="k"><svg><use href="#i-cal"/></svg>Date</span><span class="v">Aujourd'hui, 26 juillet</span></div>
+        <div class="recap-row"><span class="k"><svg><use href="#i-clock"/></svg>Horaire</span><span class="v">07:30</span></div>
+        <div class="recap-row"><span class="k"><svg><use href="#i-users"/></svg>Transport</span><span class="v">Voiture · 3 places</span></div>
+        <button class="wf-btn" style="margin-top:16px"><span class="ann" style="background:#fff;color:#000">8</span>Publier mon AD</button>
+        <button class="wf-btn-outline" style="margin-top:8px">Modifier</button>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann">7</span>Distance et temps calculés automatiquement — aucune saisie manuelle demandée.</li>
+      <li><span class="ann">8</span>Dernier tap avant publication réelle : 3 taps au total depuis l'accueil.</li>
+    </ol>
+  </div>
+</div>
+
+<div class="pair" style="margin-top:36px">
+  <div class="unit" style="grid-column:1/-1;max-width:320px;margin:0 auto">
+    <div class="state-label">Confirmation de publication (après « Publier mon AD »)</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="spacer"></div><div class="ttl">AD publié</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div class="splash-content">
+          <div style="width:52px;height:52px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;margin:10px auto 16px"><svg class="ic" style="width:24px;height:24px;color:#fff"><use href="#i-check"/></svg></div>
+          <div style="text-align:center;margin-bottom:20px">
+            <div style="font-size:17px;font-weight:700"><span class="ann new">18</span>Votre AD est publié</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:7px;line-height:1.55">Il est maintenant <b>actif</b> et visible par le moteur de matching. Vous serez prévenu dès qu'une compatibilité est trouvée.</div>
+          </div>
+          <div class="mine-card">
+            <div class="row-t"><span class="lbl">Mon AD actif</span></div>
+            <div class="route"><svg><use href="#i-route"/></svg>Kalaban Coro → FST</div>
+            <div class="meta">Aujourd'hui, 07:30 · 3 places</div>
+          </div>
+          <button class="wf-btn">Voir mes compatibilités</button>
+          <button class="wf-btn-ghost">Retour à l'accueil</button>
+        </div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann new">18</span>Boucle de publication fermée : l'utilisateur sait que son AD est actif et voit le prochain pas (compatibilités). Aucun paiement ici, conforme au MVP.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ================= DETAIL AD — DEMANDES REÇUES ================= -->
+<div class="section-row"><span class="tag">03</span><h2>Détail AD — demandes reçues</h2><span class="sub">nouvel écran</span><div class="line"></div></div>
+<div class="pair">
+
+  <div class="unit">
+    <div class="state-label">Vue propriétaire — 2 demandes en attente</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Détail de mon AD</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <span class="status-chip" style="margin-bottom:12px">Actif</span>
+        <div class="recap-row"><span class="k"><svg><use href="#i-route"/></svg>Trajet</span><span class="v">Kalaban Coro → FST</span></div>
+        <div class="recap-row"><span class="k"><svg><use href="#i-clock"/></svg>Horaire</span><span class="v">Aujourd'hui, 07:30</span></div>
+        <div class="list-label" style="margin-top:14px"><span class="ann new">9</span>Demandes reçues (2)</div>
+        <div class="resp-card">
+          <div class="top">
+            <div class="avatar-ph"><svg><use href="#i-user"/></svg></div>
+            <div><div class="name">Amadou K.</div><div class="dist">Golf → FST, 07:20 · Fort</div></div>
+          </div>
+          <div class="resp-actions">
+            <button class="wf-btn" style="flex:1"><svg class="ic" style="width:14px;height:14px"><use href="#i-check"/></svg>Accepter</button>
+            <button class="wf-btn-outline" style="flex:1"><svg class="ic" style="width:14px;height:14px;display:inline"><use href="#i-x"/></svg>Refuser</button>
+          </div>
+        </div>
+        <div class="resp-card">
+          <div class="top">
+            <div class="avatar-ph"><svg><use href="#i-user"/></svg></div>
+            <div><div class="name">Salimata T.</div><div class="dist">Kalaban → Badalabougou, 07:45 · Moyen</div></div>
+          </div>
+          <div class="resp-actions">
+            <button class="wf-btn" style="flex:1"><svg class="ic" style="width:14px;height:14px"><use href="#i-check"/></svg>Accepter</button>
+            <button class="wf-btn-outline" style="flex:1"><svg class="ic" style="width:14px;height:14px;display:inline"><use href="#i-x"/></svg>Refuser</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann new">9</span>Écran manquant en v2 : c'est ici, et seulement ici, qu'un propriétaire d'AD agit sur une demande — l'accueil ne fait qu'y renvoyer.</li>
+    </ol>
+  </div>
+
+  <div class="unit">
+    <div class="state-label">Après acceptation — coordonnées débloquées</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Détail de mon AD</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <span class="status-chip finalizing" style="margin-bottom:12px"><span class="ann new" style="width:14px;height:14px;font-size:8px">10</span>En cours de finalisation</span>
+        <div class="ph-box map-ph" style="margin-top:4px"></div>
+        <div class="recap-row"><span class="k"><svg><use href="#i-route"/></svg>Trajet</span><span class="v">Kalaban Coro → FST</span></div>
+        <div class="recap-row"><span class="k"><svg><use href="#i-cal"/></svg>Date</span><span class="v">Aujourd'hui, 07:30</span></div>
+        <div class="recap-row"><span class="k"><svg><use href="#i-users"/></svg>Partenaire</span><span class="v">Amadou K.</span></div>
+        <div class="recap-row"><span class="k">Téléphone</span><span class="v">70 12 34 56</span></div>
+        <div class="banner" style="margin-top:10px"><span class="ann">11</span>Contactez Amadou par téléphone ou WhatsApp pour organiser le trajet</div>
+        <div style="border:1.3px dashed #8A5A1E;border-radius:14px;padding:11px 12px;margin-top:12px">
+          <div style="font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#8A5A1E;margin-bottom:7px;display:flex;align-items:center"><span class="ann new" style="margin-right:6px">15</span>En cas d'imprévu sur la route</div>
+          <div style="font-size:12.5px;font-weight:700;margin-bottom:2px">Contact d'urgence d'Amadou</div>
+          <div style="font-size:11px;color:var(--ink-soft);margin-bottom:10px">Fatoumata K. — Sœur</div>
+          <button class="wf-btn-outline" style="border-color:#8A5A1E;color:#8A5A1E;display:flex;align-items:center;justify-content:center;gap:7px"><svg class="ic" style="width:14px;height:14px;color:#8A5A1E"><use href="#i-phone"/></svg>Appeler le 76 55 44 33</button>
+        </div>
+        <button class="wf-btn-new" style="margin-top:12px">Marquer comme trajet organisé</button>
+        <button class="wf-btn-quiet" style="margin-top:8px">Annuler cet AD</button>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann new">10</span>L'AD reste « Actif » aux yeux des autres jusqu'à cette acceptation — un seul partenaire peut être confirmé à la fois.</li>
+      <li><span class="ann">11</span>Aucune messagerie interne au MVP : le téléphone et WhatsApp apparaissent ici en clair, prêts à copier.</li>
+      <li><span class="ann new">15</span>Ce n'est pas le contact d'urgence de l'utilisateur qui s'affiche ici, mais celui de son partenaire confirmé — l'inverse est vrai côté Amadou. But : que chacun puisse prévenir le proche de l'autre en cas d'accident, sans attendre que la personne concernée soit en état de le faire elle-même. Visible uniquement entre deux partenaires confirmés, jamais avant.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ================= MES AD ================= -->
+<div class="section-row"><span class="tag">04</span><h2>Mes AD</h2><div class="line"></div></div>
+<div class="pair">
+  <div class="unit" style="grid-column:1/-1;max-width:320px;margin:0 auto">
+    <div class="state-label">Liste des AD du propriétaire, tous statuts confondus</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Mes AD</div><div class="spacer"></div></div>
+      <div class="wf-content">
+
+        <div class="ad-item">
+          <div class="ad-row-t"><span class="status-chip">Actif</span></div>
+          <div class="ad-route">Kalaban Coro → FST</div>
+          <div class="ad-meta">Aujourd'hui, 26 juillet · 07:30 · 3 places</div>
+        </div>
+
+        <div class="ad-item">
+          <div class="ad-row-t"><span class="status-chip finalizing"><svg><use href="#i-clock"/></svg>En cours de finalisation</span></div>
+          <div class="ad-route">Golf → FSEG</div>
+          <div class="ad-meta">Demain, 27 juillet · 07:45 · avec Amadou K.</div>
+        </div>
+
+        <div class="ad-item organized">
+          <div class="ad-row-t"><span class="status-chip organized"><svg><use href="#i-check"/></svg>Trajet organisé</span></div>
+          <div class="ad-route strike">Badalabougou → Centre-ville</div>
+          <div class="ad-meta">25 juillet · 08:00</div>
+        </div>
+
+        <div class="ad-item cancelled">
+          <div class="ad-row-t"><span class="status-chip cancelled"><svg><use href="#i-x"/></svg>Annulé</span></div>
+          <div class="ad-route strike">Sabalibougou → FST</div>
+          <div class="ad-meta">22 juillet · 07:15</div>
+        </div>
+
+        <div style="font-size:10.5px;color:var(--faint);text-align:center;margin-top:auto;padding-top:10px">Les AD archivés apparaissent dans l'historique après la date du déplacement.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PROFIL ================= -->
+<div class="section-row"><span class="tag">05</span><h2>Profil</h2><span class="sub">nouvel écran</span><div class="line"></div></div>
+<div class="pair">
+  <div class="unit">
+    <div class="state-label">Vue standard</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="spacer"></div><div class="ttl">Mon profil</div><div class="btn-round"><svg class="ic"><use href="#i-sliders"/></svg></div></div>
+      <div class="wf-content">
+        <div class="profile-head">
+          <div class="profile-avatar"><svg><use href="#i-user"/></svg></div>
+          <h3><span class="ann">12</span>Moussa Diallo</h3>
+          <div class="phone">+223 70 12 34 56</div>
+          <span class="verify-chip"><svg><use href="#i-shield"/></svg>Numéro vérifié</span>
+        </div>
+        <div class="stat-row">
+          <div class="stat-block"><div class="num">3</div><div class="lbl">AD publiés</div></div>
+          <div class="stat-block"><div class="num">2</div><div class="lbl">Trajets organisés</div></div>
+        </div>
+        <div class="banner" style="border-color:#8A5A1E;color:#8A5A1E;text-align:left;display:flex;align-items:center;gap:9px;padding:10px 11px">
+          <span class="ann new" style="margin-right:0;flex-shrink:0">16</span>
+          <svg class="ic" style="width:15px;height:15px;color:#8A5A1E;flex-shrink:0"><use href="#i-phone"/></svg>
+          <span style="flex:1">Aucun contact d'urgence — vos partenaires ne pourront prévenir personne pour vous — <b>Ajouter</b></span>
+        </div>
+        <div style="margin-top:6px">
+          <div class="menu-row"><div class="l"><svg class="ic"><use href="#i-file"/></svg>Mes Avis de Déplacement</div><svg class="chev"><use href="#i-chevr"/></svg></div>
+          <div class="menu-row"><div class="l"><svg class="ic"><use href="#i-edit"/></svg>Modifier mon profil</div><svg class="chev"><use href="#i-chevr"/></svg></div>
+          <div class="menu-row"><div class="l"><svg class="ic"><use href="#i-phone"/></svg>Contact d'urgence</div><svg class="chev"><use href="#i-chevr"/></svg></div>
+          <div class="menu-row"><div class="l"><svg class="ic"><use href="#i-sliders"/></svg>Paramètres</div><svg class="chev"><use href="#i-chevr"/></svg></div>
+          <div class="menu-row danger"><div class="l"><svg class="ic"><use href="#i-logout"/></svg>Déconnexion</div></div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><svg class="ic"><use href="#i-home"/></svg>Accueil</div>
+          <div class="tab"><svg class="ic"><use href="#i-plus"/></svg>Publier</div>
+          <div class="tab on"><svg class="ic"><use href="#i-user"/></svg>Profil</div>
+        </div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann">12</span>Ni note ni historique de paiement : les deux sont hors MVP (roadmap v2/v3). Le profil reste volontairement court.</li>
+      <li><span class="ann new">16</span>Rappel visible tant qu'aucun contact d'urgence n'est enregistré — disparaît dès qu'il est ajouté. Contrairement à un simple raccourci personnel, ce champ conditionne une vraie protection pour les partenaires de trajet : sans lui, personne ne peut être prévenu à sa place.</li>
+    </ol>
+  </div>
+
+  <div class="unit">
+    <div class="state-label">Modifier mon profil</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Modifier mon profil</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div style="display:flex;justify-content:center;margin-bottom:16px">
+          <div class="profile-avatar" style="width:64px;height:64px;position:relative">
+            <svg style="width:26px;height:26px"><use href="#i-user"/></svg>
+            <div style="position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;border-radius:50%;background:var(--ink);border:2px solid #fff;display:flex;align-items:center;justify-content:center"><svg class="ic" style="width:11px;height:11px;color:#fff"><use href="#i-edit"/></svg></div>
+          </div>
+        </div>
+        <div class="field-lbl">Prénom</div>
+        <div class="field-ph">Moussa</div>
+        <div class="field-lbl">Nom</div>
+        <div class="field-ph">Diallo</div>
+        <div class="field-lbl">Quartier principal</div>
+        <div class="field-ph"><svg><use href="#i-pin"/></svg>Kalaban Coro</div>
+        <div class="field-lbl">Numéro de téléphone</div>
+        <div class="field-ph" style="color:var(--faint)"><span class="ann" style="background:var(--faint)">13</span>+223 70 12 34 56 — vérifié</div>
+        <button class="wf-btn" style="margin-top:auto">Enregistrer</button>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann">13</span>Numéro non modifiable directement ici : le changer redemande une vérification par SMS, un flux séparé.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ================= NOTIFICATIONS ================= -->
+<div class="section-row"><span class="tag">06</span><h2>Notifications</h2><span class="sub">nouvel écran</span><div class="line"></div></div>
+<div class="pair">
+  <div class="unit" style="grid-column:1/-1;max-width:320px;margin:0 auto">
+    <div class="state-label">Accessible depuis la cloche sur l'accueil</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Notifications</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div class="notif-row">
+          <div class="notif-ico"><svg><use href="#i-users"/></svg></div>
+          <div style="flex:1"><h4>Nouvelle demande</h4><p>Amadou K. souhaite rejoindre votre trajet Kalaban Coro → FST</p></div>
+          <div class="notif-time">2 min</div>
+        </div>
+        <div class="notif-row">
+          <div class="notif-ico"><svg><use href="#i-check-c"/></svg></div>
+          <div style="flex:1"><h4>Compatibilité trouvée</h4><p>Un nouvel AD correspond à votre trajet Golf → FSEG</p></div>
+          <div class="notif-time">1 h</div>
+        </div>
+        <div class="notif-row">
+          <div class="notif-ico"><svg><use href="#i-x"/></svg></div>
+          <div style="flex:1"><h4>Demande refusée</h4><p>Votre demande pour le trajet de Fatoumata D. n'a pas été retenue</p></div>
+          <div class="notif-time">Hier</div>
+        </div>
+        <div class="notif-row">
+          <div class="notif-ico"><svg><use href="#i-alert"/></svg></div>
+          <div style="flex:1"><h4>AD bientôt expiré</h4><p>Votre trajet Badalabougou → Centre-ville a lieu demain</p></div>
+          <div class="notif-time">Hier</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pair" style="margin-top:36px">
+  <div class="unit" style="grid-column:1/-1;max-width:320px;margin:0 auto">
+    <div class="state-label">État vide — aucune notification</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Notifications</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div class="wf-empty">
+          <div class="icon-ph"><svg><use href="#i-bell"/></svg></div>
+          <h3><span class="ann new">20</span>Aucune notification</h3>
+          <p>Vous serez prévenu ici dès qu'une compatibilité est trouvée ou qu'une demande arrive.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CÔTÉ DEMANDEUR ================= -->
+<div class="section-row"><span class="tag">07</span><h2>Côté demandeur — Découvrir & demander</h2><span class="sub">nouvel écran</span><div class="line"></div></div>
+<div class="pair">
+
+  <div class="unit">
+    <div class="state-label">Voir l'AD d'un autre utilisateur</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Trajet disponible</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div class="mine-card">
+          <div class="row-t"><span class="lbl"><span class="ann new">21</span>AD de Fatoumata D.</span><span class="status-chip">Actif</span></div>
+          <div class="route"><svg><use href="#i-route"/></svg>Badalabougou → Centre-ville</div>
+          <div class="meta">Demain, 08:00 · 2 places · Voiture</div>
+        </div>
+        <div class="ph-box map-ph">
+          <div class="metric">6,2 km · 18 min</div>
+        </div>
+        <div class="resp-card" style="border-style:dashed">
+          <div class="top">
+            <div class="avatar-ph"><svg><use href="#i-user"/></svg></div>
+            <div>
+              <div class="name">Fatoumata D. <svg class="ic" style="width:13px;height:13px;color:var(--ink-soft);display:inline;vertical-align:-2px"><use href="#i-shield"/></svg></div>
+              <div class="dist">Badalabougou · Calaban Coro → FST, 07:45 · Moyen</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted)">
+            <svg class="ic" style="width:13px;height:13px"><use href="#i-route"/></svg>
+            <span>Itinéraire commun : Golf → Centre-ville</span>
+          </div>
+        </div>
+        <button class="wf-btn" style="margin-top:10px"><span class="ann" style="background:#fff;color:#000">22</span>Je suis intéressé</button>
+        <button class="wf-btn-ghost">Voir le profil de Fatoumata</button>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann new">21</span>Le badge de vérification apparaît dès cette vue : il conditionne la décision d'envoyer une demande.</li>
+      <li><span class="ann">22</span>« Je suis intéressé » envoie une demande au propriétaire de l'AD. Les coordonnées restent masquées jusqu'à acceptation.</li>
+    </ol>
+  </div>
+
+  <div class="unit">
+    <div class="state-label">Demande envoyée — confirmation</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="spacer"></div><div class="ttl">Demande envoyée</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div class="splash-content">
+          <div style="width:52px;height:52px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;margin:10px auto 16px"><svg class="ic" style="width:24px;height:24px;color:#fff"><use href="#i-send"/></svg></div>
+          <div style="text-align:center;margin-bottom:18px">
+            <div style="font-size:17px;font-weight:700"><span class="ann new">23</span>Demande envoyée à Fatoumata</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:7px;line-height:1.55">Elle sera prévenue par notification. Vous pourrez suivre la réponse depuis « Mes demandes ».</div>
+          </div>
+          <div class="banner" style="border-color:#8A5A1E;color:#8A5A1E"><span class="ann new" style="margin-right:6px">24</span>Vous pouvez annuler votre demande à tout moment</div>
+          <button class="wf-btn" style="margin-top:12px">Suivre ma demande</button>
+          <button class="wf-btn-ghost">Retour à l'accueil</button>
+        </div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann new">23</span>Le demandeur sait exactement où en est sa demande — plus de doute après le tap.</li>
+      <li><span class="ann new">24</span>L'annulation est accessible immédiatement (Module 5 de l'Architecture : envoi, acceptation, refus, annulation).</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ================= MES DEMANDES ENVOYÉES ================= -->
+<div class="section-row"><span class="tag">08</span><h2>Mes demandes envoyées</h2><span class="sub">nouvel écran</span><div class="line"></div></div>
+<div class="pair">
+  <div class="unit" style="grid-column:1/-1;max-width:320px;margin:0 auto">
+    <div class="state-label">Suivi des demandes — tous les statuts</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Mes demandes</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div class="resp-card">
+          <div class="top">
+            <div class="avatar-ph"><svg><use href="#i-user"/></svg></div>
+            <div>
+              <div class="name">Fatoumata D.</div>
+              <div class="dist">Badalabougou → Centre-ville · Demain, 08:00</div>
+            </div>
+            <span class="status-chip finalizing" style="margin-left:auto"><svg><use href="#i-clock"/></svg>En attente</span>
+          </div>
+          <button class="wf-btn-quiet" style="border-color:#8A5A1E;color:#8A5A1E"><span class="ann new" style="background:#8A5A1E;color:#fff;width:14px;height:14px;font-size:8px;margin-right:6px">25</span>Annuler ma demande</button>
+        </div>
+        <div class="resp-card">
+          <div class="top">
+            <div class="avatar-ph"><svg><use href="#i-user"/></svg></div>
+            <div>
+              <div class="name">Ibrahim S.</div>
+              <div class="dist">Sabalibougou → FST · 22 juillet, 07:15</div>
+            </div>
+            <span class="status-chip organized" style="margin-left:auto"><svg><use href="#i-check"/></svg>Acceptée</span>
+          </div>
+          <div class="banner" style="margin-top:0">Coordonnées débloquées — contactez Ibrahim par téléphone ou WhatsApp.</div>
+        </div>
+        <div class="resp-card">
+          <div class="top">
+            <div class="avatar-ph"><svg><use href="#i-user"/></svg></div>
+            <div>
+              <div class="name">Salimata T.</div>
+              <div class="dist">Kalaban → Badalabougou · 20 juillet, 07:45</div>
+            </div>
+            <span class="status-chip cancelled" style="margin-left:auto"><svg><use href="#i-x"/></svg>Refusée</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann new">25</span>L'annulation est possible tant que la demande est « En attente ». Une fois acceptée, la demande se transforme en trajet à finaliser.</li>
+    </ol>
+  </div>
+</div>
+
+<div class="pair" style="margin-top:36px">
+  <div class="unit" style="grid-column:1/-1;max-width:320px;margin:0 auto">
+    <div class="state-label">État vide — aucune demande envoyée</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Mes demandes</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div class="wf-empty">
+          <div class="icon-ph"><svg><use href="#i-send"/></svg></div>
+          <h3><span class="ann new">26</span>Aucune demande envoyée</h3>
+          <p>Quand vous serez intéressé par un trajet compatible, vos demandes apparaîtront ici.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PROFIL D'UN AUTRE UTILISATEUR ================= -->
+<div class="section-row"><span class="tag">09</span><h2>Profil d'un autre utilisateur</h2><span class="sub">nouvel écran</span><div class="line"></div></div>
+<div class="pair">
+  <div class="unit" style="grid-column:1/-1;max-width:320px;margin:0 auto">
+    <div class="state-label">Vue publique avant d'envoyer une demande</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Profil de Fatoumata</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div class="profile-head">
+          <div class="profile-avatar"><svg><use href="#i-user"/></svg></div>
+          <h3><span class="ann new">27</span>Fatoumata D. <svg class="ic" style="width:15px;height:15px;color:var(--ink-soft);display:inline;vertical-align:-2px"><use href="#i-shield"/></svg></h3>
+          <div class="phone">Badalabougou · Membre depuis juillet</div>
+          <span class="verify-chip"><svg><use href="#i-shield"/></svg>Numéro vérifié</span>
+        </div>
+        <div class="stat-row">
+          <div class="stat-block"><div class="num">5</div><div class="lbl">AD publiés</div></div>
+          <div class="stat-block"><div class="num">3</div><div class="lbl">Trajets organisés</div></div>
+          <div class="stat-block"><div class="num">1</div><div class="lbl">Signalements</div></div>
+        </div>
+        <div style="border:1.3px dashed var(--line);border-radius:var(--r-m);padding:10px 12px;font-size:11px;color:var(--ink-soft);line-height:1.5;margin-bottom:14px">
+          <svg class="ic" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:5px"><use href="#i-route"/></svg>
+          Trajets habituels : Golf → FST · Badalabougou → Centre-ville
+        </div>
+        <button class="wf-btn"><span class="ann" style="background:#fff;color:#000">28</span>Envoyer une demande</button>
+        <button class="wf-btn-quiet" style="border-color:#A3392F;color:#A3392F;margin-top:10px"><svg class="ic" style="width:14px;height:14px;color:#A3392F;display:inline;vertical-align:-2px;margin-right:6px"><use href="#i-flag"/></svg>Signaler cet utilisateur</button>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann new">27</span>Le profil public affiche la vérification, le quartier, les stats et les trajets habituels — rien de plus (pas de téléphone, pas de contact d'urgence).</li>
+      <li><span class="ann new">28</span>Bouton « Signaler » directement accessible : réponse concrète à l'inquiétude sécurité (51% de l'enquête). Le signalement part vers l'administration.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ================= HISTORIQUE DES AD ================= -->
+<div class="section-row"><span class="tag">10</span><h2>Historique des AD archivés</h2><span class="sub">nouvel écran</span><div class="line"></div></div>
+<div class="pair">
+  <div class="unit" style="grid-column:1/-1;max-width:320px;margin:0 auto">
+    <div class="state-label">AD passés, classés automatiquement après la date du déplacement</div>
+    <div class="wf-frame">
+      <div class="wf-status"><span>9:41</span><div class="dots"><span></span><span></span><span></span></div></div>
+      <div class="wf-nav"><div class="btn-round"><svg class="ic"><use href="#i-chevl"/></svg></div><div class="ttl">Historique</div><div class="spacer"></div></div>
+      <div class="wf-content">
+        <div class="ad-item organized">
+          <div class="ad-row-t"><span class="status-chip organized"><svg><use href="#i-check"/></svg>Trajet organisé</span></div>
+          <div class="ad-route strike">Badalabougou → Centre-ville</div>
+          <div class="ad-meta">25 juillet · 08:00 · avec Amadou K.</div>
+        </div>
+        <div class="ad-item cancelled">
+          <div class="ad-row-t"><span class="status-chip cancelled"><svg><use href="#i-x"/></svg>Annulé</span></div>
+          <div class="ad-route strike">Sabalibougou → FST</div>
+          <div class="ad-meta">22 juillet · 07:15</div>
+        </div>
+        <div class="ad-item">
+          <div class="ad-row-t"><span class="status-chip"><svg><use href="#i-route"/></svg>Terminé</span></div>
+          <div class="ad-route">Golf → FSEG</div>
+          <div class="ad-meta">18 juillet · 07:45 · 2 passagers</div>
+        </div>
+        <div style="font-size:10.5px;color:var(--faint);text-align:center;margin-top:auto;padding-top:10px">Les AD sont archivés automatiquement après la date et l'heure du déplacement.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer-note">
+  <p>SIRA KELEN — Wireframes basse/moyenne fidélité v4 · Aligné sur l'Architecture Fonctionnelle MVP 1.1</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+# mobile
+# backend
+# Fichiers générés par Flutter / NestJS
+
+node_modules/
+build/
+.gradle/
+*.log
+
+# Secrets
+.env
+.env.local

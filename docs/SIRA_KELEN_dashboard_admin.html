@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIRA KELEN — Dashboard Admin (Back-office)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1D1D1B; --ink-soft:#54524C; --muted:#8A877E; --faint:#C3C0B6;
+  --line:#D8D5CA; --line-soft:#E9E7DF; --panel:#EFEDE5; --panel-2:#E2DFD3; --bg:#F6F5F0; --white:#fff;
+  --danger:#A3392F; --accent:#8A5A1E;
+  --font:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+  --r-s:8px; --r-m:14px; --r-l:20px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);padding:56px 24px 100px;color:var(--ink);-webkit-font-smoothing:antialiased}
+svg.ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.icondefs{position:absolute;width:0;height:0;overflow:hidden}
+
+.page-header{max-width:1220px;margin:0 auto 8px;text-align:center}
+.eyebrow{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:2.4px;text-transform:uppercase;color:var(--muted)}
+.page-header h1{font-size:29px;font-weight:700;margin-top:10px;letter-spacing:-.4px}
+.page-header p{color:var(--ink-soft);font-size:14px;margin-top:10px;max-width:620px;margin-left:auto;margin-right:auto;line-height:1.6}
+
+.changelog{max-width:660px;margin:24px auto 0;background:var(--white);border:1px solid var(--line);border-radius:var(--r-m);padding:16px 20px}
+.changelog .t{font-family:var(--mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px}
+.changelog ul{padding-left:18px;font-size:12.5px;line-height:1.65;color:var(--ink-soft)}
+.changelog li{margin-bottom:3px}
+
+.section-row{max-width:1220px;margin:64px auto 22px;display:flex;align-items:baseline;gap:13px}
+.section-row .tag{font-family:var(--mono);font-size:10.5px;font-weight:700;background:var(--ink);color:#fff;padding:3px 9px;border-radius:5px;letter-spacing:.5px}
+.section-row h2{font-size:16px;font-weight:700}
+.section-row .sub{font-size:12px;color:var(--muted)}
+.section-row .line{flex:1;height:1px;background:var(--line)}
+
+.pair{max-width:1220px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:36px}
+.unit{display:flex;flex-direction:column;align-items:center}
+.state-label{font-family:var(--mono);font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:1.1px;color:var(--muted);margin-bottom:13px;text-align:center}
+
+/* BROWSER FRAME */
+.br-frame{width:100%;max-width:900px;border:1.5px solid var(--ink);border-radius:14px;background:var(--white);overflow:hidden;box-shadow:0 1px 2px rgba(29,29,27,.04), 0 18px 40px -20px rgba(29,29,27,.2)}
+.br-bar{display:flex;align-items:center;gap:6px;padding:9px 12px;border-bottom:1px solid var(--line-soft);background:var(--panel)}
+.br-bar .dot{width:10px;height:10px;border-radius:50%;background:var(--faint)}
+.br-bar .url{margin-left:8px;flex:1;max-width:380px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.br-layout{display:flex;min-height:430px}
+
+/* SIDEBAR */
+.sb{width:168px;border-right:1.3px solid var(--line-soft);background:var(--panel);flex-shrink:0;padding:14px 10px;display:flex;flex-direction:column;gap:2px}
+.sb .logo{font-size:12.5px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;padding:0 6px}
+.sb .logo svg{width:18px;height:18px}
+.sb .item{display:flex;align-items:center;gap:9px;font-size:11px;font-weight:600;color:var(--muted);padding:8px 9px;border-radius:7px}
+.sb .item svg{width:15px;height:15px}
+.sb .item.on{background:var(--ink);color:#fff}
+.sb .item.badge-wrap{justify-content:space-between}
+.sb .count{background:var(--danger);color:#fff;font-size:9px;font-weight:700;border-radius:20px;padding:1.5px 7px;font-family:var(--mono)}
+.sb .spacer{flex:1}
+.sb .logout{display:flex;align-items:center;gap:9px;font-size:11px;font-weight:600;color:var(--muted);padding:8px 9px;border-radius:7px}
+
+/* CONTENT */
+.cnt{flex:1;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.cnt h3{font-size:15px;font-weight:700}
+.cnt .sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.kpi{border:1.3px solid var(--line);border-radius:var(--r-m);padding:12px 13px;background:var(--white)}
+.kpi .lbl{font-size:9.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.kpi .val{font-family:var(--mono);font-size:20px;font-weight:700;margin-top:5px}
+.kpi .delta{font-size:10px;color:var(--accent);font-weight:700;margin-top:3px}
+.kpi .delta.down{color:var(--danger)}
+
+.panel{border:1.3px solid var(--line);border-radius:var(--r-m);background:var(--white)}
+.panel .ph{font-family:var(--mono);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:11px 14px;border-bottom:1px solid var(--line-soft);display:flex;justify-content:space-between;align-items:center}
+
+.tbl{width:100%;border-collapse:collapse;font-size:11px}
+.tbl th{font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);text-align:left;padding:9px 14px;border-bottom:1px solid var(--line-soft)}
+.tbl td{padding:9px 14px;border-bottom:1px solid var(--line-soft);color:var(--ink-soft)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl .strong{font-weight:700;color:var(--ink)}
+.pill{font-family:var(--mono);font-size:9px;font-weight:700;border:1.2px solid var(--ink);border-radius:20px;padding:2px 8px;white-space:nowrap;display:inline-block}
+.pill.ok{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pill.warn{border-color:var(--accent);color:var(--accent)}
+.pill.bad{border-color:var(--danger);color:var(--danger)}
+.pill.soft{border-color:var(--faint);color:var(--muted)}
+
+.legend{max-width:340px;margin-top:16px;list-style:none}
+.legend li{display:flex;align-items:flex-start;gap:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.55;margin-bottom:8px}
+.ann{display:inline-flex;width:16px;height:16px;border-radius:50%;background:var(--ink);color:#fff;font-size:9px;font-weight:700;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.ann.new{background:var(--accent)}
+
+.footer-note{max-width:1220px;margin:70px auto 0;text-align:center;padding:22px;border-top:1px solid var(--line)}
+.footer-note p{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="icondefs">
+<svg xmlns="http://www.w3.org/2000/svg">
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M4 12L12 5l8 7"/><path d="M6 11v8a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-8"/><path d="M10 20v-5h4v5"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.4" r="3"/><path d="M3.3 20c0-3.1 2.6-5.5 5.7-5.5s5.7 2.4 5.7 5.5"/><circle cx="17.3" cy="9.6" r="2.3"/><path d="M15.8 14.6c2.5.4 4.3 2.4 4.3 4.9"/></symbol>
+<symbol id="i-route" viewBox="0 0 24 24"><path d="M4 19c3-6 3.5-11 8-11s5 5 8 11"/><circle cx="12" cy="8" r="2.2"/></symbol>
+<symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 3.5v17"/><path d="M6 5c4-2.5 8 2.5 12 0v7c-4 2.5-8-2.5-12 0"/></symbol>
+<symbol id="i-logout" viewBox="0 0 24 24"><path d="M9.5 4.3H6.3a2 2 0 0 0-2 2v11.4a2 2 0 0 0 2 2h3.2"/><polyline points="14.5 15.5 18.3 12 14.5 8.5"/><line x1="18.3" y1="12" x2="9.3" y2="12"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><polyline points="5 12.5 9.5 17 19 7"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.2l6.8 2.7v6c0 4.9-2.9 7.8-6.8 8.9-3.9-1.1-6.8-4-6.8-8.9v-6z"/><polyline points="8.6 12.2 10.9 14.5 15.5 9.7"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><circle cx="14.5" cy="7" r="2.1"/><line x1="4" y1="12.5" x2="20" y2="12.5"/><circle cx="8.5" cy="12.5" r="2.1"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="16" cy="18" r="2.1"/></symbol>
+</svg>
+</div>
+
+<div class="page-header">
+  <div class="eyebrow">Phase 2 — UX · Back-office Admin</div>
+  <h1>SIRA KELEN — Dashboard administrateur</h1>
+  <p>Version web (navigateur), réservée à l'équipe. Vue d'ensemble du système, gestion des utilisateurs, des AD et des signalements. Première version volontairement simple, alignée sur le MVP : les statistiques détaillées arrivent en v2.</p>
+</div>
+<div class="changelog">
+  <div class="t">Portée de cette première version</div>
+  <ul>
+    <li>4 onglets seulement : <strong>Aperçu</strong> (stats), <strong>Utilisateurs</strong>, <strong>Avis de Déplacement</strong>, <strong>Signalements</strong>.</li>
+    <li>Chaque écran = un tableau simple + actions directes (bloquer, supprimer, marquer traité).</li>
+    <li>Le badge rouge sur « Signalements » montre les dossiers en attente.</li>
+    <li>Accessible uniquement avec un compte administrateur — pas de création de compte libre.</li>
+  </ul>
+</div>
+
+<!-- ================= APERÇU ================= -->
+<div class="section-row"><span class="tag">01</span><h2>Aperçu — statistiques</h2><span class="sub">premier écran après connexion admin</span><div class="line"></div></div>
+<div class="pair">
+  <div class="unit">
+    <div class="br-frame">
+      <div class="br-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><div class="url">admin.sirakele.ml/apercu</div></div>
+      <div class="br-layout">
+        <div class="sb">
+          <div class="logo"><svg class="ic"><use href="#i-route"/></svg>SIRA KELÉN</div>
+          <div class="item on"><svg class="ic"><use href="#i-home"/></svg>Aperçu</div>
+          <div class="item"><svg class="ic"><use href="#i-users"/></svg>Utilisateurs</div>
+          <div class="item"><svg class="ic"><use href="#i-route"/></svg>Avis de Déplacement</div>
+          <div class="item badge-wrap"><span style="display:flex;align-items:center;gap:9px"><svg class="ic"><use href="#i-flag"/></svg>Signalements</span><span class="count">3</span></div>
+          <div class="spacer"></div>
+          <div class="logout"><svg class="ic"><use href="#i-logout"/></svg>Déconnexion</div>
+        </div>
+        <div class="cnt">
+          <div>
+            <h3><span class="ann">1</span>Aperçu</h3>
+            <div class="sub">Dernières 24 h · jeudi 26 juillet</div>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><div class="lbl">Utilisateurs</div><div class="val">248</div><div class="delta">+12 cette semaine</div></div>
+            <div class="kpi"><div class="lbl">AD actifs</div><div class="val">86</div><div class="delta">+7</div></div>
+            <div class="kpi"><div class="lbl">Demandes</div><div class="val">412</div><div class="delta">+34</div></div>
+            <div class="kpi"><div class="lbl">Matching réussi</div><div class="val">58%</div><div class="delta">+4%</div></div>
+            <div class="kpi"><div class="lbl">Signalements</div><div class="val">3</div><div class="delta down">2 en attente</div></div>
+          </div>
+          <div class="panel">
+            <div class="ph">Derniers utilisateurs inscrits <span style="font-weight:600;text-transform:none;color:var(--ink)">Voir tout →</span></div>
+            <table class="tbl">
+              <tr><th>Nom</th><th>Quartier</th><th>Vérifié</th><th>Inscrit</th></tr>
+              <tr><td class="strong">Moussa D.</td><td>Kalaban Coro</td><td><span class="pill ok">Oui</span></td><td>10 min</td></tr>
+              <tr><td class="strong">Awa T.</td><td>Golf</td><td><span class="pill warn">En attente</span></td><td>32 min</td></tr>
+              <tr><td class="strong">Bakary S.</td><td>Badalabougou</td><td><span class="pill ok">Oui</span></td><td>1 h</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann">1</span>Un seul écran de stats, 5 indicateurs clés. Pas de graphiques complexes au MVP — c'est pour l'équipe, pas pour des investisseurs.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ================= UTILISATEURS ================= -->
+<div class="section-row"><span class="tag">02</span><h2>Utilisateurs</h2><span class="line"></span></div>
+<div class="pair">
+  <div class="unit">
+    <div class="br-frame">
+      <div class="br-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><div class="url">admin.sirakele.ml/utilisateurs</div></div>
+      <div class="br-layout">
+        <div class="sb">
+          <div class="logo"><svg class="ic"><use href="#i-route"/></svg>SIRA KELÉN</div>
+          <div class="item"><svg class="ic"><use href="#i-home"/></svg>Aperçu</div>
+          <div class="item on"><svg class="ic"><use href="#i-users"/></svg>Utilisateurs</div>
+          <div class="item"><svg class="ic"><use href="#i-route"/></svg>Avis de Déplacement</div>
+          <div class="item badge-wrap"><span style="display:flex;align-items:center;gap:9px"><svg class="ic"><use href="#i-flag"/></svg>Signalements</span><span class="count">3</span></div>
+          <div class="spacer"></div>
+          <div class="logout"><svg class="ic"><use href="#i-logout"/></svg>Déconnexion</div>
+        </div>
+        <div class="cnt">
+          <div>
+            <h3><span class="ann">2</span>Utilisateurs</h3>
+            <div class="sub">248 inscrits · recherche, vue détail, blocage</div>
+          </div>
+          <div class="panel">
+            <div class="ph">Liste des utilisateurs <span style="font-weight:600;text-transform:none;color:var(--ink)">Recherche…</span></div>
+            <table class="tbl">
+              <tr><th>Utilisateur</th><th>Quartier</th><th>Vérifié</th><th>Signalements</th><th>Actions</th></tr>
+              <tr>
+                <td class="strong">Moussa D. <svg class="ic" style="width:12px;height:12px;color:var(--muted);display:inline;vertical-align:-2px"><use href="#i-shield"/></svg></td>
+                <td>Kalaban Coro</td>
+                <td><span class="pill ok">Oui</span></td>
+                <td>0</td>
+                <td><span style="color:var(--ink);font-weight:700;font-size:10px">Voir · Bloquer</span></td>
+              </tr>
+              <tr>
+                <td class="strong">Fatoumata D.</td>
+                <td>Badalabougou</td>
+                <td><span class="pill ok">Oui</span></td>
+                <td><span style="color:var(--danger);font-weight:700">2</span></td>
+                <td><span style="color:var(--danger);font-weight:700;font-size:10px">Voir · Bloquer</span></td>
+              </tr>
+              <tr>
+                <td class="strong">Awa T.</td>
+                <td>Golf</td>
+                <td><span class="pill warn">En attente</span></td>
+                <td>0</td>
+                <td><span style="color:var(--ink);font-weight:700;font-size:10px">Voir · Bloquer</span></td>
+              </tr>
+              <tr>
+                <td class="strong">Anonyme 0421</td>
+                <td>—</td>
+                <td><span class="pill bad">Non</span></td>
+                <td><span style="color:var(--danger);font-weight:700">4</span></td>
+                <td><span style="color:var(--danger);font-weight:700;font-size:10px">Bloqué</span></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann">2</span>La colonne « Signalements » repère immédiatement les profils à risque. « Bloquer » retire l'accès à l'app.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ================= AVIS DE DÉPLACEMENT ================= -->
+<div class="section-row"><span class="tag">03</span><h2>Avis de Déplacement</h2><span class="line"></span></div>
+<div class="pair">
+  <div class="unit">
+    <div class="br-frame">
+      <div class="br-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><div class="url">admin.sirakele.ml/avis</div></div>
+      <div class="br-layout">
+        <div class="sb">
+          <div class="logo"><svg class="ic"><use href="#i-route"/></svg>SIRA KELÉN</div>
+          <div class="item"><svg class="ic"><use href="#i-home"/></svg>Aperçu</div>
+          <div class="item"><svg class="ic"><use href="#i-users"/></svg>Utilisateurs</div>
+          <div class="item on"><svg class="ic"><use href="#i-route"/></svg>Avis de Déplacement</div>
+          <div class="item badge-wrap"><span style="display:flex;align-items:center;gap:9px"><svg class="ic"><use href="#i-flag"/></svg>Signalements</span><span class="count">3</span></div>
+          <div class="spacer"></div>
+          <div class="logout"><svg class="ic"><use href="#i-logout"/></svg>Déconnexion</div>
+        </div>
+        <div class="cnt">
+          <div>
+            <h3><span class="ann">3</span>Avis de Déplacement</h3>
+            <div class="sub">86 AD actifs · cycle de vie complet visible</div>
+          </div>
+          <div class="panel">
+            <div class="ph">Liste des AD <span style="font-weight:600;text-transform:none;color:var(--ink)">Filtrer : Tous les statuts</span></div>
+            <table class="tbl">
+              <tr><th>Trajet</th><th>Date · heure</th><th>Propriétaire</th><th>Statut</th><th>Actions</th></tr>
+              <tr><td class="strong">Kalaban Coro → FST</td><td>Aujourd'hui 07:30</td><td>Moussa D.</td><td><span class="pill">Actif</span></td><td><span style="color:var(--ink);font-weight:700;font-size:10px">Voir</span></td></tr>
+              <tr><td class="strong">Golf → FSEG</td><td>Demain 07:45</td><td>Ibrahim S.</td><td><span class="pill warn">En cours de finalisation</span></td><td><span style="color:var(--ink);font-weight:700;font-size:10px">Voir</span></td></tr>
+              <tr><td class="strong">Badalabougou → Centre-ville</td><td>25 juillet 08:00</td><td>Fatoumata D.</td><td><span class="pill ok">Trajet organisé</span></td><td><span style="color:var(--ink);font-weight:700;font-size:10px">Voir</span></td></tr>
+              <tr><td class="strong">Sabalibougou → FST</td><td>22 juillet 07:15</td><td>Awa T.</td><td><span class="pill soft">Annulé</span></td><td><span style="color:var(--ink);font-weight:700;font-size:10px">Voir</span></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann">3</span>Les 4 statuts du cycle de vie (Actif / En cours de finalisation / Trajet organisé / Annulé) apparaissent ici pour suivre le bon fonctionnement du système.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ================= SIGNALEMENTS ================= -->
+<div class="section-row"><span class="tag">04</span><h2>Signalements</h2><span class="sub">nouveau — répond à l'inquiétude sécurité</span><div class="line"></div></div>
+<div class="pair">
+  <div class="unit">
+    <div class="br-frame">
+      <div class="br-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><div class="url">admin.sirakele.ml/signalements</div></div>
+      <div class="br-layout">
+        <div class="sb">
+          <div class="logo"><svg class="ic"><use href="#i-route"/></svg>SIRA KELÉN</div>
+          <div class="item"><svg class="ic"><use href="#i-home"/></svg>Aperçu</div>
+          <div class="item"><svg class="ic"><use href="#i-users"/></svg>Utilisateurs</div>
+          <div class="item"><svg class="ic"><use href="#i-route"/></svg>Avis de Déplacement</div>
+          <div class="item on badge-wrap"><span style="display:flex;align-items:center;gap:9px"><svg class="ic"><use href="#i-flag"/></svg>Signalements</span><span class="count">3</span></div>
+          <div class="spacer"></div>
+          <div class="logout"><svg class="ic"><use href="#i-logout"/></svg>Déconnexion</div>
+        </div>
+        <div class="cnt">
+          <div>
+            <h3><span class="ann new">4</span>Signalements</h3>
+            <div class="sub">3 dossiers · 2 en attente de décision</div>
+          </div>
+          <div class="panel">
+            <div class="ph">Dossiers de signalement <span style="font-weight:600;text-transform:none;color:var(--ink)">Filtrer : En attente</span></div>
+            <table class="tbl">
+              <tr><th>Signalé</th><th>Par</th><th>Motif</th><th>Statut</th><th>Actions</th></tr>
+              <tr>
+                <td class="strong">Fatoumata D.</td><td>Moussa D.</td><td>Annulation au dernier moment</td>
+                <td><span class="pill bad">En attente</span></td>
+                <td><span style="font-weight:700;font-size:10px"><span style="color:var(--ink)">Ignorer</span> · <span style="color:var(--danger)">Bloquer</span></span></td>
+              </tr>
+              <tr>
+                <td class="strong">Anonyme 0421</td><td>2 utilisateurs</td><td>Propos inappropriés</td>
+                <td><span class="pill bad">En attente</span></td>
+                <td><span style="font-weight:700;font-size:10px"><span style="color:var(--ink)">Ignorer</span> · <span style="color:var(--danger)">Bloquer</span></span></td>
+              </tr>
+              <tr>
+                <td class="strong">Awa T.</td><td>Ibrahim S.</td><td>Faux profil</td>
+                <td><span class="pill ok">Traité — bloqué</span></td>
+                <td><span style="color:var(--faint);font-weight:700;font-size:10px">Archivé</span></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="legend">
+      <li><span class="ann new">4</span>Le bouton « Signaler » de l'app mobile (v4 des wireframes) alimente cet écran. Deux décisions possibles : ignorer ou bloquer l'utilisateur.</li>
+    </ol>
+  </div>
+</div>
+
+<div class="footer-note">
+  <p>SIRA KELEN — Dashboard administrateur (back-office) · Phase 2 UX · Aligné sur l'Architecture Fonctionnelle MVP 1.1</p>
+</div>
+
+</body>
+</html>
