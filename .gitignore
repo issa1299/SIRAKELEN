@@ -10,3 +10,5 @@ build/
 # Secrets
 .env
 .env.local
+# Build NestJS
+backend/dist/
