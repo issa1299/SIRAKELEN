@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "743499372628",
+    "project_id": "sirakele-3ea53",
+    "storage_bucket": "sirakele-3ea53.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:743499372628:android:ba6cd103de264c4820b5c1",
+        "android_client_info": {
+          "package_name": "ml.sirakele.sirakele"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfDWtDnj1DF7ktJzHDhnWZALWRnJtplBY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
