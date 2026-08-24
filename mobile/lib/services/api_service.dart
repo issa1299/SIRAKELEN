@@ -12,7 +12,7 @@ class ApiService {
   /// IP locale du PC de développement (même Wi-Fi obligatoire).
   /// - Émulateur Android : 10.0.2.2 = localhost du PC
   /// - Vrai téléphone : l'IP locale du PC (ex. 192.168.1.204)
-  static const String baseUrl = 'http://192.168.1.204:3000';
+  static const String baseUrl = 'http://192.168.1.7:3000';
 
   static Future<Map<String, dynamic>> register({
     required String prenom,
