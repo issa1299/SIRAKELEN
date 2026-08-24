@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
-import '../services/auth_service.dart';
 import 'home_screen.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -14,55 +13,13 @@ class OtpScreen extends StatefulWidget {
 
 class _OtpScreenState extends State<OtpScreen> {
   final _code = TextEditingController();
-  final _auth = AuthService();
-  String? _verificationId;
   String? _erreur;
   bool _chargement = false;
-  bool _codeEnvoye = false;
 
   @override
-  void initState() {
-    super.initState();
-    _envoyerCode();
-  }
-
-  Future<void> _envoyerCode() async {
-    setState(() {
-      _chargement = true;
-      _erreur = null;
-    });
-    if (!AuthService.firebaseDisponible) {
-      // Mode dev : Firebase pas encore configuré (google-services.json absent).
-      setState(() {
-        _codeEnvoye = true;
-        _chargement = false;
-        _verificationId = null;
-      });
-      return;
-    }
-    try {
-      await _auth.envoyerCode(
-        telephone: widget.telephone,
-        codeEnvoye: (verificationId) {
-          setState(() {
-            _verificationId = verificationId;
-            _codeEnvoye = true;
-            _chargement = false;
-          });
-        },
-        erreur: (message) {
-          setState(() {
-            _erreur = message;
-            _chargement = false;
-          });
-        },
-      );
-    } catch (e) {
-      setState(() {
-        _erreur = 'Envoi du code impossible';
-        _chargement = false;
-      });
-    }
+  void dispose() {
+    _code.dispose();
+    super.dispose();
   }
 
   Future<void> _confirmer() async {
@@ -76,16 +33,8 @@ class _OtpScreenState extends State<OtpScreen> {
       _erreur = null;
     });
     try {
-      if (AuthService.firebaseDisponible && _verificationId != null) {
-        // Vérification réelle via Firebase.
-        await _auth.verifierCode(
-          verificationId: _verificationId!,
-          code: code,
-        );
-      } else {
-        // Mode dev : simulation.
-        await Future.delayed(const Duration(milliseconds: 600));
-      }
+      // Le backend vérifie le code reçu par SMS.
+      await ApiService.verifierCodeOtp(widget.telephone, code);
       await ApiService.marquerVerifie(widget.userId);
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
@@ -100,7 +49,7 @@ class _OtpScreenState extends State<OtpScreen> {
       });
     } catch (e) {
       setState(() {
-        _erreur = 'Code incorrect ou expiré';
+        _erreur = 'Connexion au serveur impossible';
         _chargement = false;
       });
     }
@@ -126,21 +75,6 @@ class _OtpScreenState extends State<OtpScreen> {
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
             ),
-            if (!AuthService.firebaseDisponible) ...[
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF3E6),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Text(
-                  'Mode dev : Firebase non configuré — entrez 4 chiffres au choix.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 11.5, color: Color(0xFFB35A00)),
-                ),
-              ),
-            ],
             const SizedBox(height: 24),
             TextField(
               controller: _code,
@@ -159,7 +93,7 @@ class _OtpScreenState extends State<OtpScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              _codeEnvoye ? 'Code valide encore 02:30' : 'Envoi du code…',
+              'Code valable 5 minutes',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 11.5, color: Colors.grey.shade500),
             ),
@@ -168,7 +102,10 @@ class _OtpScreenState extends State<OtpScreen> {
               Text(
                 _erreur!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFFA3392F), fontSize: 13),
+                style: const TextStyle(
+                    color: Color(0xFFA3392F),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700),
               ),
             ],
             const SizedBox(height: 24),
@@ -184,12 +121,37 @@ class _OtpScreenState extends State<OtpScreen> {
                   : const Text('Confirmer'),
             ),
             TextButton(
-              onPressed: _chargement ? null : _envoyerCode,
+              onPressed: _chargement ? null : _renvoyerCode,
               child: const Text('Rien reçu ? Renvoyer le code'),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _renvoyerCode() async {
+    setState(() {
+      _chargement = true;
+      _erreur = null;
+    });
+    try {
+      await ApiService.envoyerCodeOtp(widget.telephone);
+      if (!mounted) return;
+      setState(() {
+        _chargement = false;
+        _erreur = null;
+      });
+    } on ApiException catch (e) {
+      setState(() {
+        _erreur = e.message;
+        _chargement = false;
+      });
+    } catch (e) {
+      setState(() {
+        _erreur = 'Connexion au serveur impossible';
+        _chargement = false;
+      });
+    }
   }
 }

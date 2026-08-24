@@ -57,6 +57,35 @@ class ApiService {
     throw ApiException(_messageErreur(erreur) ?? 'Erreur de recherche');
   }
 
+  static Future<void> envoyerCodeOtp(String telephone) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/envoyer-code'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'telephone': telephone.replaceAll(' ', '')}),
+    );
+    final body = response.body.isNotEmpty
+        ? jsonDecode(response.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    if (response.statusCode >= 200 && response.statusCode < 300) return;
+    throw ApiException(_messageErreur(body) ?? 'Envoi du code impossible');
+  }
+
+  static Future<void> verifierCodeOtp(String telephone, String code) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/verifier'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'telephone': telephone.replaceAll(' ', ''),
+        'code': code,
+      }),
+    );
+    final body = response.body.isNotEmpty
+        ? jsonDecode(response.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    if (response.statusCode >= 200 && response.statusCode < 300) return;
+    throw ApiException(_messageErreur(body) ?? 'Code incorrect');
+  }
+
   static Future<Map<String, dynamic>> marquerVerifie(String id) async {
     final response = await http.patch(
       Uri.parse('$baseUrl/users/$id/verifier'),

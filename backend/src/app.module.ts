@@ -8,7 +8,9 @@ import { AvisDeplacement } from './ads/avis-deplacement.entity';
 import { Demande } from './demandes/demande.entity';
 import { Signalement } from './signalements/signalement.entity';
 import { ContactUrgence } from './contact-urgence/contact-urgence.entity';
+import { CodeVerification } from './auth/code-verification.entity';
 import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -22,11 +24,12 @@ import { UsersModule } from './users/users.module';
         username: config.get<string>('DB_USER'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
-        entities: [User, AvisDeplacement, Demande, Signalement, ContactUrgence],
+        entities: [User, AvisDeplacement, Demande, Signalement, ContactUrgence, CodeVerification],
         synchronize: true,
       }),
     }),
     UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
