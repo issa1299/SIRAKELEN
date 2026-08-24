@@ -21,6 +21,11 @@ export class UsersController {
     return this.usersService.create(dto);
   }
 
+  @Post('recherche')
+  findByTelephone(@Body() body: { telephone: string }): Promise<User | null> {
+    return this.usersService.findByTelephone(body.telephone);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<User> {
     return this.usersService.findOne(id);
