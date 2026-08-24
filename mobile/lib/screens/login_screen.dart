@@ -47,13 +47,16 @@ class _LoginScreenState extends State<LoginScreen> {
           builder: (_) => HomeScreen(prenom: user['prenom'] as String? ?? ''),
         ),
       );
-    } catch (_) {
+    } catch (e) {
       setState(() {
-        _erreur = 'Impossible de joindre le serveur';
+        _erreur = 'Connexion au serveur impossible';
+        _detailErreur = e.toString();
         _chargement = false;
       });
     }
   }
+
+  String? _detailErreur;
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +90,14 @@ class _LoginScreenState extends State<LoginScreen> {
             if (_erreur != null) ...[
               const SizedBox(height: 14),
               Text(_erreur!,
-                  style: const TextStyle(color: Color(0xFFA3392F), fontSize: 13)),
+                  style: const TextStyle(
+                      color: Color(0xFFA3392F),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700)),
+              if (_detailErreur != null)
+                Text(_detailErreur!,
+                    style: TextStyle(
+                        color: Colors.grey.shade600, fontSize: 10)),
             ],
             const SizedBox(height: 24),
             FilledButton(
