@@ -44,12 +44,17 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'telephone': normalise}),
     );
-    if (response.statusCode == 404) return null;
-    final body = jsonDecode(response.body) as Map<String, dynamic>;
-    if (response.statusCode == 200) {
-      return body;
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      // Compte introuvable : l'API renvoie un corps vide.
+      if (response.body.isEmpty) return null;
+      final body = jsonDecode(response.body);
+      if (body == null) return null;
+      return body as Map<String, dynamic>;
     }
-    throw ApiException(_messageErreur(body) ?? 'Erreur de recherche');
+    final erreur = response.body.isNotEmpty
+        ? jsonDecode(response.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    throw ApiException(_messageErreur(erreur) ?? 'Erreur de recherche');
   }
 
   static Future<Map<String, dynamic>> marquerVerifie(String id) async {

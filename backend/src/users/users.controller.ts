@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -22,7 +24,8 @@ export class UsersController {
   }
 
   @Post('recherche')
-  findByTelephone(@Body() body: { telephone: string }): Promise<User | null> {
+  @HttpCode(HttpStatus.OK)
+  async findByTelephone(@Body() body: { telephone: string }): Promise<User | null> {
     return this.usersService.findByTelephone(body.telephone);
   }
 
