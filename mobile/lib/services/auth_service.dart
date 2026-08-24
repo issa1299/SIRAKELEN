@@ -58,10 +58,8 @@ class AuthService {
       case 'operation-not-allowed':
         return 'La connexion par téléphone n’est pas activée dans Firebase';
       default:
-        if (kDebugMode) {
-          return 'Erreur Firebase : ${e.code}';
-        }
-        return 'Vérification impossible pour le moment';
+        // Temporaire : afficher le code exact pour le diagnostic.
+        return 'Erreur Firebase : ${e.code}';
     }
   }
 }
