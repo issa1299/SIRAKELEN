@@ -44,6 +44,12 @@ export class UsersService {
     });
   }
 
+  async marquerVerifie(id: string): Promise<User> {
+    const user = await this.findOne(id);
+    user.verifie = true;
+    return this.usersRepository.save(user);
+  }
+
   async update(id: string, dto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
     Object.assign(user, dto);

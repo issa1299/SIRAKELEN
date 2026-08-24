@@ -31,6 +31,11 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
+  @Patch(':id/verifier')
+  async verifier(@Param('id', ParseUUIDPipe) id: string): Promise<User> {
+    return this.usersService.marquerVerifie(id);
+  }
+
   @Patch(':id')
   update(
     @Param('id', ParseUUIDPipe) id: string,

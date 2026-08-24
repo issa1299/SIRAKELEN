@@ -51,6 +51,16 @@ class ApiService {
     throw ApiException(_messageErreur(body) ?? 'Erreur de recherche');
   }
 
+  static Future<Map<String, dynamic>> marquerVerifie(String id) async {
+    final response = await http.patch(
+      Uri.parse('$baseUrl/users/$id/verifier'),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    }
+    throw ApiException('Impossible de marquer le profil vérifié');
+  }
+
   static Future<Map<String, dynamic>> getUser(String id) async {
     final response = await http.get(Uri.parse('$baseUrl/users/$id'));
     final body = jsonDecode(response.body) as Map<String, dynamic>;

@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'screens/welcome_screen.dart';
+import 'services/auth_service.dart';
 
 const Color kOrange = Color(0xFFFF7700);
 const Color kOrangeDark = Color(0xFFE25F00);
 const Color kGreen = Color(0xFF1B7A2B);
 const Color kCream = Color(0xFFFFF8F0);
 
-void main() {
+/// Firebase est optionnel tant que google-services.json n'est pas ajouté :
+/// l'app démarre et l'OTP est simulé (mode dev).
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp();
+    AuthService.firebaseDisponible = true;
+  } catch (_) {
+    AuthService.firebaseDisponible = false;
+  }
   runApp(const SirakeleApp());
 }
 

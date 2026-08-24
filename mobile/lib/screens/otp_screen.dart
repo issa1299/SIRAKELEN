@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import 'home_screen.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -13,13 +14,55 @@ class OtpScreen extends StatefulWidget {
 
 class _OtpScreenState extends State<OtpScreen> {
   final _code = TextEditingController();
+  final _auth = AuthService();
+  String? _verificationId;
   String? _erreur;
   bool _chargement = false;
+  bool _codeEnvoye = false;
 
   @override
-  void dispose() {
-    _code.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _envoyerCode();
+  }
+
+  Future<void> _envoyerCode() async {
+    setState(() {
+      _chargement = true;
+      _erreur = null;
+    });
+    if (!AuthService.firebaseDisponible) {
+      // Mode dev : Firebase pas encore configuré (google-services.json absent).
+      setState(() {
+        _codeEnvoye = true;
+        _chargement = false;
+        _verificationId = null;
+      });
+      return;
+    }
+    try {
+      await _auth.envoyerCode(
+        telephone: widget.telephone,
+        codeEnvoye: (verificationId) {
+          setState(() {
+            _verificationId = verificationId;
+            _codeEnvoye = true;
+            _chargement = false;
+          });
+        },
+        erreur: (message) {
+          setState(() {
+            _erreur = message;
+            _chargement = false;
+          });
+        },
+      );
+    } catch (e) {
+      setState(() {
+        _erreur = 'Envoi du code impossible';
+        _chargement = false;
+      });
+    }
   }
 
   Future<void> _confirmer() async {
@@ -32,20 +75,32 @@ class _OtpScreenState extends State<OtpScreen> {
       _chargement = true;
       _erreur = null;
     });
-    // TODO Phase 2 : vérifier le code avec Firebase Phone Auth ici.
-    // Pour l'instant, on simule la vérification puis on marque le profil vérifié.
-    await Future.delayed(const Duration(milliseconds: 600));
     try {
-      await ApiService.getUser(widget.userId);
+      if (AuthService.firebaseDisponible && _verificationId != null) {
+        // Vérification réelle via Firebase.
+        await _auth.verifierCode(
+          verificationId: _verificationId!,
+          code: code,
+        );
+      } else {
+        // Mode dev : simulation.
+        await Future.delayed(const Duration(milliseconds: 600));
+      }
+      await ApiService.marquerVerifie(widget.userId);
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const HomeScreen()),
         (route) => false,
       );
-    } catch (_) {
+    } on ApiException catch (e) {
       setState(() {
-        _erreur = 'Vérification impossible pour le moment';
+        _erreur = e.message;
+        _chargement = false;
+      });
+    } catch (e) {
+      setState(() {
+        _erreur = 'Code incorrect ou expiré';
         _chargement = false;
       });
     }
@@ -55,7 +110,7 @@ class _OtpScreenState extends State<OtpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Vérification'), backgroundColor: Colors.transparent),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -71,7 +126,22 @@ class _OtpScreenState extends State<OtpScreen> {
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
             ),
-            const SizedBox(height: 28),
+            if (!AuthService.firebaseDisponible) ...[
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF3E6),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  'Mode dev : Firebase non configuré — entrez 4 chiffres au choix.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 11.5, color: Color(0xFFB35A00)),
+                ),
+              ),
+            ],
+            const SizedBox(height: 24),
             TextField(
               controller: _code,
               keyboardType: TextInputType.number,
@@ -89,7 +159,7 @@ class _OtpScreenState extends State<OtpScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              'Code valide encore 02:30',
+              _codeEnvoye ? 'Code valide encore 02:30' : 'Envoi du code…',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 11.5, color: Colors.grey.shade500),
             ),
@@ -114,7 +184,7 @@ class _OtpScreenState extends State<OtpScreen> {
                   : const Text('Confirmer'),
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: _chargement ? null : _envoyerCode,
               child: const Text('Rien reçu ? Renvoyer le code'),
             ),
           ],
