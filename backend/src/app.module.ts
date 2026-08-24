@@ -8,6 +8,7 @@ import { AvisDeplacement } from './ads/avis-deplacement.entity';
 import { Demande } from './demandes/demande.entity';
 import { Signalement } from './signalements/signalement.entity';
 import { ContactUrgence } from './contact-urgence/contact-urgence.entity';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ContactUrgence } from './contact-urgence/contact-urgence.entity';
         synchronize: true,
       }),
     }),
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
