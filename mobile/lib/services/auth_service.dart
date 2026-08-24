@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 
 /// Vérification du numéro par SMS via Firebase Phone Auth.
 /// Renvoie l'identifiant Firebase (uid) si le code est correct.
