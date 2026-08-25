@@ -5,7 +5,13 @@ import 'home_screen.dart';
 class OtpScreen extends StatefulWidget {
   final String telephone;
   final String userId;
-  const OtpScreen({super.key, required this.telephone, required this.userId});
+  final String prenom;
+  const OtpScreen({
+    super.key,
+    required this.telephone,
+    required this.userId,
+    this.prenom = '',
+  });
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
@@ -39,7 +45,8 @@ class _OtpScreenState extends State<OtpScreen> {
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(
+            builder: (_) => HomeScreen(prenom: widget.prenom)),
         (route) => false,
       );
     } on ApiException catch (e) {

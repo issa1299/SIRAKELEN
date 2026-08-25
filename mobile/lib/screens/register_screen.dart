@@ -48,6 +48,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           builder: (_) => OtpScreen(
             telephone: user['telephone'] as String,
             userId: user['id'] as String,
+            prenom: user['prenom'] as String? ?? '',
           ),
         ),
       );
