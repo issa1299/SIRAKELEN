@@ -12,7 +12,10 @@ class ApiService {
   /// IP locale du PC de développement (même Wi-Fi obligatoire).
   /// - Émulateur Android : 10.0.2.2 = localhost du PC
   /// - Vrai téléphone : l'IP locale du PC (ex. 192.168.1.204)
-  static const String baseUrl = 'http://192.168.1.7:3000';
+  /// Tunnel ADB (adb reverse tcp:3000 tcp:3000) : le téléphone appelle
+  /// localhost:3000 qui est redirigé vers le PC. Fonctionne quel que soit
+  /// le Wi-Fi, sans pare-feu.
+  static const String baseUrl = 'http://localhost:3000';
 
   static Future<Map<String, dynamic>> register({
     required String prenom,
