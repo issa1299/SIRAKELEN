@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../main.dart';
 import '../services/api_service.dart';
-import 'home_screen.dart';
 
 class PublierScreen extends StatefulWidget {
   final String userId;
@@ -167,12 +166,10 @@ class _PublierScreenState extends State<PublierScreen> {
               ),
               const SizedBox(height: 28),
               FilledButton(
-                onPressed: () => Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => HomeScreen(userId: widget.userId)),
-                  (route) => false,
-                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
                 child: const Text('Retour à l’accueil'),
               ),
             ],

@@ -4,12 +4,18 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AvisDeplacement } from '../ads/avis-deplacement.entity';
+import { Signalement } from '../signalements/signalement.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(AvisDeplacement)
+    private readonly adsRepository: Repository<AvisDeplacement>,
+    @InjectRepository(Signalement)
+    private readonly signalementsRepository: Repository<Signalement>,
   ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
@@ -54,6 +60,30 @@ export class UsersService {
     const user = await this.findOne(id);
     Object.assign(user, dto);
     return this.usersRepository.save(user);
+  }
+
+  async stats(userId: string): Promise<{
+    adPublies: number;
+    trajetsOrganises: number;
+    signalements: number;
+  }> {
+    const user = await this.findOne(userId);
+    const ads = await this.usersRepository
+      .createQueryBuilder('u')
+      .leftJoin('u.ads', 'a')
+      .where('u.id = :id', { id: userId })
+      .getMany();
+    void ads;
+    const adPublies = await this.adsRepository.count({
+      where: { proprietaire: { id: userId } },
+    });
+    const trajetsOrganises = await this.adsRepository.count({
+      where: { proprietaire: { id: userId }, statut: 'trajet_organise' as never },
+    });
+    const signalements = await this.signalementsRepository.count({
+      where: { utilisateurSignale: { id: userId } },
+    });
+    return { adPublies, trajetsOrganises, signalements };
   }
 
   private normalizeTelephone(telephone: string): string {

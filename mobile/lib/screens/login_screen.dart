@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
-import 'home_screen.dart';
+import 'main_scaffold.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -44,9 +44,9 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => HomeScreen(
-            prenom: user['prenom'] as String? ?? '',
+          builder: (_) => MainScaffold(
             userId: user['id'] as String? ?? '',
+            prenom: user['prenom'] as String? ?? '',
           ),
         ),
       );

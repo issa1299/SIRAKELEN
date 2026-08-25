@@ -13,6 +13,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { AdsModule } from './ads/ads.module';
 import { DemandesModule } from './demandes/demandes.module';
+import { SecuriteModule } from './securite/securite.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { DemandesModule } from './demandes/demandes.module';
     AuthModule,
     AdsModule,
     DemandesModule,
+    SecuriteModule,
   ],
   controllers: [AppController],
   providers: [AppService],

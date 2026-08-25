@@ -201,6 +201,70 @@ class ApiService {
     throw ApiException(_messageErreur(body) ?? 'Annulation impossible');
   }
 
+  static Future<void> definirContactUrgence({
+    required String userId,
+    required String nomContact,
+    required String telephoneContact,
+    String? lien,
+  }) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/securite/contact-urgence'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'userId': userId,
+        'nomContact': nomContact,
+        'telephoneContact': telephoneContact.replaceAll(' ', ''),
+        'lien': ?lien,
+      }),
+    );
+    if (response.statusCode >= 200 && response.statusCode < 300) return;
+    final body = response.body.isNotEmpty
+        ? jsonDecode(response.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    throw ApiException(_messageErreur(body) ?? 'Enregistrement impossible');
+  }
+
+  static Future<Map<String, dynamic>?> getContactUrgence(String userId) async {
+    final response =
+        await http.get(Uri.parse('$baseUrl/securite/contact-urgence/$userId'));
+    if (response.statusCode == 200 &&
+        response.body.isNotEmpty &&
+        response.body != 'null') {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    }
+    return null;
+  }
+
+  static Future<Map<String, dynamic>> getStats(String userId) async {
+    final response =
+        await http.get(Uri.parse('$baseUrl/securite/stats/$userId'));
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    }
+    return {'adPublies': 0, 'trajetsOrganises': 0, 'signalements': 0};
+  }
+
+  static Future<void> signaler({
+    required String signaleUserId,
+    required String auteurId,
+    required String motif,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/securite/signalements'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'signaleUserId': signaleUserId,
+        'auteurId': auteurId,
+        'motif': motif,
+      }),
+    );
+    if (response.statusCode == 201) return;
+    final body = response.body.isNotEmpty
+        ? jsonDecode(response.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    throw ApiException(_messageErreur(body) ?? 'Signalement impossible');
+  }
+
   static Future<List<dynamic>> getCompatibilites(String userId) async {
     final response =
         await http.get(Uri.parse('$baseUrl/ads/compatibilites/$userId'));

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
-import 'home_screen.dart';
+import 'main_scaffold.dart';
 
 class OtpScreen extends StatefulWidget {
   final String telephone;
@@ -46,8 +46,8 @@ class _OtpScreenState extends State<OtpScreen> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-            builder: (_) => HomeScreen(
-                prenom: widget.prenom, userId: widget.userId)),
+            builder: (_) => MainScaffold(
+                userId: widget.userId, prenom: widget.prenom)),
         (route) => false,
       );
     } on ApiException catch (e) {
