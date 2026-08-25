@@ -130,6 +130,58 @@ class ApiService {
     return [];
   }
 
+  static Future<void> envoyerDemande(String adId, String demandeurId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/demandes'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'adId': adId, 'demandeurId': demandeurId}),
+    );
+    final body = response.body.isNotEmpty
+        ? jsonDecode(response.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    if (response.statusCode == 201) return;
+    throw ApiException(_messageErreur(body) ?? 'Envoi impossible');
+  }
+
+  static Future<List<dynamic>> getDemandesRecues(String userId) async {
+    final response =
+        await http.get(Uri.parse('$baseUrl/demandes/recues/$userId'));
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      return jsonDecode(response.body) as List<dynamic>;
+    }
+    return [];
+  }
+
+  static Future<void> accepterDemande(String demandeId, String userId) async {
+    final r = await http.post(
+        Uri.parse('$baseUrl/demandes/$demandeId/accepter/$userId'));
+    if (r.statusCode >= 200 && r.statusCode < 300) return;
+    final body = r.body.isNotEmpty
+        ? jsonDecode(r.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    throw ApiException(_messageErreur(body) ?? 'Acceptation impossible');
+  }
+
+  static Future<void> refuserDemande(String demandeId, String userId) async {
+    final r = await http.post(
+        Uri.parse('$baseUrl/demandes/$demandeId/refuser/$userId'));
+    if (r.statusCode >= 200 && r.statusCode < 300) return;
+    final body = r.body.isNotEmpty
+        ? jsonDecode(r.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    throw ApiException(_messageErreur(body) ?? 'Refus impossible');
+  }
+
+  static Future<void> marquerOrganise(String adId, String userId) async {
+    final r = await http.post(
+        Uri.parse('$baseUrl/demandes/ads/$adId/organise/$userId'));
+    if (r.statusCode >= 200 && r.statusCode < 300) return;
+    final body = r.body.isNotEmpty
+        ? jsonDecode(r.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    throw ApiException(_messageErreur(body) ?? 'Action impossible');
+  }
+
   static Future<List<dynamic>> getCompatibilites(String userId) async {
     final response =
         await http.get(Uri.parse('$baseUrl/ads/compatibilites/$userId'));

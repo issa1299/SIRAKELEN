@@ -12,6 +12,7 @@ import { CodeVerification } from './auth/code-verification.entity';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { AdsModule } from './ads/ads.module';
+import { DemandesModule } from './demandes/demandes.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AdsModule } from './ads/ads.module';
     UsersModule,
     AuthModule,
     AdsModule,
+    DemandesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

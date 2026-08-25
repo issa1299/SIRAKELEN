@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   ManyToOne,
+  Unique,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 import { AvisDeplacement } from '../ads/avis-deplacement.entity';
@@ -16,14 +17,15 @@ export enum StatutDemande {
 }
 
 @Entity('demandes')
+@Unique(['ad', 'demandeur'])
 export class Demande {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => AvisDeplacement)
+  @ManyToOne(() => AvisDeplacement, { nullable: false })
   ad: AvisDeplacement;
 
-  @ManyToOne(() => User, (u) => u.demandesEnvoyees)
+  @ManyToOne(() => User, { nullable: false })
   demandeur: User;
 
   @Column({ type: 'enum', enum: StatutDemande, default: StatutDemande.EN_ATTENTE })

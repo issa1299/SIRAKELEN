@@ -14,6 +14,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? _adActif;
   List<dynamic> _compatibilites = [];
+  List<dynamic> _demandesRecues = [];
   bool _chargement = true;
 
   @override
@@ -35,14 +36,19 @@ class _HomeScreenState extends State<HomeScreen> {
               a['statut'] == 'en_cours_de_finalisation')
           .toList();
       List<dynamic> comps = [];
+      List<dynamic> recues = [];
       if (actifs.isNotEmpty) {
         comps = await ApiService.getCompatibilites(widget.userId);
+        recues = await ApiService.getDemandesRecues(widget.userId);
       }
       if (!mounted) return;
       setState(() {
         _adActif =
             actifs.isNotEmpty ? actifs.first as Map<String, dynamic> : null;
         _compatibilites = comps;
+        _demandesRecues = recues
+            .where((d) => d['statut'] == 'en_attente')
+            .toList();
         _chargement = false;
       });
     } catch (_) {
@@ -88,6 +94,137 @@ class _HomeScreenState extends State<HomeScreen> {
       default:
         return statut.toUpperCase();
     }
+  }
+
+  Future<void> _envoyerInteret(Map<String, dynamic> comp) async {
+    try {
+      await ApiService.envoyerDemande(
+          comp['adId'] as String, widget.userId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Demande envoyée ! Tu pourras suivre la réponse ici.'),
+          backgroundColor: kGreen,
+        ),
+      );
+      await _chargerMonAd();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message), backgroundColor: kOrangeDark));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Connexion au serveur impossible'),
+          backgroundColor: Color(0xFFA3392F)));
+    }
+  }
+
+  Widget _carteDemandeRecue(Map<String, dynamic> d) {
+    final demandeur = d['demandeur'] as Map<String, dynamic>;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEDEAE2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: const Color(0xFFFFF3E6),
+                child: Icon(Icons.person, color: kOrangeDark, size: 18),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                              '${demandeur['prenom']} ${demandeur['nom']}',
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800)),
+                        ),
+                        if (demandeur['verifie'] == true) ...[
+                          const SizedBox(width: 4),
+                          const Icon(Icons.verified,
+                              color: kGreen, size: 13),
+                        ],
+                      ],
+                    ),
+                    Text(
+                        'veut rejoindre ton trajet ${d['ad']['depart']} → ${d['ad']['destination']}',
+                        style: TextStyle(
+                            fontSize: 10.5, color: Colors.grey.shade600)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () async {
+                    try {
+                      await ApiService.accepterDemande(
+                          d['id'] as String, widget.userId);
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text(
+                              'Accepté ! Contacte ton partenaire par téléphone ou WhatsApp.'),
+                          backgroundColor: kGreen));
+                      await _chargerMonAd();
+                    } catch (e) {
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(e.toString()),
+                          backgroundColor: const Color(0xFFA3392F)));
+                    }
+                  },
+                  icon: const Icon(Icons.check, size: 16),
+                  label: const Text('Accepter'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: kGreen,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    try {
+                      await ApiService.refuserDemande(
+                          d['id'] as String, widget.userId);
+                      await _chargerMonAd();
+                    } catch (_) {}
+                  },
+                  icon: const Icon(Icons.close, size: 16),
+                  label: const Text('Refuser'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.grey.shade700,
+                    side: const BorderSide(color: Color(0xFFEDEAE2)),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _carteCompatibilite(Map<String, dynamic> comp) {
@@ -157,22 +294,46 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
-            decoration: BoxDecoration(
-              color: pillBg,
-              borderRadius: BorderRadius.circular(20),
-              border: niveau == 'faible'
-                  ? Border.all(color: const Color(0xFFEDEAE2))
-                  : null,
-            ),
-            child: Text(label,
-                style: TextStyle(
-                    fontSize: 8.5,
-                    fontWeight: FontWeight.w800,
-                    fontFamily: 'monospace',
-                    color: pillText)),
+          Column(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
+                decoration: BoxDecoration(
+                  color: pillBg,
+                  borderRadius: BorderRadius.circular(20),
+                  border: niveau == 'faible'
+                      ? Border.all(color: const Color(0xFFEDEAE2))
+                      : null,
+                ),
+                child: Text(label,
+                    style: TextStyle(
+                        fontSize: 8.5,
+                        fontWeight: FontWeight.w800,
+                        fontFamily: 'monospace',
+                        color: pillText)),
+              ),
+              const SizedBox(height: 6),
+              GestureDetector(
+                onTap: _adActif != null &&
+                        _adActif!['statut'] == 'en_cours_de_finalisation'
+                    ? null
+                    : () => _envoyerInteret(comp),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: kOrange,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Text('Intéressé',
+                      style: TextStyle(
+                          fontSize: 8.5,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white)),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -301,10 +462,43 @@ class _HomeScreenState extends State<HomeScreen> {
                                   fontWeight: FontWeight.w700)),
                         ),
                       ),
+                      if (_adActif!['statut'] ==
+                          'en_cours_de_finalisation') ...[
+                        const SizedBox(height: 4),
+                        FilledButton.icon(
+                          onPressed: () async {
+                            try {
+                              await ApiService.marquerOrganise(
+                                  _adActif!['id'] as String, widget.userId);
+                              await _chargerMonAd();
+                            } catch (_) {}
+                          },
+                          icon: const Icon(Icons.check, size: 18),
+                          label: const Text('Marquer comme trajet organisé'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: kGreen,
+                            minimumSize: const Size.fromHeight(44),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
                 const SizedBox(height: 18),
+                if (_demandesRecues.isNotEmpty) ...[
+                  Text(
+                    '${_demandesRecues.length} demande${_demandesRecues.length > 1 ? 's' : ''} reçue${_demandesRecues.length > 1 ? 's' : ''}',
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.6,
+                        color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(height: 10),
+                  ..._demandesRecues.map(
+                      (d) => _carteDemandeRecue(d as Map<String, dynamic>)),
+                  const SizedBox(height: 12),
+                ],
                 if (_compatibilites.isNotEmpty) ...[
                   Text(
                     '${_compatibilites.length} compatibilité${_compatibilites.length > 1 ? 's' : ''} trouvée${_compatibilites.length > 1 ? 's' : ''}',
