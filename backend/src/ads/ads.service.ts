@@ -116,6 +116,7 @@ export class AdsService {
     const resultats: Array<{
       adId: string;
       monAdId: string;
+      userId: string;
       nom: string;
       verifie: boolean;
       role: string;
@@ -149,6 +150,7 @@ export class AdsService {
         resultats.push({
           adId: autre.id,
           monAdId: monAd.id,
+          userId: autre.proprietaire.id,
           nom: `${autre.proprietaire.prenom} ${autre.proprietaire.nom.charAt(0).toUpperCase()}.`,
           verifie: autre.proprietaire.verifie,
           role: autre.role,

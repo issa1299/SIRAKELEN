@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/api_service.dart';
 import 'publier_screen.dart';
+import 'profil_autre_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String prenom;
@@ -379,7 +380,17 @@ class _HomeScreenState extends State<HomeScreen> {
         pillText = Colors.grey.shade600;
         label = 'FAIBLE';
     }
-    return Container(
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProfilAutreScreen(
+            targetUserId: comp['userId'] as String,
+            viewerUserId: widget.userId,
+          ),
+        ),
+      ),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -467,6 +478,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ],
+      ),
       ),
     );
   }
