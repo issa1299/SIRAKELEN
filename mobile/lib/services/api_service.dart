@@ -130,6 +130,15 @@ class ApiService {
     return [];
   }
 
+  static Future<List<dynamic>> getCompatibilites(String userId) async {
+    final response =
+        await http.get(Uri.parse('$baseUrl/ads/compatibilites/$userId'));
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      return jsonDecode(response.body) as List<dynamic>;
+    }
+    return [];
+  }
+
   static Future<void> annulerAd(String adId, String userId) async {
     final response = await http.post(
       Uri.parse('$baseUrl/ads/$adId/annuler/$userId'),

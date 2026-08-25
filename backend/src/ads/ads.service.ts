@@ -8,6 +8,7 @@ import { Repository, Not, In } from 'typeorm';
 import { AvisDeplacement, RoleAd, StatutAd } from './avis-deplacement.entity';
 import { UsersService } from '../users/users.service';
 import { CreateAdDto } from './dto/create-ad.dto';
+import { calculerScore, NiveauCompatibilite } from './matching';
 
 @Injectable()
 export class AdsService {
@@ -82,6 +83,90 @@ export class AdsService {
       where: { proprietaire: { id: userId } },
       order: { creeLe: 'DESC' },
     });
+  }
+
+  async compatibilites(
+    userId: string,
+  ): Promise<
+    Array<{
+      adId: string;
+      monAdId: string;
+      nom: string;
+      verifie: boolean;
+      role: string;
+      depart: string;
+      destination: string;
+      date: string;
+      heure: string;
+      places: number | null;
+      niveau: NiveauCompatibilite;
+    }>
+  > {
+    const mesAds = await this.adsRepository.find({
+      where: { proprietaire: { id: userId }, statut: StatutAd.ACTIF },
+    });
+    if (mesAds.length === 0) return [];
+
+    // Tous les AD actifs des autres utilisateurs.
+    const autresAds = await this.adsRepository.find({
+      where: { statut: StatutAd.ACTIF },
+      relations: { proprietaire: true },
+    });
+
+    const resultats: Array<{
+      adId: string;
+      monAdId: string;
+      nom: string;
+      verifie: boolean;
+      role: string;
+      depart: string;
+      destination: string;
+      date: string;
+      heure: string;
+      places: number | null;
+      niveau: NiveauCompatibilite;
+    }> = [];
+
+    for (const monAd of mesAds) {
+      for (const autre of autresAds) {
+        // Jamais avec soi-même.
+        if (autre.proprietaire.id === userId) continue;
+        // Rôles opposés : conducteur ↔ passager.
+        if (autre.role === monAd.role) continue;
+        // Chaque AD correspond à une date précise : même date obligatoire.
+        if (autre.dateDeplacement !== monAd.dateDeplacement) continue;
+
+        const { niveau } = calculerScore(
+          monAd.depart,
+          monAd.destination,
+          monAd.heureDepart,
+          autre.depart,
+          autre.destination,
+          autre.heureDepart,
+        );
+        if (!niveau) continue;
+
+        resultats.push({
+          adId: autre.id,
+          monAdId: monAd.id,
+          nom: `${autre.proprietaire.prenom} ${autre.proprietaire.nom.charAt(0).toUpperCase()}.`,
+          verifie: autre.proprietaire.verifie,
+          role: autre.role,
+          depart: autre.depart,
+          destination: autre.destination,
+          date: autre.dateDeplacement,
+          heure: autre.heureDepart,
+          places: autre.placesDisponibles,
+          niveau,
+        });
+      }
+    }
+
+    // Tri : fort > moyen > faible.
+    const ordre = { fort: 0, moyen: 1, faible: 2 };
+    return resultats.sort(
+      (a, b) => ordre[a.niveau] - ordre[b.niveau],
+    );
   }
 
   async annuler(adId: string, userId: string): Promise<AvisDeplacement> {

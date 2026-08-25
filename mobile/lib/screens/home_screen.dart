@@ -11,9 +11,9 @@ class HomeScreen extends StatefulWidget {
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
-
 class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? _adActif;
+  List<dynamic> _compatibilites = [];
   bool _chargement = true;
 
   @override
@@ -34,9 +34,15 @@ class _HomeScreenState extends State<HomeScreen> {
               a['statut'] == 'actif' ||
               a['statut'] == 'en_cours_de_finalisation')
           .toList();
+      List<dynamic> comps = [];
+      if (actifs.isNotEmpty) {
+        comps = await ApiService.getCompatibilites(widget.userId);
+      }
       if (!mounted) return;
       setState(() {
-        _adActif = actifs.isNotEmpty ? actifs.first as Map<String, dynamic> : null;
+        _adActif =
+            actifs.isNotEmpty ? actifs.first as Map<String, dynamic> : null;
+        _compatibilites = comps;
         _chargement = false;
       });
     } catch (_) {
@@ -82,6 +88,95 @@ class _HomeScreenState extends State<HomeScreen> {
       default:
         return statut.toUpperCase();
     }
+  }
+
+  Widget _carteCompatibilite(Map<String, dynamic> comp) {
+    final niveau = comp['niveau'] as String;
+    Color pillBg;
+    Color pillText;
+    String label;
+    switch (niveau) {
+      case 'fort':
+        pillBg = kGreen;
+        pillText = Colors.white;
+        label = 'FORT';
+        break;
+      case 'moyen':
+        pillBg = const Color(0xFFFFE8D4);
+        pillText = const Color(0xFFB35A00);
+        label = 'MOYEN';
+        break;
+      default:
+        pillBg = Colors.white;
+        pillText = Colors.grey.shade600;
+        label = 'FAIBLE';
+    }
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEDEAE2)),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 19,
+            backgroundColor: const Color(0xFFFFF3E6),
+            child: Icon(Icons.person, color: kOrangeDark, size: 19),
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(comp['nom'] as String,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w800)),
+                    ),
+                    if (comp['verifie'] == true) ...[
+                      const SizedBox(width: 4),
+                      const Icon(Icons.verified,
+                          color: kGreen, size: 13),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${comp['depart']} → ${comp['destination']} · ${comp['heure']}',
+                  style:
+                      TextStyle(fontSize: 10.5, color: Colors.grey.shade600),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
+            decoration: BoxDecoration(
+              color: pillBg,
+              borderRadius: BorderRadius.circular(20),
+              border: niveau == 'faible'
+                  ? Border.all(color: const Color(0xFFEDEAE2))
+                  : null,
+            ),
+            child: Text(label,
+                style: TextStyle(
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w800,
+                    fontFamily: 'monospace',
+                    color: pillText)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -210,6 +305,48 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 18),
+                if (_compatibilites.isNotEmpty) ...[
+                  Text(
+                    '${_compatibilites.length} compatibilité${_compatibilites.length > 1 ? 's' : ''} trouvée${_compatibilites.length > 1 ? 's' : ''}',
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.6,
+                        color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(height: 10),
+                  ..._compatibilites.map(
+                      (c) => _carteCompatibilite(c as Map<String, dynamic>)),
+                ] else
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFFEDEAE2)),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(Icons.refresh,
+                            color: Colors.grey.shade400, size: 28),
+                        const SizedBox(height: 8),
+                        const Text('Aucune compatibilité pour l’instant',
+                            style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w800)),
+                        const SizedBox(height: 5),
+                        Text(
+                          'Ton AD reste actif. Tu seras prévenu dès qu’un trajet compatible est trouvé.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 11.5,
+                              color: Colors.grey.shade600,
+                              height: 1.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 10),
                 Center(
                   child: Text(
                     _adActif!['role'] == 'conducteur'

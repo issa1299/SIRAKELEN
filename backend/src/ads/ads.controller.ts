@@ -17,6 +17,11 @@ export class AdsController {
     return this.adsService.mesAds(userId);
   }
 
+  @Get('compatibilites/:userId')
+  compatibilites(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.adsService.compatibilites(userId);
+  }
+
   @Post(':id/annuler/:userId')
   annuler(
     @Param('id', ParseUUIDPipe) id: string,
