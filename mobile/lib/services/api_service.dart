@@ -182,6 +182,25 @@ class ApiService {
     throw ApiException(_messageErreur(body) ?? 'Action impossible');
   }
 
+  static Future<List<dynamic>> getDemandesEnvoyees(String userId) async {
+    final response =
+        await http.get(Uri.parse('$baseUrl/demandes/envoyees/$userId'));
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      return jsonDecode(response.body) as List<dynamic>;
+    }
+    return [];
+  }
+
+  static Future<void> annulerDemande(String demandeId, String userId) async {
+    final r = await http.post(
+        Uri.parse('$baseUrl/demandes/$demandeId/annuler/$userId'));
+    if (r.statusCode >= 200 && r.statusCode < 300) return;
+    final body = r.body.isNotEmpty
+        ? jsonDecode(r.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    throw ApiException(_messageErreur(body) ?? 'Annulation impossible');
+  }
+
   static Future<List<dynamic>> getCompatibilites(String userId) async {
     final response =
         await http.get(Uri.parse('$baseUrl/ads/compatibilites/$userId'));

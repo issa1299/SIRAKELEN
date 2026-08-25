@@ -15,6 +15,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? _adActif;
   List<dynamic> _compatibilites = [];
   List<dynamic> _demandesRecues = [];
+  List<dynamic> _demandesEnvoyees = [];
   bool _chargement = true;
 
   @override
@@ -37,18 +38,22 @@ class _HomeScreenState extends State<HomeScreen> {
           .toList();
       List<dynamic> comps = [];
       List<dynamic> recues = [];
-      if (actifs.isNotEmpty) {
-        comps = await ApiService.getCompatibilites(widget.userId);
+      List<dynamic> envoyees = [];
+      if (actifs.isNotEmpty || ads.isNotEmpty) {
+        comps = actifs.isNotEmpty
+            ? await ApiService.getCompatibilites(widget.userId)
+            : [];
         recues = await ApiService.getDemandesRecues(widget.userId);
+        envoyees = await ApiService.getDemandesEnvoyees(widget.userId);
       }
       if (!mounted) return;
       setState(() {
         _adActif =
             actifs.isNotEmpty ? actifs.first as Map<String, dynamic> : null;
         _compatibilites = comps;
-        _demandesRecues = recues
-            .where((d) => d['statut'] == 'en_attente')
-            .toList();
+        _demandesRecues =
+            recues.where((d) => d['statut'] == 'en_attente').toList();
+        _demandesEnvoyees = envoyees;
         _chargement = false;
       });
     } catch (_) {
@@ -118,6 +123,132 @@ class _HomeScreenState extends State<HomeScreen> {
           content: Text('Connexion au serveur impossible'),
           backgroundColor: Color(0xFFA3392F)));
     }
+  }
+
+  Widget _carteDemandeEnvoyee(Map<String, dynamic> d) {
+    final ad = d['ad'] as Map<String, dynamic>;
+    final proprietaire = ad['proprietaire'] as Map<String, dynamic>;
+    final statut = d['statut'] as String;
+
+    String label;
+    Color bg;
+    Color text;
+    switch (statut) {
+      case 'en_attente':
+        label = 'EN ATTENTE';
+        bg = const Color(0xFFFFE8D4);
+        text = const Color(0xFFB35A00);
+        break;
+      case 'acceptee':
+        label = 'ACCEPTÉE ✓';
+        bg = kGreen;
+        text = Colors.white;
+        break;
+      case 'refusee':
+        label = 'REFUSÉE';
+        bg = const Color(0xFFFDECEA);
+        text = const Color(0xFFA3392F);
+        break;
+      default:
+        label = 'ANNULÉE';
+        bg = const Color(0xFFEFEDE5);
+        text = Colors.grey.shade600;
+    }
+
+    final acceptee = statut == 'acceptee';
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEDEAE2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('${proprietaire['prenom']} ${proprietaire['nom']}',
+                        style: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w800)),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${ad['depart']} → ${ad['destination']} · ${ad['heureDepart']}',
+                      style: TextStyle(
+                          fontSize: 10.5, color: Colors.grey.shade600),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
+                decoration: BoxDecoration(
+                  color: bg,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(label,
+                    style: TextStyle(
+                        fontSize: 8.5,
+                        fontWeight: FontWeight.w800,
+                        fontFamily: 'monospace',
+                        color: text)),
+              ),
+            ],
+          ),
+          if (acceptee) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE2F2E5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.call, color: kGreen, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Coordonnées débloquées : appelle ${proprietaire['prenom']} au ${proprietaire['telephone']} ou via WhatsApp.',
+                      style: const TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF125A1E),
+                          height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          if (statut == 'en_attente') ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () async {
+                  try {
+                    await ApiService.annulerDemande(
+                        d['id'] as String, widget.userId);
+                    await _chargerMonAd();
+                  } catch (_) {}
+                },
+                child: Text('Annuler ma demande',
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey.shade700)),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   Widget _carteDemandeRecue(Map<String, dynamic> d) {
@@ -498,6 +629,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   ..._demandesRecues.map(
                       (d) => _carteDemandeRecue(d as Map<String, dynamic>)),
                   const SizedBox(height: 12),
+                ],
+                if (_demandesEnvoyees.isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  Text(
+                    'MES DEMANDES ENVOYÉES',
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.6,
+                        color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(height: 10),
+                  ..._demandesEnvoyees.map(
+                      (d) => _carteDemandeEnvoyee(d as Map<String, dynamic>)),
                 ],
                 if (_compatibilites.isNotEmpty) ...[
                   Text(
