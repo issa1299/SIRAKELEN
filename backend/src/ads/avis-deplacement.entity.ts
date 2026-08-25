@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 
@@ -24,7 +25,8 @@ export class AvisDeplacement {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User, (u) => u.ads)
+  @ManyToOne(() => User, { nullable: false })
+  @JoinColumn({ name: 'userId' })
   proprietaire: User;
 
   @Column({ type: 'enum', enum: RoleAd })

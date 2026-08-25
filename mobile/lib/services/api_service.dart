@@ -89,6 +89,58 @@ class ApiService {
     throw ApiException(_messageErreur(body) ?? 'Code incorrect');
   }
 
+  static Future<Map<String, dynamic>> publierAd({
+    required String userId,
+    required String role,
+    required String depart,
+    required String destination,
+    required String dateDeplacement,
+    required String heureDepart,
+    String? moyenTransport,
+    int? placesDisponibles,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/ads'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'userId': userId,
+        'role': role,
+        'depart': depart,
+        'destination': destination,
+        'dateDeplacement': dateDeplacement,
+        'heureDepart': heureDepart,
+        'moyenTransport': ?moyenTransport,
+        'placesDisponibles': ?placesDisponibles,
+      }),
+    );
+    final body = response.body.isNotEmpty
+        ? jsonDecode(response.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    if (response.statusCode == 201) {
+      return body;
+    }
+    throw ApiException(_messageErreur(body) ?? 'Publication impossible');
+  }
+
+  static Future<List<dynamic>> mesAds(String userId) async {
+    final response = await http.get(Uri.parse('$baseUrl/ads/mine/$userId'));
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      return jsonDecode(response.body) as List<dynamic>;
+    }
+    return [];
+  }
+
+  static Future<void> annulerAd(String adId, String userId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/ads/$adId/annuler/$userId'),
+    );
+    if (response.statusCode >= 200 && response.statusCode < 300) return;
+    final body = response.body.isNotEmpty
+        ? jsonDecode(response.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    throw ApiException(_messageErreur(body) ?? 'Annulation impossible');
+  }
+
   static Future<Map<String, dynamic>> marquerVerifie(String id) async {
     final response = await http.patch(
       Uri.parse('$baseUrl/users/$id/verifier'),

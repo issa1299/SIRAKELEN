@@ -11,6 +11,7 @@ import { ContactUrgence } from './contact-urgence/contact-urgence.entity';
 import { CodeVerification } from './auth/code-verification.entity';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { AdsModule } from './ads/ads.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AuthModule } from './auth/auth.module';
     }),
     UsersModule,
     AuthModule,
+    AdsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

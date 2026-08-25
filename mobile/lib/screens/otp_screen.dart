@@ -46,7 +46,8 @@ class _OtpScreenState extends State<OtpScreen> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-            builder: (_) => HomeScreen(prenom: widget.prenom)),
+            builder: (_) => HomeScreen(
+                prenom: widget.prenom, userId: widget.userId)),
         (route) => false,
       );
     } on ApiException catch (e) {
