@@ -21,6 +21,7 @@ class _PublierScreenState extends State<PublierScreen> {
   bool _chargement = false;
   String? _erreur;
   bool _publie = false;
+  bool _apercu = false;
 
   static const List<String> _transports = ['Voiture', 'Moto'];
 
@@ -128,8 +129,138 @@ class _PublierScreenState extends State<PublierScreen> {
 
   String? _transportChoisi = 'Voiture';
 
+  String _dateLisible() {
+    final d = DateTime.tryParse(_date);
+    if (d == null) return _date;
+    const mois = [
+      'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+      'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
+    ];
+    final aujourdhui = DateTime.now();
+    final demain = aujourdhui.add(const Duration(days: 1));
+    String prefixe = '${d.day} ${mois[d.month - 1]}';
+    if (d.year == aujourdhui.year &&
+        d.month == aujourdhui.month &&
+        d.day == aujourdhui.day) {
+      prefixe = "Aujourd'hui, ${d.day} ${mois[d.month - 1]}";
+    } else if (d.year == demain.year &&
+        d.month == demain.month &&
+        d.day == demain.day) {
+      prefixe = 'Demain, ${d.day} ${mois[d.month - 1]}';
+    }
+    return prefixe;
+  }
+
+  /// Étape 2 : aperçu avant publication.
+  Widget _ecranApercu() {
+    return Scaffold(
+      appBar: AppBar(
+          title: const Text('Aperçu de l’AD'), backgroundColor: Colors.transparent),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              height: 110,
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFDF1E3), Color(0xFFFBEAD6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFFFDFC0)),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      _role == 'conducteur'
+                          ? Icons.directions_car
+                          : Icons.person_search,
+                      color: kOrangeDark,
+                      size: 34,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      _role == 'conducteur'
+                          ? '${_transportChoisi ?? 'Voiture'} · ${_places.text} place(s)'
+                          : 'À la recherche d’un conducteur',
+                      style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFFB35A00)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            _ligneRecap(Icons.route, 'Trajet',
+                '$_depart → $_destination'),
+            _ligneRecap(Icons.calendar_today_outlined, 'Date', _dateLisible()),
+            _ligneRecap(Icons.access_time, 'Horaire', _heure.text),
+            if (_role == 'conducteur')
+              _ligneRecap(Icons.event_seat, 'Places',
+                  '${_places.text} place(s)'),
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: _chargement ? null : _publier,
+              child: _chargement
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2.5, color: Colors.white))
+                  : Text(_role == 'conducteur'
+                      ? 'Publier mon AD'
+                      : 'Rechercher les trajets compatibles'),
+            ),
+            OutlinedButton(
+              onPressed: () => setState(() => _apercu = false),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Color(0xFFEDEAE2)),
+                minimumSize: const Size.fromHeight(48),
+              ),
+              child: const Text('Modifier'),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _ligneRecap(IconData icone, String label, String valeur) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 11),
+      decoration: const BoxDecoration(
+        border:
+            Border(bottom: BorderSide(color: Color(0xFFEDEAE2))),
+      ),
+      child: Row(
+        children: [
+          Icon(icone, size: 16, color: kOrange),
+          const SizedBox(width: 9),
+          Text(label,
+              style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600)),
+          const Spacer(),
+          Text(valeur,
+              style: const TextStyle(
+                  fontSize: 13, fontWeight: FontWeight.w800)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Étape 2 : aperçu
+    if (_apercu && !_publie) {
+      return _ecranApercu();
+    }
     // Écran de confirmation
     if (_publie) {
       return Scaffold(
@@ -331,17 +462,20 @@ class _PublierScreenState extends State<PublierScreen> {
             const SizedBox(height: 24),
             if (_role != null)
               FilledButton(
-                onPressed: _chargement ? null : _publier,
-                child: _chargement
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2.5, color: Colors.white),
-                      )
-                    : Text(_role == 'conducteur'
-                        ? 'Publier mon AD'
-                        : 'Rechercher les trajets compatibles'),
+                onPressed: _chargement
+                    ? null
+                    : () {
+                        if (_depart.text.trim().isEmpty ||
+                            _destination.text.trim().isEmpty ||
+                            _heure.text.isEmpty) {
+                          setState(() =>
+                              _erreur = 'Remplis tous les champs obligatoires');
+                          return;
+                        }
+                        FocusScope.of(context).unfocus();
+                        setState(() => _apercu = true);
+                      },
+                child: const Text('Voir l’aperçu'),
               ),
             const SizedBox(height: 24),
           ],

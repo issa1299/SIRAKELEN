@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
-import 'main_scaffold.dart';
+import 'contact_urgence_screen.dart';
 
 class OtpScreen extends StatefulWidget {
   final String telephone;
@@ -43,11 +43,15 @@ class _OtpScreenState extends State<OtpScreen> {
       await ApiService.verifierCodeOtp(widget.telephone, code);
       await ApiService.marquerVerifie(widget.userId);
       if (!mounted) return;
+      // Invitation au contact d'urgence (non bloquante), puis accueil.
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-            builder: (_) => MainScaffold(
-                userId: widget.userId, prenom: widget.prenom)),
+          builder: (_) => ContactUrgenceScreen(
+            userId: widget.userId,
+            invitation: true,
+          ),
+        ),
         (route) => false,
       );
     } on ApiException catch (e) {

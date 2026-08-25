@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/api_service.dart';
+import 'main_scaffold.dart';
 
 class ContactUrgenceScreen extends StatefulWidget {
   final String userId;
-  const ContactUrgenceScreen({super.key, required this.userId});
+
+  /// true = ouvert juste après l'inscription (invitation avec "Plus tard").
+  final bool invitation;
+  const ContactUrgenceScreen({
+    super.key,
+    required this.userId,
+    this.invitation = false,
+  });
 
   @override
   State<ContactUrgenceScreen> createState() => _ContactUrgenceScreenState();
@@ -65,10 +73,19 @@ class _ContactUrgenceScreenState extends State<ContactUrgenceScreen> {
         lien: _lien.text.trim().isEmpty ? null : _lien.text.trim(),
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Contact d’urgence enregistré'),
-          backgroundColor: Color(0xFF1B7A2B)));
-      Navigator.pop(context);
+      if (widget.invitation) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (_) => MainScaffold(userId: widget.userId)),
+          (route) => false,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Contact d’urgence enregistré'),
+            backgroundColor: Color(0xFF1B7A2B)));
+        Navigator.pop(context);
+      }
     } on ApiException catch (e) {
       setState(() {
         _erreur = e.message;
@@ -167,6 +184,24 @@ class _ContactUrgenceScreenState extends State<ContactUrgenceScreen> {
                               ? 'Mettre à jour'
                               : 'Ajouter maintenant'),
                     ),
+                    if (widget.invitation) ...[
+                      const SizedBox(height: 4),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) =>
+                                    MainScaffold(userId: widget.userId)),
+                            (route) => false,
+                          );
+                        },
+                        child: const Text('Plus tard',
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.grey))),
+                    ],
                     const SizedBox(height: 24),
                   ],
                 ),

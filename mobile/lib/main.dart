@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/welcome_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'services/auth_service.dart';
 
 const Color kOrange = Color(0xFFFF7700);
@@ -19,6 +21,30 @@ Future<void> main() async {
     AuthService.firebaseDisponible = false;
   }
   runApp(const SirakeleApp());
+}
+
+/// Choisit l'écran de départ : onboarding (1re fois) ou accueil.
+class EcranDemarrage extends StatelessWidget {
+  const EcranDemarrage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: SharedPreferences.getInstance()
+          .then((p) => p.getBool('onboarding_vu') ?? false),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator(color: kOrange)),
+          );
+        }
+        if (snapshot.data == true) {
+          return const WelcomeScreen();
+        }
+        return const OnboardingScreen();
+      },
+    );
+  }
 }
 
 class SirakeleApp extends StatelessWidget {
@@ -68,7 +94,7 @@ class SirakeleApp extends StatelessWidget {
               const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         ),
       ),
-      home: const WelcomeScreen(),
+      home: const EcranDemarrage(),
     );
   }
 }
