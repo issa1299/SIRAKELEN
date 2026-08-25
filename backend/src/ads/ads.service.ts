@@ -171,6 +171,23 @@ export class AdsService {
     );
   }
 
+  /** Trajets publics d'un utilisateur (pour le profil vu par un autre). */
+  async trajetsPublics(userId: string) {
+    await this.usersService.findOne(userId);
+    const ads = await this.adsRepository.find({
+      where: { proprietaire: { id: userId }, statut: StatutAd.ACTIF },
+    });
+    return ads.map((a) => ({
+      id: a.id,
+      role: a.role,
+      depart: a.depart,
+      destination: a.destination,
+      dateDeplacement: a.dateDeplacement,
+      heureDepart: a.heureDepart,
+      placesDisponibles: a.placesDisponibles,
+    }));
+  }
+
   async annuler(adId: string, userId: string): Promise<AvisDeplacement> {
     const ad = await this.adsRepository.findOne({
       where: { id: adId },

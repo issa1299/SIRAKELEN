@@ -17,6 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> _compatibilites = [];
   List<dynamic> _demandesRecues = [];
   List<dynamic> _demandesEnvoyees = [];
+  Map<String, dynamic>? _partenaire;
   bool _chargement = true;
 
   @override
@@ -55,6 +56,18 @@ class _HomeScreenState extends State<HomeScreen> {
         _demandesRecues =
             recues.where((d) => d['statut'] == 'en_attente').toList();
         _demandesEnvoyees = envoyees;
+        // Partenaire accepté (si l'AD est en cours de finalisation).
+        _partenaire = null;
+        if (_adActif != null &&
+            _adActif!['statut'] == 'en_cours_de_finalisation') {
+          final acceptee = recues
+              .where((d) => d['statut'] == 'acceptee')
+              .toList();
+          if (acceptee.isNotEmpty) {
+            _partenaire =
+                (acceptee.first['demandeur'] as Map<String, dynamic>?);
+          }
+        }
         _chargement = false;
       });
     } catch (_) {
@@ -594,6 +607,45 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                             fontSize: 11.5, color: Colors.grey.shade600),
                       ),
+                      if (_partenaire != null) ...[
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE2F2E5),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.person,
+                                      color: Color(0xFF125A1E), size: 15),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      'Partenaire : ${_partenaire!['prenom']} ${_partenaire!['nom']} · ${_partenaire!['telephone']}',
+                                      style: const TextStyle(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF125A1E)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'Contactez-le par téléphone ou WhatsApp pour organiser le trajet.',
+                                style: TextStyle(
+                                    fontSize: 10.5,
+                                    color: Color(0xFF125A1E),
+                                    height: 1.4),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(

@@ -22,6 +22,7 @@ class _ProfilAutreScreenState extends State<ProfilAutreScreen> {
     'trajetsOrganises': 0,
     'signalements': 0
   };
+  List<dynamic> _trajets = [];
   bool _chargement = true;
 
   @override
@@ -34,15 +35,36 @@ class _ProfilAutreScreenState extends State<ProfilAutreScreen> {
     try {
       final user = await ApiService.getUser(widget.targetUserId);
       final stats = await ApiService.getStats(widget.targetUserId);
+      final trajets = await ApiService.getTrajetsPublics(widget.targetUserId);
       if (!mounted) return;
       setState(() {
         _user = user;
         _stats = stats;
+        _trajets = trajets;
         _chargement = false;
       });
     } catch (_) {
       if (!mounted) return;
       setState(() => _chargement = false);
+    }
+  }
+
+  Future<void> _envoyerDemande(String adId) async {
+    try {
+      await ApiService.envoyerDemande(adId, widget.viewerUserId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Demande envoyée ! Suivi depuis « Mes demandes envoyées ».'),
+          backgroundColor: kGreen));
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(e.message), backgroundColor: kOrangeDark));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Connexion au serveur impossible'),
+          backgroundColor: Color(0xFFA3392F)));
     }
   }
 
@@ -171,8 +193,74 @@ class _ProfilAutreScreenState extends State<ProfilAutreScreen> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    // Le téléphone n'est PAS affiché : coordonnées masquées
-                    // tant que la demande n'est pas acceptée (Architecture §15).
+                    if (_trajets.isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                              color: const Color(0xFFEDEAE2),
+                              style: BorderStyle.solid),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.route,
+                                    size: 14, color: kOrange),
+                                const SizedBox(width: 6),
+                                Text('Trajets actuels',
+                                    style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.grey.shade700)),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            ..._trajets.map((t) => Padding(
+                                  padding:
+                                      const EdgeInsets.only(bottom: 8),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          '${t['depart']} → ${t['destination']} · ${t['heureDepart']}'
+                                          '${t['role'] == 'conducteur' ? ' (${t['placesDisponibles']} place(s))' : ''}',
+                                          style: const TextStyle(
+                                              fontSize: 11.5,
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () =>
+                                            _envoyerDemande(t['id'] as String),
+                                        child: Container(
+                                          padding:
+                                              const EdgeInsets.symmetric(
+                                                  horizontal: 10,
+                                                  vertical: 5),
+                                          decoration: BoxDecoration(
+                                            color: kOrange,
+                                            borderRadius:
+                                                BorderRadius.circular(14),
+                                          ),
+                                          child: const Text('Demander',
+                                              style: TextStyle(
+                                                  fontSize: 9.5,
+                                                  fontWeight:
+                                                      FontWeight.w800,
+                                                  color: Colors.white)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                    ],
                     FilledButton(
                       onPressed: () => Navigator.pop(context),
                       child: const Text('Retour'),

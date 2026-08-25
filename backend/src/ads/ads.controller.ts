@@ -22,6 +22,12 @@ export class AdsController {
     return this.adsService.compatibilites(userId);
   }
 
+  /** Trajets publics d'un utilisateur (vue profil d'un autre). */
+  @Get('publiques/:userId')
+  publiques(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.adsService.trajetsPublics(userId);
+  }
+
   @Post(':id/annuler/:userId')
   annuler(
     @Param('id', ParseUUIDPipe) id: string,

@@ -265,6 +265,15 @@ class ApiService {
     throw ApiException(_messageErreur(body) ?? 'Signalement impossible');
   }
 
+  static Future<List<dynamic>> getTrajetsPublics(String userId) async {
+    final response =
+        await http.get(Uri.parse('$baseUrl/ads/publiques/$userId'));
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      return jsonDecode(response.body) as List<dynamic>;
+    }
+    return [];
+  }
+
   static Future<List<dynamic>> getCompatibilites(String userId) async {
     final response =
         await http.get(Uri.parse('$baseUrl/ads/compatibilites/$userId'));
