@@ -42,6 +42,7 @@ class _OtpScreenState extends State<OtpScreen> {
       // Le backend vérifie le code reçu par SMS.
       await ApiService.verifierCodeOtp(widget.telephone, code);
       await ApiService.marquerVerifie(widget.userId);
+      await Session.sauver(widget.userId, widget.prenom);
       if (!mounted) return;
       // Invitation au contact d'urgence (non bloquante), puis accueil.
       Navigator.pushAndRemoveUntil(

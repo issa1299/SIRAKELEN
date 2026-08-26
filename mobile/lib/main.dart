@@ -3,7 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/main_scaffold.dart';
 import 'services/auth_service.dart';
+import 'services/api_service.dart';
 
 const Color kOrange = Color(0xFFFF7700);
 const Color kOrangeDark = Color(0xFFE25F00);
@@ -23,27 +25,40 @@ Future<void> main() async {
   runApp(const SirakeleApp());
 }
 
-/// Choisit l'écran de départ : onboarding (1re fois) ou accueil.
+/// Choisit l'écran de départ :
+/// 1. Session existante -> accueil directement (reste connecté).
+/// 2. Sinon onboarding (1re fois) ou accueil de bienvenue.
 class EcranDemarrage extends StatelessWidget {
   const EcranDemarrage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: SharedPreferences.getInstance()
-          .then((p) => p.getBool('onboarding_vu') ?? false),
+    return FutureBuilder<(bool onboardingVu, ({String userId, String prenom})? session)>(
+      future: _chargerEtat(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator(color: kOrange)),
           );
         }
-        if (snapshot.data == true) {
+        final (onboardingVu, session) =
+            snapshot.data ?? (false, null);
+        if (session != null && session.userId.isNotEmpty) {
+          return MainScaffold(
+              userId: session.userId, prenom: session.prenom);
+        }
+        if (onboardingVu) {
           return const WelcomeScreen();
         }
         return const OnboardingScreen();
       },
     );
+  }
+
+  Future<(bool, ({String userId, String prenom})?)> _chargerEtat() async {
+    final prefs = await SharedPreferences.getInstance();
+    final session = await Session.lire();
+    return (prefs.getBool('onboarding_vu') ?? false, session);
   }
 }
 

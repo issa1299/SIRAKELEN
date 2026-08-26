@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'main_scaffold.dart';
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -41,6 +40,9 @@ class _LoginScreenState extends State<LoginScreen> {
         });
         return;
       }
+      await Session.sauver(
+          user['id'] as String? ?? '', user['prenom'] as String? ?? '');
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

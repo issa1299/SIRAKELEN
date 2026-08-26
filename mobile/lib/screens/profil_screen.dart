@@ -214,7 +214,9 @@ class _ProfilScreenState extends State<ProfilScreen> {
                     );
                     _charger();
                   }),
-                  _menu(Icons.logout, 'Déconnexion', () {
+                  _menu(Icons.logout, 'Déconnexion', () async {
+                    await Session.effacer();
+                    if (!context.mounted) return;
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(

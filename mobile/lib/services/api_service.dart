@@ -1,5 +1,31 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// Session locale : l'utilisateur reste connecté entre les ouvertures.
+class Session {
+  static const _kUserId = 'session_user_id';
+  static const _kPrenom = 'session_prenom';
+
+  static Future<void> sauver(String userId, String prenom) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kUserId, userId);
+    await prefs.setString(_kPrenom, prenom);
+  }
+
+  static Future<({String userId, String prenom})?> lire() async {
+    final prefs = await SharedPreferences.getInstance();
+    final id = prefs.getString(_kUserId);
+    if (id == null || id.isEmpty) return null;
+    return (userId: id, prenom: prefs.getString(_kPrenom) ?? '');
+  }
+
+  static Future<void> effacer() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_kUserId);
+    await prefs.remove(_kPrenom);
+  }
+}
 
 class ApiException implements Exception {
   final String message;
