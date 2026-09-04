@@ -59,6 +59,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   total: 3,
                   onTap: _suivant,
                   onSkip: _terminer,
+                  showLogo: true,
                 ),
                 _Slide(
                   icon: Icons.auto_awesome_rounded,
@@ -113,6 +114,7 @@ class _Slide extends StatelessWidget {
   final int total;
   final VoidCallback onTap;
   final VoidCallback onSkip;
+  final bool showLogo;
 
   const _Slide({
     required this.icon,
@@ -123,6 +125,7 @@ class _Slide extends StatelessWidget {
     required this.total,
     required this.onTap,
     required this.onSkip,
+    this.showLogo = false,
   });
 
   @override
@@ -139,28 +142,53 @@ class _Slide extends StatelessWidget {
                 child: Column(
                   children: [
                     const Spacer(flex: 2),
-                    // Gradient background circle
-                    Container(
-                      width: size.width * 0.35,
-                      height: size.width * 0.35,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: gradient,
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                    // Gradient background circle or logo
+                    if (showLogo)
+                      Container(
+                        width: size.width * 0.35,
+                        height: size.width * 0.35,
+                        constraints: const BoxConstraints(minWidth: 100, minHeight: 100),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: kOrange.withAlpha(30),
+                              blurRadius: 30,
+                              spreadRadius: 5,
+                              offset: const Offset(0, 15),
+                            ),
+                          ],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: gradient[0].withAlpha(50),
-                            blurRadius: 40,
-                            spreadRadius: 5,
-                            offset: const Offset(0, 15),
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/logo-officiel.png',
+                            fit: BoxFit.contain,
                           ),
-                        ],
+                        ),
+                      )
+                    else
+                      Container(
+                        width: size.width * 0.35,
+                        height: size.width * 0.35,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: gradient,
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: gradient[0].withAlpha(50),
+                              blurRadius: 40,
+                              spreadRadius: 5,
+                              offset: const Offset(0, 15),
+                            ),
+                          ],
+                        ),
+                        child: Icon(icon, size: 52, color: Colors.white),
                       ),
-                      child: Icon(icon, size: 52, color: Colors.white),
-                    ),
                     const SizedBox(height: 32),
                     // Title
                     Text(

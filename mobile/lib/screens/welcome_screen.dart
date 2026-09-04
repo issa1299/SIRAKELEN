@@ -17,27 +17,29 @@ class WelcomeScreen extends StatelessWidget {
           child: Column(
             children: [
               const Spacer(flex: 2),
-              // Logo with gradient
+              // Logo
               Container(
-                width: size.width * 0.26,
-                height: size.width * 0.26,
-                constraints: const BoxConstraints(minWidth: 88, minHeight: 88),
+                width: size.width * 0.35,
+                height: size.width * 0.35,
+                constraints: const BoxConstraints(minWidth: 100, minHeight: 100),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [kOrange, kOrangeDark],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(26),
                   boxShadow: [
                     BoxShadow(
-                      color: kOrange.withAlpha(50),
+                      color: kOrange.withAlpha(30),
                       blurRadius: 30,
                       offset: const Offset(0, 12),
                     ),
                   ],
                 ),
-                child: const Icon(Icons.route_rounded, color: Colors.white, size: 44),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(26),
+                  child: Image.asset(
+                    'assets/logo-officiel.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
               const SizedBox(height: 32),
               // Title
