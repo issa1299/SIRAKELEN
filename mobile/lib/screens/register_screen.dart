@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/api_service.dart';
 import 'otp_screen.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -191,9 +192,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         )
                       : const Text('Recevoir mon code'),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Login link
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                ),
+                child: Text.rich(
+                  TextSpan(
+                    text: 'Déjà un compte ? ',
+                    style: TextStyle(color: kTextSecondary, fontSize: 14),
+                    children: [
+                      TextSpan(
+                        text: 'Se connecter',
+                        style: TextStyle(
+                          color: kOrange,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 32),
+            ),
+            const SizedBox(height: 32),
             ],
           ),
         ),
