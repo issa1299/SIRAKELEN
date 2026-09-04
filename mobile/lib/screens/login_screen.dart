@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/api_service.dart';
 import 'main_scaffold.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,12 +25,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _continuer() async {
     final text = _controller.text.trim().replaceAll(' ', '');
-    final isPhone = RegExp(r'^[0-9]{8}$').hasMatch(text);
-    final isEmail = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(text);
 
-    if (!isPhone && !isEmail) {
-      setState(() => _erreur = 'Téléphone (8 chiffres) ou email valide requis');
-      return;
+    if (_useEmail) {
+      final isEmail = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(text);
+      if (!isEmail) {
+        setState(() => _erreur = 'Email invalide');
+        return;
+      }
+    } else {
+      final isPhone = RegExp(r'^[0-9]{8}$').hasMatch(text);
+      if (!isPhone) {
+        setState(() => _erreur = 'Numéro de téléphone invalide (8 chiffres)');
+        return;
+      }
     }
 
     setState(() {
@@ -38,9 +46,9 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final user = await (isPhone
-          ? ApiService.findByTelephone(text)
-          : ApiService.findByEmail(text));
+      final user = await (_useEmail
+          ? ApiService.findByEmail(text)
+          : ApiService.findByTelephone(text));
 
       if (!mounted) return;
       if (user == null) {
@@ -248,6 +256,31 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       )
                     : const Text('Continuer'),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Register link
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                ),
+                child: Text.rich(
+                  TextSpan(
+                    text: 'Pas encore de compte ? ',
+                    style: TextStyle(color: kTextSecondary, fontSize: 14),
+                    children: [
+                      TextSpan(
+                        text: 'Créer un compte',
+                        style: TextStyle(
+                          color: kOrange,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
