@@ -334,7 +334,6 @@ class _PublierScreenState extends State<PublierScreen> {
                 child: FilledButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    Navigator.pop(context);
                   },
                   child: const Text('Retour à l\'accueil'),
                 ),
