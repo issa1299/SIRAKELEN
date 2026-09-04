@@ -66,6 +66,18 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
+  async definirCodeRecuperation(id: string, code: string): Promise<User> {
+    const user = await this.findOne(id);
+    user.codeRecuperation = code;
+    return this.usersRepository.save(user);
+  }
+
+  async verifierCodeRecuperation(telephone: string, code: string): Promise<User | null> {
+    const user = await this.findByTelephone(telephone);
+    if (!user || user.codeRecuperation !== code) return null;
+    return user;
+  }
+
   async update(id: string, dto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
     Object.assign(user, dto);

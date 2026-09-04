@@ -19,6 +19,12 @@ class VerifierCodeDto extends TelephoneDto {
   code: string;
 }
 
+class CodeRecuperationDto extends TelephoneDto {
+  @IsString()
+  @Matches(/^[0-9]{4}$/, { message: 'Le code de récupération doit contenir 4 chiffres' })
+  codeRecuperation: string;
+}
+
 class EmailDto {
   @IsString()
   email: string;
@@ -60,5 +66,17 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async verifierEmail(@Body() dto: VerifierEmailDto) {
     return this.authService.verifierCodeEmail(dto.email, dto.code);
+  }
+
+  @Post('definir-code-recuperation')
+  @HttpCode(HttpStatus.OK)
+  async definirCodeRecuperation(@Body() dto: CodeRecuperationDto) {
+    return this.authService.definirCodeRecuperation(dto.telephone, dto.codeRecuperation);
+  }
+
+  @Post('verifier-code-recuperation')
+  @HttpCode(HttpStatus.OK)
+  async verifierCodeRecuperation(@Body() dto: CodeRecuperationDto) {
+    return this.authService.verifierCodeRecuperation(dto.telephone, dto.codeRecuperation);
   }
 }

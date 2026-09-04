@@ -411,6 +411,29 @@ class ApiService {
     throw ApiException(_messageErreur(body) ?? 'Erreur de mise à jour');
   }
 
+  // === CODE DE RÉCUPÉRATION ===
+  static Future<void> definirCodeRecuperation(String telephone, String code) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/definir-code-recuperation'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'telephone': telephone, 'codeRecuperation': code}),
+    );
+    if (response.statusCode == 200) return;
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    throw ApiException(_messageErreur(body) ?? 'Erreur lors de l\'enregistrement du code');
+  }
+
+  static Future<Map<String, dynamic>> verifierCodeRecuperation(String telephone, String code) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/verifier-code-recuperation'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'telephone': telephone, 'codeRecuperation': code}),
+    );
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode == 200) return body;
+    throw ApiException(_messageErreur(body) ?? 'Code de récupération incorrect');
+  }
+
   static String? _messageErreur(Map<String, dynamic> body) {
     final message = body['message'];
     if (message is List && message.isNotEmpty) {

@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import 'welcome_screen.dart';
+import 'register_screen.dart';
+import 'login_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -13,14 +16,79 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   int _page = 0;
+  Timer? _autoScrollTimer;
+
+  static const _autoScrollDuration = Duration(seconds: 5);
+
+  final _slides = const [
+    _SlideData(
+      icon: Icons.savings_rounded,
+      key: 'Voyagez mieux. Dépensez moins.',
+      title: 'Réduisez vos frais de transport',
+      description:
+          'Partagez les coûts de déplacement avec des personnes qui effectuent un trajet similaire au vôtre.',
+      gradient: [kOrange, Color(0xFFFF9A3E)],
+      showLogo: true,
+    ),
+    _SlideData(
+      icon: Icons.auto_awesome_rounded,
+      key: 'Publication simple. Matching intelligent.',
+      title: 'Matching intelligent',
+      description:
+          'Publiez votre trajet en quelques secondes. Le système identifie automatiquement les utilisateurs compatibles.',
+      gradient: [Color(0xFFE25F00), kOrange],
+    ),
+    _SlideData(
+      icon: Icons.verified_user_rounded,
+      key: 'Sécurité, confiance et liberté de choix.',
+      title: 'Confiance et sécurité',
+      description:
+          'Chaque utilisateur est vérifié par téléphone. Vous choisissez librement les personnes avec lesquelles partager votre trajet.',
+      gradient: [kOrange, Color(0xFFFF6B00)],
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _startAutoScroll();
+  }
 
   @override
   void dispose() {
+    _autoScrollTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
 
+  void _startAutoScroll() {
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = Timer.periodic(_autoScrollDuration, (_) {
+      if (!mounted) return;
+      final nextPage = _page + 1;
+      if (nextPage < _slides.length) {
+        _controller.animateToPage(
+          nextPage,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOutCubic,
+        );
+      } else {
+        _autoScrollTimer?.cancel();
+      }
+    });
+  }
+
+  void _onPageChanged(int i) {
+    setState(() => _page = i);
+    if (i < _slides.length - 1) {
+      _startAutoScroll();
+    } else {
+      _autoScrollTimer?.cancel();
+    }
+  }
+
   void _suivant() {
+    _autoScrollTimer?.cancel();
     _controller.nextPage(
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOutCubic,
@@ -28,12 +96,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _terminer() async {
+    _autoScrollTimer?.cancel();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_vu', true);
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+    );
+  }
+
+  void _creerCompte() {
+    _autoScrollTimer?.cancel();
+    final prefs = SharedPreferences.getInstance();
+    prefs.then((p) => p.setBool('onboarding_vu', true));
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const RegisterScreen()),
+    );
+  }
+
+  void _seConnecter() {
+    _autoScrollTimer?.cancel();
+    final prefs = SharedPreferences.getInstance();
+    prefs.then((p) => p.setBool('onboarding_vu', true));
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
     );
   }
 
@@ -46,46 +135,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           children: [
             PageView(
               controller: _controller,
-              onPageChanged: (i) => setState(() => _page = i),
+              onPageChanged: _onPageChanged,
               physics: const BouncingScrollPhysics(),
-              children: [
-                _Slide(
-                  icon: Icons.savings_rounded,
-                  title: 'Réduisez vos frais de transport',
-                  description:
-                      'Partagez les coûts de déplacement avec des personnes qui effectuent un trajet similaire au vôtre.',
-                  gradient: [kOrange, const Color(0xFFFF9A3E)],
-                  page: 0,
-                  total: 3,
-                  onTap: _suivant,
+              children: List.generate(_slides.length, (i) {
+                final s = _slides[i];
+                final isLast = i == _slides.length - 1;
+                return _Slide(
+                  data: s,
+                  page: i,
+                  total: _slides.length,
+                  onTap: isLast ? null : _suivant,
                   onSkip: _terminer,
-                  showLogo: true,
-                ),
-                _Slide(
-                  icon: Icons.auto_awesome_rounded,
-                  title: 'Matching intelligent',
-                  description:
-                      'Publiez votre trajet en quelques secondes. Le système identifie automatiquement les utilisateurs compatibles.',
-                  gradient: [const Color(0xFFE25F00), kOrange],
-                  page: 1,
-                  total: 3,
-                  onTap: _suivant,
-                  onSkip: _terminer,
-                ),
-                _Slide(
-                  icon: Icons.verified_user_rounded,
-                  title: 'Confiance et sécurité',
-                  description:
-                      'Chaque utilisateur est vérifié par téléphone. Vous choisissez librement avec qui partager votre trajet.',
-                  gradient: [kOrange, const Color(0xFFFF6B00)],
-                  page: 2,
-                  total: 3,
-                  onTap: _terminer,
-                  onSkip: _terminer,
-                ),
-              ],
+                  isLast: isLast,
+                  onCreerCompte: _creerCompte,
+                  onSeConnecter: _seConnecter,
+                );
+              }),
             ),
-            if (_page < 2)
+            if (_page < _slides.length - 1)
               Positioned(
                 top: 12,
                 right: 16,
@@ -105,27 +172,43 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-class _Slide extends StatelessWidget {
+class _SlideData {
   final IconData icon;
+  final String key;
   final String title;
   final String description;
   final List<Color> gradient;
-  final int page;
-  final int total;
-  final VoidCallback onTap;
-  final VoidCallback onSkip;
   final bool showLogo;
 
-  const _Slide({
+  const _SlideData({
     required this.icon,
+    required this.key,
     required this.title,
     required this.description,
     required this.gradient,
+    this.showLogo = false,
+  });
+}
+
+class _Slide extends StatelessWidget {
+  final _SlideData data;
+  final int page;
+  final int total;
+  final VoidCallback? onTap;
+  final VoidCallback onSkip;
+  final bool isLast;
+  final VoidCallback onCreerCompte;
+  final VoidCallback onSeConnecter;
+
+  const _Slide({
+    required this.data,
     required this.page,
     required this.total,
     required this.onTap,
     required this.onSkip,
-    this.showLogo = false,
+    required this.isLast,
+    required this.onCreerCompte,
+    required this.onSeConnecter,
   });
 
   @override
@@ -142,8 +225,7 @@ class _Slide extends StatelessWidget {
                 child: Column(
                   children: [
                     const Spacer(flex: 2),
-                    // Gradient background circle or logo
-                    if (showLogo)
+                    if (data.showLogo)
                       Container(
                         width: size.width * 0.35,
                         height: size.width * 0.35,
@@ -174,25 +256,38 @@ class _Slide extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
-                            colors: gradient,
+                            colors: data.gradient,
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: gradient[0].withAlpha(50),
+                              color: data.gradient[0].withAlpha(50),
                               blurRadius: 40,
                               spreadRadius: 5,
                               offset: const Offset(0, 15),
                             ),
                           ],
                         ),
-                        child: Icon(icon, size: 52, color: Colors.white),
+                        child: Icon(data.icon, size: 52, color: Colors.white),
                       ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
+                    // Key label
+                    Text(
+                      data.key.toUpperCase(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
+                        color: kOrange,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     // Title
                     Text(
-                      title,
+                      data.title,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 24,
@@ -206,7 +301,7 @@ class _Slide extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
-                        description,
+                        data.description,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 14,
@@ -235,28 +330,66 @@ class _Slide extends StatelessWidget {
                       }),
                     ),
                     const SizedBox(height: 24),
-                    // Action button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: FilledButton(
-                        onPressed: onTap,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: kOrange,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                    if (isLast) ...[
+                      // Last slide: two CTAs
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: FilledButton(
+                          onPressed: onCreerCompte,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: kOrange,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          page < 2 ? 'Suivant' : 'Commencer',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.3,
+                          child: const Text(
+                            'Créer un compte',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.3,
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 14),
+                      GestureDetector(
+                        onTap: onSeConnecter,
+                        child: Text.rich(
+                          TextSpan(
+                            text: 'J\'ai déjà un compte',
+                            style: TextStyle(
+                              color: kTextSecondary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ] else ...[
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: FilledButton(
+                          onPressed: onTap,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: kOrange,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: const Text(
+                            'Suivant',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                   ],
                 ),

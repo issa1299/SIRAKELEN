@@ -36,6 +36,9 @@ export class User {
   @Column({ default: false })
   verifie: boolean;
 
+  @Column({ length: 4, nullable: true })
+  codeRecuperation: string;
+
   @CreateDateColumn()
   creeLe: Date;
 

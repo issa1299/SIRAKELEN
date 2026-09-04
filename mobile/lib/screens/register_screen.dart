@@ -50,10 +50,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         context,
         MaterialPageRoute(
           builder: (_) => OtpScreen(
-            telephone: user['email'] as String? ?? '',
-            userId: user['id'] as String,
+            telephone: _telephone.text.trim(),
+            userId: '',
             prenom: user['prenom'] as String? ?? '',
-            useEmail: true,
           ),
         ),
       );

@@ -12,6 +12,7 @@ import { createHash, randomInt } from 'crypto';
 import { CodeVerification } from './code-verification.entity';
 import { SmsService } from './sms.service';
 import { EmailService } from './email.service';
+import { UsersService } from '../users/users.service';
 
 const DUREE_CODE_MINUTES = 5;
 const MAX_TENTATIVES = 3;
@@ -26,6 +27,7 @@ export class AuthService {
     private readonly codesRepository: Repository<CodeVerification>,
     private readonly smsService: SmsService,
     private readonly emailService: EmailService,
+    private readonly usersService: UsersService,
   ) {}
 
   // === MÉTHODES SMS (déjà existantes, gardées à l'identique) ===
@@ -159,6 +161,30 @@ export class AuthService {
 
     await this.codesRepository.delete({ email });
     return { verifie: true };
+  }
+
+  // === CODE DE RÉCUPÉRATION ===
+  async definirCodeRecuperation(
+    telephone: string,
+    code: string,
+  ): Promise<{ message: string }> {
+    const user = await this.usersService.findByTelephone(telephone);
+    if (!user) {
+      throw new BadRequestException('Aucun compte associé à ce numéro');
+    }
+    await this.usersService.definirCodeRecuperation(user.id, code);
+    return { message: 'Code de récupération enregistré' };
+  }
+
+  async verifierCodeRecuperation(
+    telephone: string,
+    code: string,
+  ): Promise<{ id: string; prenom: string }> {
+    const user = await this.usersService.verifierCodeRecuperation(telephone, code);
+    if (!user) {
+      throw new BadRequestException('Code de récupération incorrect');
+    }
+    return { id: user.id, prenom: user.prenom };
   }
 
   private hasher(code: string): string {

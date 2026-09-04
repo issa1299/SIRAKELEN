@@ -3,12 +3,14 @@ import 'package:flutter/services.dart';
 import '../main.dart';
 import '../services/api_service.dart';
 import 'contact_urgence_screen.dart';
+import 'code_recuperation_screen.dart';
 
 class OtpScreen extends StatefulWidget {
   final String telephone;
   final String userId;
   final String prenom;
   final bool useEmail;
+  final bool isCodeOublie;
 
   const OtpScreen({
     super.key,
@@ -16,6 +18,7 @@ class OtpScreen extends StatefulWidget {
     required this.userId,
     this.prenom = '',
     this.useEmail = false,
+    this.isCodeOublie = false,
   });
 
   @override
@@ -94,18 +97,50 @@ class _OtpScreenState extends State<OtpScreen> with SingleTickerProviderStateMix
       } else {
         await ApiService.verifierCodeOtp(widget.telephone, code);
       }
-      await ApiService.marquerVerifie(widget.userId);
-      await Session.sauver(widget.userId, widget.prenom);
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ContactUrgenceScreen(
-            userId: widget.userId,
-            invitation: true,
+      if (widget.isCodeOublie) {
+        // Code oublié flow: after SMS verification, go to recovery code creation
+        final user = await ApiService.findByTelephone(widget.telephone);
+        if (!mounted) return;
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CodeRecuperationScreen(
+              telephone: widget.telephone,
+              userId: user?['id'] as String? ?? '',
+              prenom: user?['prenom'] as String? ?? '',
+            ),
           ),
-        ),
-        (route) => false,
-      );
+          (route) => false,
+        );
+      } else if (widget.userId.isEmpty) {
+        // New registration: after SMS verification, go to recovery code creation
+        final user = await ApiService.findByTelephone(widget.telephone);
+        if (!mounted) return;
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CodeRecuperationScreen(
+              telephone: widget.telephone,
+              userId: user?['id'] as String? ?? '',
+              prenom: user?['prenom'] as String? ?? '',
+            ),
+          ),
+          (route) => false,
+        );
+      } else {
+        await ApiService.marquerVerifie(widget.userId);
+        await Session.sauver(widget.userId, widget.prenom);
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ContactUrgenceScreen(
+              userId: widget.userId,
+              invitation: true,
+            ),
+          ),
+          (route) => false,
+        );
+      }
     } on ApiException catch (e) {
       setState(() {
         _erreur = e.message;
