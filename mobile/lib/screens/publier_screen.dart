@@ -205,7 +205,7 @@ class _PublierScreenState extends State<PublierScreen> {
             ),
             const SizedBox(height: 16),
             // Summary rows
-            _ligneRecap(Icons.route_rounded, 'Trajet', '$_depart → $_destination'),
+            _ligneRecap(Icons.route_rounded, 'Trajet', '${_depart.text} → ${_destination.text}'),
             _ligneRecap(Icons.calendar_today_rounded, 'Date', _dateLisible()),
             _ligneRecap(Icons.access_time_rounded, 'Horaire', _heure.text),
             if (_role == 'conducteur')
