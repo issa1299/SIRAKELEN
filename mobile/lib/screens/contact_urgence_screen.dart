@@ -5,8 +5,6 @@ import 'main_scaffold.dart';
 
 class ContactUrgenceScreen extends StatefulWidget {
   final String userId;
-
-  /// true = ouvert juste après l'inscription (invitation avec "Plus tard").
   final bool invitation;
   const ContactUrgenceScreen({
     super.key,
@@ -76,14 +74,13 @@ class _ContactUrgenceScreenState extends State<ContactUrgenceScreen> {
       if (widget.invitation) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(
-              builder: (_) => MainScaffold(userId: widget.userId)),
+          MaterialPageRoute(builder: (_) => MainScaffold(userId: widget.userId)),
           (route) => false,
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Contact d’urgence enregistré'),
-            backgroundColor: Color(0xFF1B7A2B)));
+            content: Text('Contact d\'urgence enregistré'),
+            backgroundColor: kGreen));
         Navigator.pop(context);
       }
     } on ApiException catch (e) {
@@ -102,9 +99,8 @@ class _ContactUrgenceScreenState extends State<ContactUrgenceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: const Text('Contact d’urgence'),
-          backgroundColor: Colors.transparent),
+      backgroundColor: kCream,
+      appBar: AppBar(title: const Text('Contact d\'urgence')),
       body: _chargement
           ? const Center(child: CircularProgressIndicator(color: kOrange))
           : SingleChildScrollView(
@@ -114,41 +110,64 @@ class _ContactUrgenceScreenState extends State<ContactUrgenceScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
+                    // Safety info card
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE2F2E5),
-                        borderRadius: BorderRadius.circular(12),
+                        color: kGreenLight,
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      child: const Text(
-                        'En cas d’accident ou d’imprévu sur la route, ton partenaire de trajet confirmé pourra joindre cette personne depuis l’app.',
-                        style: TextStyle(
-                            fontSize: 11.5,
-                            color: Color(0xFF125A1E),
-                            height: 1.5),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: kGreen,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.shield_rounded, color: Colors.white, size: 20),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Text(
+                              'En cas d\'accident ou d\'imprévu, ton partenaire pourra joindre cette personne depuis l\'app.',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF125A1E),
+                                height: 1.5,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     TextFormField(
                       controller: _nom,
+                      style: const TextStyle(fontSize: 15),
                       decoration: const InputDecoration(
-                          labelText: 'Nom du contact',
-                          hintText: 'Aïcha Diallo'),
+                        labelText: 'Nom du contact',
+                        hintText: 'Aïcha Diallo',
+                        prefixIcon: Icon(Icons.person_outline_rounded, size: 20),
+                      ),
                       validator: (v) => v == null || v.trim().isEmpty
                           ? 'Le nom du contact est obligatoire'
                           : null,
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     TextFormField(
                       controller: _telephone,
                       keyboardType: TextInputType.phone,
                       maxLength: 8,
+                      style: const TextStyle(fontSize: 15),
                       decoration: const InputDecoration(
                         labelText: 'Numéro de téléphone',
                         prefixText: '+223  ',
                         counterText: '',
                         hintText: '70 98 76 54',
+                        prefixIcon: Icon(Icons.phone_outlined, size: 20),
                       ),
                       validator: (v) {
                         final c = v?.replaceAll(' ', '') ?? '';
@@ -158,49 +177,81 @@ class _ContactUrgenceScreenState extends State<ContactUrgenceScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     TextFormField(
                       controller: _lien,
+                      style: const TextStyle(fontSize: 15),
                       decoration: const InputDecoration(
-                          labelText: 'Lien (facultatif)',
-                          hintText: 'Sœur, frère, parent…'),
+                        labelText: 'Lien (facultatif)',
+                        hintText: 'Sœur, frère, parent…',
+                        prefixIcon: Icon(Icons.family_restroom_rounded, size: 20),
+                      ),
                     ),
                     if (_erreur != null) ...[
-                      const SizedBox(height: 14),
-                      Text(_erreur!,
-                          style: const TextStyle(
-                              color: Color(0xFFA3392F), fontSize: 13)),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: kRedLight,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: kRed.withAlpha(50)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.error_outline, color: kRed, size: 20),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                _erreur!,
+                                style: const TextStyle(color: kRed, fontSize: 13),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
-                    const SizedBox(height: 24),
-                    FilledButton(
-                      onPressed: _enregistrement ? null : _enregistrer,
-                      child: _enregistrement
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2.5, color: Colors.white))
-                          : Text(_existant
-                              ? 'Mettre à jour'
-                              : 'Ajouter maintenant'),
+                    const SizedBox(height: 28),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 54,
+                      child: FilledButton(
+                        onPressed: _enregistrement ? null : _enregistrer,
+                        child: _enregistrement
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(_existant ? 'Mettre à jour' : 'Ajouter maintenant'),
+                      ),
                     ),
                     if (widget.invitation) ...[
-                      const SizedBox(height: 4),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) =>
-                                    MainScaffold(userId: widget.userId)),
-                            (route) => false,
-                          );
-                        },
-                        child: const Text('Plus tard',
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => MainScaffold(userId: widget.userId)),
+                              (route) => false,
+                            );
+                          },
+                          child: Text(
+                            'Plus tard',
                             style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.grey))),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: kTextSecondary,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                     const SizedBox(height: 24),
                   ],

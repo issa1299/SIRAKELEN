@@ -8,12 +8,16 @@ import {
 
 @Entity('codes_verification')
 @Index(['telephone'])
+@Index(['email'])
 export class CodeVerification {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ length: 20 })
+  @Column({ length: 20, nullable: true })
   telephone: string;
+
+  @Column({ length: 100 })
+  email: string;
 
   @Column({ length: 64 })
   codeHash: string;

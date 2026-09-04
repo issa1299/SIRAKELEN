@@ -12,7 +12,7 @@ class PublierScreen extends StatefulWidget {
 }
 
 class _PublierScreenState extends State<PublierScreen> {
-  String? _role; // 'conducteur' ou 'passager'
+  String? _role;
   final _depart = TextEditingController();
   final _destination = TextEditingController();
   final _heure = TextEditingController();
@@ -24,6 +24,7 @@ class _PublierScreenState extends State<PublierScreen> {
   bool _apercu = false;
 
   static const List<String> _transports = ['Voiture', 'Moto'];
+  String? _transportChoisi = 'Voiture';
 
   @override
   void initState() {
@@ -127,8 +128,6 @@ class _PublierScreenState extends State<PublierScreen> {
     }
   }
 
-  String? _transportChoisi = 'Voiture';
-
   String _dateLisible() {
     final d = DateTime.tryParse(_date);
     if (d == null) return _date;
@@ -151,80 +150,94 @@ class _PublierScreenState extends State<PublierScreen> {
     return prefixe;
   }
 
-  /// Étape 2 : aperçu avant publication.
   Widget _ecranApercu() {
     return Scaffold(
-      appBar: AppBar(
-          title: const Text('Aperçu de l’AD'), backgroundColor: Colors.transparent),
+      backgroundColor: kCream,
+      appBar: AppBar(title: const Text('Aperçu de l\'AD')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const SizedBox(height: 8),
+            // Preview header
             Container(
-              height: 110,
-              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFFDF1E3), Color(0xFFFBEAD6)],
+                  colors: [Color(0xFFFFF8F0), Color(0xFFFFF3E6)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFFFDFC0)),
+                border: Border.all(color: kOrange.withAlpha(60)),
               ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      _role == 'conducteur'
-                          ? Icons.directions_car
-                          : Icons.person_search,
-                      color: kOrangeDark,
-                      size: 34,
+              child: Column(
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: kOrange,
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(height: 6),
-                    Text(
+                    child: Icon(
                       _role == 'conducteur'
-                          ? '${_transportChoisi ?? 'Voiture'} · ${_places.text} place(s)'
-                          : 'À la recherche d’un conducteur',
-                      style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFFB35A00)),
+                          ? Icons.directions_car_rounded
+                          : Icons.person_search_rounded,
+                      color: Colors.white,
+                      size: 28,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    _role == 'conducteur'
+                        ? '${_transportChoisi ?? 'Voiture'} · ${_places.text} place(s)'
+                        : 'À la recherche d\'un conducteur',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: kOrange,
+                    ),
+                  ),
+                ],
               ),
             ),
-            _ligneRecap(Icons.route, 'Trajet',
-                '$_depart → $_destination'),
-            _ligneRecap(Icons.calendar_today_outlined, 'Date', _dateLisible()),
-            _ligneRecap(Icons.access_time, 'Horaire', _heure.text),
+            const SizedBox(height: 16),
+            // Summary rows
+            _ligneRecap(Icons.route_rounded, 'Trajet', '$_depart → $_destination'),
+            _ligneRecap(Icons.calendar_today_rounded, 'Date', _dateLisible()),
+            _ligneRecap(Icons.access_time_rounded, 'Horaire', _heure.text),
             if (_role == 'conducteur')
-              _ligneRecap(Icons.event_seat, 'Places',
-                  '${_places.text} place(s)'),
-            const SizedBox(height: 20),
-            FilledButton(
-              onPressed: _chargement ? null : _publier,
-              child: _chargement
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2.5, color: Colors.white))
-                  : Text(_role == 'conducteur'
-                      ? 'Publier mon AD'
-                      : 'Rechercher les trajets compatibles'),
-            ),
-            OutlinedButton(
-              onPressed: () => setState(() => _apercu = false),
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Color(0xFFEDEAE2)),
-                minimumSize: const Size.fromHeight(48),
+              _ligneRecap(Icons.event_seat_rounded, 'Places', '${_places.text} place(s)'),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: FilledButton(
+                onPressed: _chargement ? null : _publier,
+                child: _chargement
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(_role == 'conducteur'
+                        ? 'Publier mon AD'
+                        : 'Rechercher les trajets compatibles'),
               ),
-              child: const Text('Modifier'),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: OutlinedButton(
+                onPressed: () => setState(() => _apercu = false),
+                child: const Text('Modifier'),
+              ),
             ),
             const SizedBox(height: 24),
           ],
@@ -235,21 +248,32 @@ class _PublierScreenState extends State<PublierScreen> {
 
   Widget _ligneRecap(IconData icone, String label, String valeur) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 11),
+      padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: const BoxDecoration(
-        border:
-            Border(bottom: BorderSide(color: Color(0xFFEDEAE2))),
+        border: Border(bottom: BorderSide(color: kBorder)),
       ),
       child: Row(
         children: [
-          Icon(icone, size: 16, color: kOrange),
-          const SizedBox(width: 9),
-          Text(label,
-              style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600)),
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: kOrangeLight,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icone, size: 16, color: kOrange),
+          ),
+          const SizedBox(width: 12),
+          Text(label, style: TextStyle(fontSize: 13, color: kTextSecondary)),
           const Spacer(),
-          Text(valeur,
-              style: const TextStyle(
-                  fontSize: 13, fontWeight: FontWeight.w800)),
+          Text(
+            valeur,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: kTextPrimary,
+            ),
+          ),
         ],
       ),
     );
@@ -257,34 +281,39 @@ class _PublierScreenState extends State<PublierScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Étape 2 : aperçu
     if (_apercu && !_publie) {
       return _ecranApercu();
     }
-    // Écran de confirmation
+
     if (_publie) {
       return Scaffold(
-        appBar: AppBar(title: const Text('AD publié'), backgroundColor: Colors.transparent),
+        backgroundColor: kCream,
+        appBar: AppBar(title: const Text('AD publié')),
         body: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(28),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 84,
-                height: 84,
+                width: 88,
+                height: 88,
                 decoration: const BoxDecoration(
-                    color: kGreen, shape: BoxShape.circle),
-                child: const Icon(Icons.check, color: Colors.white, size: 42),
+                  color: kGreen,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check_rounded, color: Colors.white, size: 44),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               Text(
                 _role == 'conducteur'
                     ? 'Ton AD conducteur est publié !'
                     : 'Ton AD passager est publié !',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                    fontSize: 19, fontWeight: FontWeight.w800),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: kTextPrimary,
+                ),
               ),
               const SizedBox(height: 10),
               Text(
@@ -293,15 +322,22 @@ class _PublierScreenState extends State<PublierScreen> {
                     : 'Nous cherchons les conducteurs compatibles.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 13, color: Colors.grey.shade600, height: 1.5),
+                  fontSize: 14,
+                  color: kTextSecondary,
+                  height: 1.5,
+                ),
               ),
-              const SizedBox(height: 28),
-              FilledButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                },
-                child: const Text('Retour à l’accueil'),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: FilledButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Retour à l\'accueil'),
+                ),
               ),
             ],
           ),
@@ -310,104 +346,102 @@ class _PublierScreenState extends State<PublierScreen> {
     }
 
     return Scaffold(
+      backgroundColor: kCream,
       appBar: AppBar(
         title: Text(_role == null ? 'Publier un AD' : 'Nouvel AD'),
-        backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ===== Étape 1 : choix du rôle =====
+            const SizedBox(height: 8),
             Text(
               'Quel est ton statut pour ce trajet ?',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800,
-                  color: _role == null ? kOrangeDark : Colors.grey.shade500),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: _role == null ? kTextPrimary : kTextSecondary,
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             _carteRole(
-              icone: Icons.directions_car,
+              icone: Icons.directions_car_rounded,
               titre: 'Je conduis',
-              description:
-                  'Je propose des places dans mon véhicule à des passagers au trajet similaire.',
+              description: 'Je propose des places dans mon véhicule.',
               valeur: 'conducteur',
             ),
             const SizedBox(height: 10),
             _carteRole(
-              icone: Icons.person_search,
+              icone: Icons.person_search_rounded,
               titre: 'Je cherche un trajet',
-              description:
-                  'Je veux rejoindre un conducteur qui effectue un trajet similaire au mien.',
+              description: 'Je veux rejoindre un conducteur compatible.',
               valeur: 'passager',
             ),
             if (_role != null) ...[
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               Text(
                 _role == 'conducteur' ? 'Ton trajet' : 'Trajet souhaité',
                 style: const TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w800),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: kTextPrimary,
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
               TextField(
                 controller: _depart,
+                style: const TextStyle(fontSize: 15),
                 decoration: const InputDecoration(
                   labelText: 'Départ',
-                  prefixIcon: Icon(Icons.location_on_outlined),
+                  prefixIcon: Icon(Icons.location_on_outlined, size: 20),
                   hintText: 'Kalaban Coro',
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
               TextField(
                 controller: _destination,
+                style: const TextStyle(fontSize: 15),
                 decoration: const InputDecoration(
                   labelText: 'Destination',
-                  prefixIcon: Icon(Icons.flag_outlined),
+                  prefixIcon: Icon(Icons.flag_outlined, size: 20),
                   hintText: 'FST — Faculté des Sciences',
                 ),
               ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: _choisirDate,
-                      borderRadius: BorderRadius.circular(12),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Date du déplacement',
-                          prefixIcon: Icon(Icons.calendar_today_outlined),
-                        ),
-                        child: Text(_date),
-                      ),
-                    ),
+              const SizedBox(height: 14),
+              InkWell(
+                onTap: _choisirDate,
+                borderRadius: BorderRadius.circular(14),
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Date du déplacement',
+                    prefixIcon: Icon(Icons.calendar_today_rounded, size: 20),
                   ),
-                ],
+                  child: Text(_date, style: const TextStyle(fontSize: 15)),
+                ),
               ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: _choisirHeure,
-                      borderRadius: BorderRadius.circular(12),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Heure de départ',
-                          prefixIcon: Icon(Icons.access_time),
-                        ),
-                        child: Text(_heure.text.isEmpty ? '--:--' : _heure.text),
-                      ),
-                    ),
+              const SizedBox(height: 14),
+              InkWell(
+                onTap: _choisirHeure,
+                borderRadius: BorderRadius.circular(14),
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Heure de départ',
+                    prefixIcon: Icon(Icons.access_time_rounded, size: 20),
                   ),
-                ],
+                  child: Text(
+                    _heure.text.isEmpty ? '--:--' : _heure.text,
+                    style: const TextStyle(fontSize: 15),
+                  ),
+                ),
               ),
               if (_role == 'conducteur') ...[
-                const SizedBox(height: 12),
-                const Text('Moyen de transport',
-                    style:
-                        TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 8),
+                const SizedBox(height: 18),
+                const Text(
+                  'Moyen de transport',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: kTextPrimary),
+                ),
+                const SizedBox(height: 10),
                 Row(
                   children: _transports
                       .map((t) => Expanded(
@@ -420,8 +454,9 @@ class _PublierScreenState extends State<PublierScreen> {
                                 labelStyle: TextStyle(
                                   color: _transportChoisi == t
                                       ? Colors.white
-                                      : Colors.grey.shade700,
-                                  fontWeight: FontWeight.w700,
+                                      : kTextSecondary,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
                                 ),
                                 showCheckmark: false,
                                 onSelected: (_) =>
@@ -431,7 +466,7 @@ class _PublierScreenState extends State<PublierScreen> {
                           ))
                       .toList(),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 TextField(
                   controller: _places,
                   keyboardType: TextInputType.number,
@@ -439,9 +474,10 @@ class _PublierScreenState extends State<PublierScreen> {
                     FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(2),
                   ],
+                  style: const TextStyle(fontSize: 15),
                   decoration: const InputDecoration(
                     labelText: 'Places disponibles',
-                    prefixIcon: Icon(Icons.event_seat),
+                    prefixIcon: Icon(Icons.event_seat_rounded, size: 20),
                   ),
                 ),
               ],
@@ -449,35 +485,49 @@ class _PublierScreenState extends State<PublierScreen> {
             if (_erreur != null) ...[
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFDECEA),
+                  color: kRedLight,
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: kRed.withAlpha(50)),
                 ),
-                child: Text(_erreur!,
-                    style: const TextStyle(
-                        color: Color(0xFFA3392F), fontSize: 13)),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: kRed, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _erreur!,
+                        style: const TextStyle(color: kRed, fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
             if (_role != null)
-              FilledButton(
-                onPressed: _chargement
-                    ? null
-                    : () {
-                        if (_depart.text.trim().isEmpty ||
-                            _destination.text.trim().isEmpty ||
-                            _heure.text.isEmpty) {
-                          setState(() =>
-                              _erreur = 'Remplis tous les champs obligatoires');
-                          return;
-                        }
-                        FocusScope.of(context).unfocus();
-                        setState(() => _apercu = true);
-                      },
-                child: const Text('Voir l’aperçu'),
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: FilledButton(
+                  onPressed: _chargement
+                      ? null
+                      : () {
+                          if (_depart.text.trim().isEmpty ||
+                              _destination.text.trim().isEmpty ||
+                              _heure.text.isEmpty) {
+                            setState(() =>
+                                _erreur = 'Remplis tous les champs obligatoires');
+                            return;
+                          }
+                          FocusScope.of(context).unfocus();
+                          setState(() => _apercu = true);
+                        },
+                  child: const Text('Voir l\'aperçu'),
+                ),
               ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
           ],
         ),
       ),
@@ -490,49 +540,62 @@ class _PublierScreenState extends State<PublierScreen> {
     required String description,
     required String valeur,
   }) {
-    final selectionne = _role == valeur;
-    return InkWell(
+    final selected = _role == valeur;
+    return GestureDetector(
       onTap: () => setState(() => _role = valeur),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: selectionne ? const Color(0xFFFFF3E6) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          color: selected ? kOrangeLight : Colors.white,
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selectionne ? kOrange : const Color(0xFFEDEAE2),
-            width: selectionne ? 1.8 : 1,
+            color: selected ? kOrange : kBorder,
+            width: selected ? 2 : 1,
           ),
         ),
         child: Row(
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
-                color: selectionne ? kOrange : const Color(0xFFF6F5F0),
+                color: selected ? kOrange : kGreyLight,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icone,
-                  color: selectionne ? Colors.white : Colors.grey.shade600),
+              child: Icon(
+                icone,
+                color: selected ? Colors.white : kTextSecondary,
+                size: 24,
+              ),
             ),
-            const SizedBox(width: 13),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(titre,
-                      style: const TextStyle(
-                          fontSize: 14.5, fontWeight: FontWeight.w800)),
+                  Text(
+                    titre,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: kTextPrimary,
+                    ),
+                  ),
                   const SizedBox(height: 3),
-                  Text(description,
-                      style: TextStyle(
-                          fontSize: 11.5,
-                          color: Colors.grey.shade600,
-                          height: 1.45)),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: kTextSecondary,
+                      height: 1.4,
+                    ),
+                  ),
                 ],
               ),
             ),
+            if (selected)
+              const Icon(Icons.check_circle_rounded, color: kOrange, size: 22),
           ],
         ),
       ),

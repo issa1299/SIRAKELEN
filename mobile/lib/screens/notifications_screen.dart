@@ -9,13 +9,13 @@ class NotificationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: kCream,
       appBar: AppBar(title: const Text('Notifications')),
       body: FutureBuilder<List<dynamic>>(
         future: _charger(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-                child: CircularProgressIndicator(color: kOrange));
+            return const Center(child: CircularProgressIndicator(color: kOrange));
           }
           final notifs = snapshot.data ?? [];
           if (notifs.isEmpty) {
@@ -23,20 +23,36 @@ class NotificationsScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.notifications_none,
-                      size: 46, color: Colors.grey.shade400),
-                  const SizedBox(height: 12),
-                  const Text('Aucune notification',
-                      style: TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.w800)),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Tu seras prévenu ici dès qu’une compatibilité est trouvée ou qu’une demande arrive.',
-                    textAlign: TextAlign.center,
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: kGreyLight,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.notifications_none_rounded, size: 32, color: Colors.grey.shade400),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Aucune notification',
                     style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                        height: 1.5),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: kTextPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Text(
+                      'Tu seras prévenu ici dès qu\'une compatibilité est trouvée ou qu\'une demande arrive.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: kTextSecondary,
+                        height: 1.5,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -58,12 +74,13 @@ class NotificationsScreen extends StatelessWidget {
       for (final d in recues) {
         final demandeur = d['demandeur'] as Map<String, dynamic>;
         notifs.add({
-          'icone': Icons.group_add,
+          'icone': Icons.group_add_rounded,
           'titre': 'Nouvelle demande',
           'texte':
               '${demandeur['prenom']} ${demandeur['nom']} souhaite rejoindre ton trajet '
                   '${(d['ad'] as Map<String, dynamic>)['depart']} → ${(d['ad'] as Map<String, dynamic>)['destination']}',
-          'couleur': kOrangeDark,
+          'couleur': kOrange,
+          'bg': kOrangeLight,
         });
       }
       final envoyees = await ApiService.getDemandesEnvoyees(userId);
@@ -73,19 +90,21 @@ class NotificationsScreen extends StatelessWidget {
         final statut = d['statut'] as String;
         if (statut == 'acceptee') {
           notifs.add({
-            'icone': Icons.check_circle_outline,
+            'icone': Icons.check_circle_outline_rounded,
             'titre': 'Demande acceptée',
             'texte':
                 '${proprio['prenom']} a accepté ta demande pour ${ad['depart']} → ${ad['destination']}. Contacte-le au ${proprio['telephone']}.',
             'couleur': kGreen,
+            'bg': kGreenLight,
           });
         } else if (statut == 'refusee') {
           notifs.add({
             'icone': Icons.cancel_outlined,
             'titre': 'Demande refusée',
             'texte':
-                'Ta demande pour le trajet de ${proprio['prenom']} n’a pas été retenue.',
-            'couleur': const Color(0xFFA3392F),
+                'Ta demande pour le trajet de ${proprio['prenom']} n\'a pas été retenue.',
+            'couleur': kRed,
+            'bg': kRedLight,
           });
         }
       }
@@ -95,40 +114,51 @@ class NotificationsScreen extends StatelessWidget {
 
   Widget _ligne(Map<String, dynamic> n) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFEDEAE2)),
+        border: Border.all(color: kBorder),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFFFFF3E6),
+              color: n['bg'] as Color,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(n['icone'] as IconData,
-                size: 17, color: n['couleur'] as Color),
+            child: Icon(
+              n['icone'] as IconData,
+              size: 20,
+              color: n['couleur'] as Color,
+            ),
           ),
-          const SizedBox(width: 11),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(n['titre'] as String,
-                    style: const TextStyle(
-                        fontSize: 12.5, fontWeight: FontWeight.w800)),
-                const SizedBox(height: 2),
-                Text(n['texte'] as String,
-                    style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey.shade600,
-                        height: 1.4)),
+                Text(
+                  n['titre'] as String,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: kTextPrimary,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  n['texte'] as String,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: kTextSecondary,
+                    height: 1.4,
+                  ),
+                ),
               ],
             ),
           ),

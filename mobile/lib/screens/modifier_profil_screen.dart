@@ -63,7 +63,7 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Profil mis à jour'),
-          backgroundColor: Color(0xFF1B7A2B)));
+          backgroundColor: kGreen));
       Navigator.pop(context);
     } catch (_) {
       setState(() {
@@ -76,9 +76,8 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: const Text('Modifier mon profil'),
-          backgroundColor: Colors.transparent),
+      backgroundColor: kCream,
+      appBar: AppBar(title: const Text('Modifier mon profil')),
       body: _chargement
           ? const Center(child: CircularProgressIndicator(color: kOrange))
           : SingleChildScrollView(
@@ -88,69 +87,103 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     TextFormField(
                       controller: _prenom,
-                      decoration: const InputDecoration(labelText: 'Prénom'),
+                      style: const TextStyle(fontSize: 15),
+                      decoration: const InputDecoration(
+                        labelText: 'Prénom',
+                        prefixIcon: Icon(Icons.person_outline_rounded, size: 20),
+                      ),
                       validator: (v) => v == null || v.trim().isEmpty
                           ? 'Le prénom est obligatoire'
                           : null,
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     TextFormField(
                       controller: _nom,
-                      decoration: const InputDecoration(labelText: 'Nom'),
+                      style: const TextStyle(fontSize: 15),
+                      decoration: const InputDecoration(
+                        labelText: 'Nom',
+                        prefixIcon: Icon(Icons.badge_outlined, size: 20),
+                      ),
                       validator: (v) => v == null || v.trim().isEmpty
                           ? 'Le nom est obligatoire'
                           : null,
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     TextFormField(
                       controller: _quartier,
+                      style: const TextStyle(fontSize: 15),
                       decoration: const InputDecoration(
-                          labelText: 'Quartier principal',
-                          prefixIcon: Icon(Icons.location_on_outlined)),
+                        labelText: 'Quartier principal',
+                        prefixIcon: Icon(Icons.location_on_outlined, size: 20),
+                      ),
                       validator: (v) => v == null || v.trim().isEmpty
                           ? 'Le quartier est obligatoire'
                           : null,
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     InputDecorator(
                       decoration: const InputDecoration(
                         labelText: 'Numéro de téléphone',
-                        helperText:
-                            'Le numéro ne peut pas être modifié ici (vérification SMS requise)',
+                        helperText: 'Vérification SMS requise pour modifier',
+                        helperStyle: TextStyle(color: kTextSecondary, fontSize: 12),
+                        prefixIcon: Icon(Icons.phone_outlined, size: 20),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.verified,
-                              size: 14, color: Colors.grey.shade500),
+                          const Icon(Icons.verified_rounded, size: 14, color: kGreen),
                           const SizedBox(width: 6),
-                          Text('Vérifié',
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade500)),
+                          Text(
+                            'Vérifié',
+                            style: TextStyle(fontSize: 13, color: kTextSecondary),
+                          ),
                         ],
                       ),
                     ),
                     if (_erreur != null) ...[
-                      const SizedBox(height: 14),
-                      Text(_erreur!,
-                          style: const TextStyle(
-                              color: Color(0xFFA3392F), fontSize: 13)),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: kRedLight,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: kRed.withAlpha(50)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.error_outline, color: kRed, size: 20),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                _erreur!,
+                                style: const TextStyle(color: kRed, fontSize: 13),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
-                    const SizedBox(height: 24),
-                    FilledButton(
-                      onPressed: _enregistrement ? null : _enregistrer,
-                      child: _enregistrement
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2.5, color: Colors.white))
-                          : const Text('Enregistrer'),
+                    const SizedBox(height: 28),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 54,
+                      child: FilledButton(
+                        onPressed: _enregistrement ? null : _enregistrer,
+                        child: _enregistrement
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Enregistrer'),
+                      ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),

@@ -13,7 +13,7 @@ class MesAdScreen extends StatelessWidget {
       case 'en_cours_de_finalisation':
         return 'EN COURS';
       case 'trajet_organise':
-        return 'TRAJET ORGANISÉ';
+        return 'ORGANISÉ';
       case 'annule':
         return 'ANNULÉ';
       default:
@@ -24,26 +24,26 @@ class MesAdScreen extends StatelessWidget {
   Color _bgStatut(String statut) {
     switch (statut) {
       case 'actif':
-        return const Color(0xFFE2F2E5);
+        return kGreenLight;
       case 'en_cours_de_finalisation':
         return const Color(0xFFFFE8D4);
       case 'trajet_organise':
         return kGreen;
       default:
-        return const Color(0xFFEFEDE5);
+        return kGreyLight;
     }
   }
 
   Color _textStatut(String statut) {
     switch (statut) {
       case 'actif':
-        return const Color(0xFF125A1E);
+        return kGreen;
       case 'en_cours_de_finalisation':
         return const Color(0xFFB35A00);
       case 'trajet_organise':
         return Colors.white;
       default:
-        return Colors.grey.shade600;
+        return kTextSecondary;
     }
   }
 
@@ -51,13 +51,13 @@ class MesAdScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final aujourdhui = DateTime.now();
     return Scaffold(
+      backgroundColor: kCream,
       appBar: AppBar(title: const Text('Mes Avis de Déplacement')),
       body: FutureBuilder<List<dynamic>>(
         future: ApiService.mesAds(userId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-                child: CircularProgressIndicator(color: kOrange));
+            return const Center(child: CircularProgressIndicator(color: kOrange));
           }
           final ads = snapshot.data ?? [];
           if (ads.isEmpty) {
@@ -65,12 +65,24 @@ class MesAdScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.description_outlined,
-                      size: 44, color: Colors.grey.shade400),
-                  const SizedBox(height: 12),
-                  const Text('Aucun AD publié',
-                      style: TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.w800)),
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: kGreyLight,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.description_outlined, size: 32, color: Colors.grey.shade400),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Aucun AD publié',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: kTextPrimary,
+                    ),
+                  ),
                 ],
               ),
             );
@@ -93,24 +105,12 @@ class MesAdScreen extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             children: [
               if (enCours.isNotEmpty) ...[
-                Text('EN COURS',
-                    style: TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.6,
-                        color: Colors.grey.shade600)),
-                const SizedBox(height: 8),
+                _sectionTitle('EN COURS'),
                 ...enCours.map((a) => _carte(a, false)),
                 const SizedBox(height: 16),
               ],
               if (archives.isNotEmpty) ...[
-                Text('HISTORIQUE',
-                    style: TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.6,
-                        color: Colors.grey.shade600)),
-                const SizedBox(height: 8),
+                _sectionTitle('HISTORIQUE'),
                 ...archives.map((a) => _carte(a, true)),
               ],
             ],
@@ -120,18 +120,33 @@ class MesAdScreen extends StatelessWidget {
     );
   }
 
+  Widget _sectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.5,
+          color: kTextSecondary,
+        ),
+      ),
+    );
+  }
+
   Widget _carte(Map<String, dynamic> a, bool archive) {
     final statut = a['statut'] as String;
     final barre = statut == 'trajet_organise' || statut == 'annule';
     return Opacity(
-      opacity: archive ? 0.65 : 1,
+      opacity: archive ? 0.6 : 1,
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(13),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFEDEAE2)),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: kBorder),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,44 +155,62 @@ class MesAdScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 9, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: _bgStatut(statut),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text(_libelleStatut(statut),
-                      style: TextStyle(
-                          fontSize: 8.5,
-                          fontWeight: FontWeight.w800,
-                          fontFamily: 'monospace',
-                          color: _textStatut(statut))),
+                  child: Text(
+                    _libelleStatut(statut),
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      color: _textStatut(statut),
+                    ),
+                  ),
                 ),
                 Text(
                   a['role'] == 'conducteur' ? 'Conducteur' : 'Passager',
                   style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.grey.shade600),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: kTextSecondary,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 7),
-            Text(
-              '${a['depart']} → ${a['destination']}',
-              style: TextStyle(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w800,
-                decoration: barre ? TextDecoration.lineThrough : null,
-                color: barre ? Colors.grey.shade600 : const Color(0xFF1D1D1B),
-              ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Icon(
+                  a['role'] == 'conducteur'
+                      ? Icons.directions_car_rounded
+                      : Icons.person_search_rounded,
+                  size: 18,
+                  color: kOrange,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '${a['depart']} → ${a['destination']}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      decoration: barre ? TextDecoration.lineThrough : null,
+                      color: barre ? kTextSecondary : kTextPrimary,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 4),
-            Text(
-              '${a['dateDeplacement']} · ${a['heureDepart']}'
-              '${a['role'] == 'conducteur' ? ' · ${a['moyenTransport']} · ${a['placesDisponibles']} place(s)' : ''}',
-              style: TextStyle(
-                  fontSize: 10.5, color: Colors.grey.shade600),
+            Padding(
+              padding: const EdgeInsets.only(left: 26),
+              child: Text(
+                '${a['dateDeplacement']} · ${a['heureDepart']}'
+                '${a['role'] == 'conducteur' ? ' · ${a['moyenTransport']} · ${a['placesDisponibles']} place(s)' : ''}',
+                style: TextStyle(fontSize: 11, color: kTextSecondary),
+              ),
             ),
           ],
         ),

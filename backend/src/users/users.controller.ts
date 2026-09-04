@@ -25,8 +25,11 @@ export class UsersController {
 
   @Post('recherche')
   @HttpCode(HttpStatus.OK)
-  async findByTelephone(@Body() body: { telephone: string }): Promise<User | null> {
-    return this.usersService.findByTelephone(body.telephone);
+  async findByTelephone(@Body() body: { telephone?: string; email?: string }): Promise<User | null> {
+    if (body.email) {
+      return this.usersService.findByEmail(body.email);
+    }
+    return this.usersService.findByTelephone(body.telephone ?? '');
   }
 
   @Get(':id')

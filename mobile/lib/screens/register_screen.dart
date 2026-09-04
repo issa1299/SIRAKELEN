@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../main.dart';
 import '../services/api_service.dart';
 import 'otp_screen.dart';
 
@@ -15,6 +16,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nom = TextEditingController();
   final _telephone = TextEditingController();
   final _quartier = TextEditingController();
+  final _email = TextEditingController();
   bool _chargement = false;
   String? _erreur;
 
@@ -24,6 +26,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _nom.dispose();
     _telephone.dispose();
     _quartier.dispose();
+    _email.dispose();
     super.dispose();
   }
 
@@ -34,21 +37,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _erreur = null;
     });
     try {
-      // TODO Phase 2 : envoyer le code SMS via Firebase avant de continuer.
       final user = await ApiService.register(
         prenom: _prenom.text.trim(),
         nom: _nom.text.trim(),
         telephone: _telephone.text.trim(),
         quartier: _quartier.text.trim(),
+        email: _email.text.trim(),
       );
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (_) => OtpScreen(
-            telephone: user['telephone'] as String,
+            telephone: user['email'] as String? ?? '',
             userId: user['id'] as String,
             prenom: user['prenom'] as String? ?? '',
+            useEmail: true,
           ),
         ),
       );
@@ -59,8 +63,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       });
     } catch (_) {
       setState(() {
-        _erreur =
-            'Impossible de joindre le serveur. Vérifie ta connexion (10.0.2.2:3000).';
+        _erreur = 'Impossible de joindre le serveur. Vérifie ta connexion.';
         _chargement = false;
       });
     }
@@ -69,10 +72,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Créer mon compte'),
-        backgroundColor: Colors.transparent,
-      ),
+      backgroundColor: kCream,
+      appBar: AppBar(title: const Text('Créer un compte')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Form(
@@ -80,40 +81,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const SizedBox(height: 8),
               const Text(
                 'Bienvenue !',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: kTextPrimary,
+                ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
                 'Ton numéro de téléphone est ton identifiant unique.',
-                style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                style: TextStyle(fontSize: 14, color: kTextSecondary),
               ),
-              const SizedBox(height: 24),
-              TextFormField(
+              const SizedBox(height: 28),
+              _buildField(
                 controller: _prenom,
-                decoration: const InputDecoration(labelText: 'Prénom'),
+                label: 'Prénom',
+                icon: Icons.person_outline_rounded,
                 validator: (v) =>
                     v == null || v.trim().isEmpty ? 'Le prénom est obligatoire' : null,
               ),
-              const SizedBox(height: 14),
-              TextFormField(
+              const SizedBox(height: 16),
+              _buildField(
                 controller: _nom,
-                decoration: const InputDecoration(labelText: 'Nom'),
+                label: 'Nom',
+                icon: Icons.badge_outlined,
                 validator: (v) =>
                     v == null || v.trim().isEmpty ? 'Le nom est obligatoire' : null,
               ),
-              const SizedBox(height: 14),
-              TextFormField(
+              const SizedBox(height: 16),
+              _buildField(
                 controller: _telephone,
+                label: 'Numéro de téléphone',
+                icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
                 maxLength: 8,
-                decoration: const InputDecoration(
-                  labelText: 'Numéro de téléphone',
-                  prefixText: '+223  ',
-                  counterText: '',
-                  hintText: '70 12 34 56',
-                ),
+                prefixText: '+223  ',
+                hintText: '70 12 34 56',
                 validator: (v) {
                   final chiffres = v?.replaceAll(' ', '') ?? '';
                   if (chiffres.length != 8) {
@@ -122,49 +128,102 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 14),
-              TextFormField(
+              const SizedBox(height: 16),
+              _buildField(
                 controller: _quartier,
-                decoration: const InputDecoration(
-                  labelText: 'Quartier principal',
-                  hintText: 'Kalaban Coro',
-                ),
+                label: 'Quartier principal',
+                icon: Icons.location_on_outlined,
+                hintText: 'Kalaban Coro',
                 validator: (v) =>
                     v == null || v.trim().isEmpty ? 'Le quartier est obligatoire' : null,
+              ),
+              const SizedBox(height: 16),
+              _buildField(
+                controller: _email,
+                label: 'Email',
+                icon: Icons.email_outlined,
+                keyboardType: TextInputType.emailAddress,
+                hintText: 'exemple@domaine.com',
+                validator: (v) {
+                  final email = v ?? '';
+                  if (!email.contains('@') || !email.contains('.')) {
+                    return 'Email invalide';
+                  }
+                  return null;
+                },
               ),
               if (_erreur != null) ...[
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFDECEA),
+                    color: kRedLight,
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: kRed.withAlpha(50)),
                   ),
-                  child: Text(
-                    _erreur!,
-                    style: const TextStyle(color: Color(0xFFA3392F), fontSize: 13),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline, color: kRed, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _erreur!,
+                          style: const TextStyle(color: kRed, fontSize: 13, fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
               const SizedBox(height: 28),
-              FilledButton(
-                onPressed: _chargement ? null : _envoyerCode,
-                child: _chargement
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text('Recevoir mon code'),
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: FilledButton(
+                  onPressed: _chargement ? null : _envoyerCode,
+                  child: _chargement
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Recevoir mon code'),
+                ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    String? hintText,
+    String? prefixText,
+    int? maxLength,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLength: maxLength,
+      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hintText,
+        prefixText: prefixText,
+        counterText: '',
+        prefixIcon: Icon(icon, size: 20),
+      ),
+      validator: validator,
     );
   }
 }

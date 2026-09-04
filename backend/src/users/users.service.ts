@@ -21,15 +21,19 @@ export class UsersService {
   async create(dto: CreateUserDto): Promise<User> {
     const telephone = this.normalizeTelephone(dto.telephone);
     const existant = await this.usersRepository.findOne({
-      where: { telephone },
+      where: [{ telephone }, { email: dto.email }],
     });
     if (existant) {
-      throw new ConflictException('Ce numéro est déjà associé à un compte');
+      if (existant.telephone === telephone) {
+        throw new ConflictException('Ce numéro est déjà associé à un compte');
+      }
+      throw new ConflictException('Cet email est déjà associé à un compte');
     }
     const user = this.usersRepository.create({
       prenom: dto.prenom.trim(),
       nom: dto.nom.trim(),
       telephone,
+      email: dto.email.toLowerCase().trim(),
       quartier: dto.quartier.trim(),
       verifie: false,
     });
@@ -47,6 +51,12 @@ export class UsersService {
   async findByTelephone(telephone: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { telephone: this.normalizeTelephone(telephone) },
+    });
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: { email: email.toLowerCase().trim() },
     });
   }
 

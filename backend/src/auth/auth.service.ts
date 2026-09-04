@@ -11,6 +11,7 @@ import { Repository, LessThan } from 'typeorm';
 import { createHash, randomInt } from 'crypto';
 import { CodeVerification } from './code-verification.entity';
 import { SmsService } from './sms.service';
+import { EmailService } from './email.service';
 
 const DUREE_CODE_MINUTES = 5;
 const MAX_TENTATIVES = 3;
@@ -24,8 +25,10 @@ export class AuthService {
     @InjectRepository(CodeVerification)
     private readonly codesRepository: Repository<CodeVerification>,
     private readonly smsService: SmsService,
+    private readonly emailService: EmailService,
   ) {}
 
+  // === MÉTHODES SMS (déjà existantes, gardées à l'identique) ===
   async envoyerCode(telephone: string): Promise<{ message: string }> {
     // Anti-abus : max 5 codes par heure par numéro.
     const ilYAUneHeure = new Date(Date.now() - 60 * 60 * 1000);
@@ -88,6 +91,73 @@ export class AuthService {
     }
 
     await this.codesRepository.delete({ telephone });
+    return { verifie: true };
+  }
+
+  // === NOUVELLES MÉTHODES EMAIL ===
+  async envoyerCodeEmail(email: string): Promise<{ message: string }> {
+    // Anti-abus : max 5 codes par heure par email.
+    const ilYAUneHeure = new Date(Date.now() - 60 * 60 * 1000);
+    const recents = await this.codesRepository.count({
+      where: { email, creeLe: LessThan(ilYAUneHeure) },
+    });
+    if (recents >= MAX_CODES_PAR_HEURE) {
+      throw new HttpException(
+        'Trop de codes demandés. Réessaie dans une heure.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
+    const code = randomInt(1000, 10000).toString();
+    const expireLe = new Date(Date.now() + DUREE_CODE_MINUTES * 60 * 1000);
+
+    await this.codesRepository.delete({ email });
+    await this.codesRepository.save({
+      email,
+      codeHash: this.hasher(code),
+      tentatives: 0,
+      expireLe,
+    });
+
+    // Envoi par email (SMTP Gmail)
+    await this.emailService.envoyerVerification(email, code);
+    return { message: 'Code envoyé par email' };
+  }
+
+  async verifierCodeEmail(
+    email: string,
+    code: string,
+  ): Promise<{ verifie: boolean }> {
+    const enregistrement = await this.codesRepository.findOne({
+      where: { email },
+    });
+
+    if (!enregistrement) {
+      throw new BadRequestException(
+        'Aucun code actif. Demande un nouveau code.',
+      );
+    }
+    if (enregistrement.expireLe < new Date()) {
+      await this.codesRepository.delete({ email });
+      throw new BadRequestException('Code expiré. Demande un nouveau code.');
+    }
+    if (enregistrement.tentatives >= MAX_TENTATIVES) {
+      await this.codesRepository.delete({ email });
+      throw new UnauthorizedException(
+        'Trop de tentatives. Demande un nouveau code.',
+      );
+    }
+
+    if (enregistrement.codeHash !== this.hasher(code)) {
+      enregistrement.tentatives += 1;
+      await this.codesRepository.save(enregistrement);
+      const restantes = MAX_TENTATIVES - enregistrement.tentatives;
+      throw new BadRequestException(
+        `Code incorrect. ${restantes} tentative(s) restante(s).`,
+      );
+    }
+
+    await this.codesRepository.delete({ email });
     return { verifie: true };
   }
 

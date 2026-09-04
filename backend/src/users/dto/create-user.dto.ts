@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, Matches, MaxLength } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, Matches, MaxLength } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
@@ -21,4 +21,7 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Le quartier est obligatoire' })
   @MaxLength(120)
   quartier: string;
+
+  @IsEmail({}, { message: 'Email invalide' })
+  email: string;
 }

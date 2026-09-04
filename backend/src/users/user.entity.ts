@@ -24,6 +24,9 @@ export class User {
   @Column({ length: 20, unique: true })
   telephone: string;
 
+  @Column({ length: 100, nullable: true, unique: true })
+  email: string;
+
   @Column({ length: 120 })
   quartier: string;
 

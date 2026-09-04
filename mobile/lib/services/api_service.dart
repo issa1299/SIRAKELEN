@@ -38,16 +38,17 @@ class ApiService {
   /// IP locale du PC de développement (même Wi-Fi obligatoire).
   /// - Émulateur Android : 10.0.2.2 = localhost du PC
   /// - Vrai téléphone : l'IP locale du PC (ex. 192.168.1.204)
-  /// Tunnel ADB (adb reverse tcp:3000 tcp:3000) : le téléphone appelle
-  /// localhost:3000 qui est redirigé vers le PC. Fonctionne quel que soit
+  /// Tunnel ADB (adb reverse tcp:8080 tcp:8080) : le téléphone appelle
+  /// localhost:8080 qui est redirigé vers le PC. Fonctionne quel que soit
   /// le Wi-Fi, sans pare-feu.
-  static const String baseUrl = 'http://localhost:3000';
+  static const String baseUrl = 'http://192.168.1.113:8080';
 
   static Future<Map<String, dynamic>> register({
     required String prenom,
     required String nom,
     required String telephone,
     required String quartier,
+    required String email,
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/users'),
@@ -57,6 +58,7 @@ class ApiService {
         'nom': nom,
         'telephone': telephone,
         'quartier': quartier,
+        'email': email,
       }),
     );
     final body = jsonDecode(response.body) as Map<String, dynamic>;
@@ -113,6 +115,54 @@ class ApiService {
         : <String, dynamic>{};
     if (response.statusCode >= 200 && response.statusCode < 300) return;
     throw ApiException(_messageErreur(body) ?? 'Code incorrect');
+  }
+
+  // === NOUVEAUX : Email ===
+  static Future<Map<String, dynamic>?> findByEmail(String email) async {
+    final normalise = email.toLowerCase().trim();
+    final response = await http.post(
+      Uri.parse('$baseUrl/users/recherche'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': normalise}),
+    );
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (response.body.isEmpty) return null;
+      final body = jsonDecode(response.body);
+      if (body == null) return null;
+      return body as Map<String, dynamic>;
+    }
+    throw ApiException('Recherche par email impossible');
+  }
+
+  static Future<void> envoyerCodeOtpEmail(String email) async {
+    final normalise = email.toLowerCase().trim();
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/envoyer-code-email'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': normalise}),
+    );
+    final body = response.body.isNotEmpty
+        ? jsonDecode(response.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    if (response.statusCode >= 200 && response.statusCode < 300) return;
+    throw ApiException(_messageErreur(body) ?? 'Envoi du code par email impossible');
+  }
+
+  static Future<void> verifierCodeOtpEmail(String email, String code) async {
+    final normalise = email.toLowerCase().trim();
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/verifier-email'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': normalise,
+        'code': code,
+      }),
+    );
+    final body = response.body.isNotEmpty
+        ? jsonDecode(response.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    if (response.statusCode >= 200 && response.statusCode < 300) return;
+    throw ApiException(_messageErreur(body) ?? 'Code incorrect par email');
   }
 
   static Future<Map<String, dynamic>> publierAd({
