@@ -35,3 +35,5 @@ sirakele/
 ## MVP
 
 Inscription/connexion par téléphone, publication d'Avis de Déplacement (AD), matching par itinéraire/direction/heure, demandes de mise en relation, organisation du trajet via WhatsApp/téléphone, notifications, signalements.
+npm run start:dev
+flutter run

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIRA KELEN — Connexion Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--orange:#FF7700;--orange-dark:#E25F00;--ink:#1D1D1B;--ink-soft:#54524C;--muted:#8A877E;--line:#E4E1D6;--bg:#F7F6F1;--white:#fff;--danger:#A3392F;--green:#1B7A2B;--font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;-webkit-font-smoothing:antialiased}
+.login{width:100%;max-width:400px;padding:20px}
+.logo{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:40px}
+.logo img{height:56px;width:56px;border-radius:14px}
+.logo .text{font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.5px}
+.logo .sub{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-top:2px}
+.card{background:var(--white);border:1.5px solid var(--line);border-radius:20px;padding:36px 32px;box-shadow:0 1px 2px rgba(0,0,0,.03),0 8px 32px -12px rgba(0,0,0,.08)}
+.card h1{font-size:20px;font-weight:800;text-align:center;margin-bottom:6px}
+.card .subtitle{text-align:center;font-size:13px;color:var(--muted);margin-bottom:28px}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.field input{width:100%;padding:12px 16px;border:1.5px solid var(--line);border-radius:12px;font-size:14px;font-family:var(--font);outline:none;transition:.15s;background:var(--bg)}
+.field input:focus{border-color:var(--orange);background:var(--white)}
+.field input::placeholder{color:var(--muted)}
+.btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;transition:.15s;margin-top:8px}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-dark)}.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.error{background:#FFEBEE;color:var(--danger);padding:12px 16px;border-radius:10px;font-size:12px;font-weight:600;margin-bottom:16px;display:none;align-items:center;gap:8px}
+.error.show{display:flex}
+.footer{text-align:center;margin-top:24px;font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="login">
+  <div class="logo">
+    <img src="../mobile/assets/logo-officiel.png" alt="Logo">
+    <div>
+      <div class="text">SIRA KELEN</div>
+      <div class="sub">Back-office Admin</div>
+    </div>
+  </div>
+  <div class="card">
+    <h1>Connexion</h1>
+    <div class="subtitle">Acces reserve aux administrateurs</div>
+    <div class="error" id="error"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span id="errorMsg"></span></div>
+    <form onsubmit="login(event)">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="admin@sirakele.com" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Mot de passe</label>
+        <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary" id="btnLogin">Se connecter</button>
+    </form>
+  </div>
+  <div class="footer">SIRA KELEN &mdash; Dashboard administrateur</div>
+</div>
+<script>
+const API='http://localhost:8080';
+if(localStorage.getItem('adminToken')){window.location.href='dashboard.html'}
+async function login(e){
+  e.preventDefault();
+  const email=document.getElementById('email').value.trim();
+  const password=document.getElementById('password').value;
+  const btn=document.getElementById('btnLogin');
+  const err=document.getElementById('error');
+  btn.disabled=true;btn.textContent='Connexion...';err.classList.remove('show');
+  try{
+    const r=await fetch(API+'/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,motDePasse:password})});
+    const d=await r.json();
+    if(!r.ok){throw new Error(d.message||'Identifiants incorrects')}
+    localStorage.setItem('adminToken',d.token);
+    localStorage.setItem('adminUser',JSON.stringify(d));
+    window.location.href='dashboard.html';
+  }catch(e){
+    document.getElementById('errorMsg').textContent=e.message;
+    err.classList.add('show');
+    btn.disabled=false;btn.textContent='Se connecter';
+  }
+}
+</script>
+</body>
+</html>

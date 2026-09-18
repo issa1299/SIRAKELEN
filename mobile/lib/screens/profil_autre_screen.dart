@@ -152,15 +152,34 @@ class _ProfilAutreScreenState extends State<ProfilAutreScreen> {
                                 ),
                               ],
                             ),
-                            child: Center(
-                              child: Text(
-                                '${(_user!['prenom'] as String).isNotEmpty ? (_user!['prenom'] as String)[0] : ''}',
-                                style: const TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                ),
-                              ),
+                            child: ClipOval(
+                              child: (_user!['photoUrl'] != null && (_user!['photoUrl'] as String).isNotEmpty)
+                                  ? Image.network(
+                                      '${ApiService.baseUrl}${_user!['photoUrl']}',
+                                      width: 80,
+                                      height: 80,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Center(
+                                        child: Text(
+                                          '${(_user!['prenom'] as String).isNotEmpty ? (_user!['prenom'] as String)[0] : ''}',
+                                          style: const TextStyle(
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : Center(
+                                      child: Text(
+                                        '${(_user!['prenom'] as String).isNotEmpty ? (_user!['prenom'] as String)[0] : ''}',
+                                        style: const TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
                             ),
                           ),
                           const SizedBox(height: 14),

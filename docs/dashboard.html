@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIRA KELEN — Dashboard Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--orange:#FF7700;--orange-dark:#E25F00;--orange-soft:#FFD9A8;--green:#1B7A2B;--green-dark:#125A1E;--green-soft:#BEE3C4;--yellow:#FFC107;--cream:#FFF8F0;--ink:#1D1D1B;--ink-soft:#54524C;--muted:#8A877E;--faint:#C3C0B6;--line:#E4E1D6;--bg:#F7F6F1;--white:#fff;--danger:#A3392F;--font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;--r-s:10px;--r-m:16px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;-webkit-font-smoothing:antialiased}
+.sidebar{width:240px;background:var(--ink);padding:24px 16px;display:flex;flex-direction:column;position:fixed;height:100vh;z-index:10}
+.sidebar .logo{display:flex;align-items:center;gap:12px;margin-bottom:36px;padding:0 4px}
+.sidebar .logo img{height:36px;width:36px;border-radius:8px}
+.sidebar .logo span{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.3px}
+.sidebar .nav{display:flex;flex-direction:column;gap:4px;flex:1}
+.sidebar .item{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:600;color:var(--faint);padding:11px 14px;border-radius:var(--r-s);cursor:pointer;transition:.15s}
+.sidebar .item:hover{background:rgba(255,255,255,.08);color:#fff}
+.sidebar .item.active{background:var(--orange);color:#fff}
+.sidebar .item svg{width:18px;height:18px;flex-shrink:0}
+.sidebar .badge{background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;font-family:var(--mono);margin-left:auto}
+.sidebar .spacer{flex:1}
+.sidebar .logout{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:600;color:var(--faint);padding:11px 14px;border-radius:var(--r-s);cursor:pointer;transition:.15s}
+.sidebar .logout:hover{background:rgba(255,255,255,.08);color:#fff}
+.main{margin-left:240px;flex:1;padding:28px 36px;min-height:100vh}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px}
+.header h1{font-size:24px;font-weight:800;letter-spacing:-.5px}
+.header .date{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:32px}
+.kpi{background:var(--white);border:1.5px solid var(--line);border-radius:var(--r-m);padding:20px;transition:.15s}
+.kpi:hover{border-color:var(--orange)}
+.kpi .label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.kpi .value{font-family:var(--mono);font-size:32px;font-weight:700;margin-top:8px}
+.kpi .sub{font-size:11px;color:var(--muted);margin-top:4px}
+.panel{background:var(--white);border:1.5px solid var(--line);border-radius:var(--r-m);margin-bottom:24px}
+.panel-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+.panel-header h3{font-size:15px;font-weight:700}
+.panel-header .right{display:flex;align-items:center;gap:12px}
+.search{padding:8px 14px;border:1.5px solid var(--line);border-radius:var(--r-s);font-size:12px;font-family:var(--font);width:220px;outline:none;transition:.15s}
+.search:focus{border-color:var(--orange)}
+.filter{padding:7px 12px;border:1.5px solid var(--line);border-radius:var(--r-s);font-size:11px;font-weight:600;font-family:var(--font);background:var(--white);color:var(--ink);cursor:pointer;outline:none}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);text-align:left;padding:14px 20px;border-bottom:1px solid var(--line)}
+td{padding:14px 20px;border-bottom:1px solid var(--line);color:var(--ink-soft)}
+tr:last-child td{border-bottom:none}
+tr:hover{background:rgba(255,119,0,.03)}
+.strong{font-weight:700;color:var(--ink)}
+.pill{font-family:var(--mono);font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block}
+.pill.ok{background:var(--ink);color:#fff}
+.pill.warn{background:var(--orange-soft);color:var(--orange-dark)}
+.pill.bad{background:#FFEBEE;color:var(--danger)}
+.pill.green{background:var(--green-soft);color:var(--green-dark)}
+.pill.soft{background:var(--bg);color:var(--muted)}
+.act{font-size:10px;font-weight:700;cursor:pointer;border:none;background:none;padding:4px 8px;border-radius:6px;transition:.15s}
+.act:hover{background:var(--bg)}
+.act.danger{color:var(--danger)}.act.danger:hover{background:#FFEBEE}
+.act.primary{color:var(--orange)}.act.primary:hover{background:var(--orange-soft)}
+.tab-content{display:none}.tab-content.active{display:block}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;justify-content:center;align-items:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--white);border-radius:var(--r-m);padding:32px;max-width:520px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px -15px rgba(0,0,0,.3)}
+.modal h2{font-size:18px;font-weight:800;margin-bottom:16px}
+.modal .field{margin-bottom:16px;padding:12px 14px;background:var(--bg);border-radius:var(--r-s)}
+.modal .field label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
+.modal .field .val{font-size:14px;font-weight:600;color:var(--ink)}
+.modal .btn-row{display:flex;gap:10px;margin-top:24px}
+.modal .btn-row button{flex:1;padding:12px;border-radius:var(--r-s);font-size:13px;font-weight:700;cursor:pointer;border:none;transition:.15s}
+.btn-cancel{background:var(--ink);color:#fff}.btn-cancel:hover{opacity:.8}
+.toast{position:fixed;bottom:24px;right:24px;padding:14px 20px;border-radius:var(--r-s);font-size:13px;font-weight:600;color:#fff;z-index:200;transform:translateY(100px);opacity:0;transition:.3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--green)}.toast.error{background:var(--danger)}
+.empty{text-align:center;padding:48px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <img src="../mobile/assets/logo-officiel.png" alt="Logo">
+    <span>SIRA KELEN</span>
+  </div>
+  <nav class="nav">
+    <div class="item active" onclick="showTab('overview',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12L12 5l8 7"/><path d="M6 11v8a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-8"/></svg>
+      Apercu
+    </div>
+    <div class="item" onclick="showTab('users',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8.4" r="3"/><path d="M3.3 20c0-3.1 2.6-5.5 5.7-5.5s5.7 2.4 5.7 5.5"/><circle cx="17.3" cy="9.6" r="2.3"/><path d="M15.8 14.6c2.5.4 4.3 2.4 4.3 4.9"/></svg>
+      Utilisateurs
+    </div>
+    <div class="item" onclick="showTab('ads',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19c3-6 3.5-11 8-11s5 5 8 11"/><circle cx="12" cy="8" r="2.2"/></svg>
+      ADs
+    </div>
+    <div class="item" onclick="showTab('reports',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3.5v17"/><path d="M6 5c4-2.5 8 2.5 12 0v7c-4 2.5-8-2.5-12 0"/></svg>
+      Signalements
+      <span class="badge" id="reportBadge" style="display:none">0</span>
+    </div>
+    <div class="item" onclick="showTab('settings',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Parametres
+    </div>
+  </nav>
+  <div class="logout" onclick="logout()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9.5 4.3H6.3a2 2 0 0 0-2 2v11.4a2 2 0 0 0 2 2h3.2"/><polyline points="14.5 15.5 18.3 12 14.5 8.5"/><line x1="18.3" y1="12" x2="9.3" y2="12"/></svg>
+    Deconnexion
+  </div>
+</aside>
+
+<main class="main">
+  <div class="header">
+    <div><h1 id="pageTitle">Apercu general</h1><div class="date" id="dateDisplay"></div></div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="tab-content active" id="tab-overview">
+    <div class="kpis">
+      <div class="kpi"><div class="label">Utilisateurs</div><div class="value" id="kpiUsers">-</div><div class="sub">inscrits</div></div>
+      <div class="kpi"><div class="label">ADs actifs</div><div class="value" id="kpiAds">-</div><div class="sub" id="kpiAdsSub"></div></div>
+      <div class="kpi"><div class="label">Demandes</div><div class="value" id="kpiDemandes">-</div><div class="sub" id="kpiDemandesSub"></div></div>
+      <div class="kpi"><div class="label">Matching reussi</div><div class="value" id="kpiMatching">-</div><div class="sub">taux d'acceptation</div></div>
+      <div class="kpi"><div class="label">Signalements</div><div class="value" id="kpiSignalements">-</div><div class="sub" id="kpiSigSub"></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><h3>Derniers utilisateurs</h3><span class="act primary" onclick="goTab('users')">Voir tout &rarr;</span></div>
+      <table><thead><tr><th>Nom</th><th>Telephone</th><th>Quartier</th><th>Verifie</th><th>Inscrit</th></tr></thead><tbody id="ovUsers"><tr><td colspan="5" class="empty">Chargement...</td></tr></tbody></table>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><h3>Derniers ADs</h3><span class="act primary" onclick="goTab('ads')">Voir tout &rarr;</span></div>
+      <table><thead><tr><th>Route</th><th>Proprietaire</th><th>Date</th><th>Statut</th></tr></thead><tbody id="ovAds"><tr><td colspan="4" class="empty">Chargement...</td></tr></tbody></table>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="tab-content" id="tab-users">
+    <div class="panel">
+      <div class="panel-header"><h3>Utilisateurs <span style="color:var(--muted);font-weight:400;font-size:12px;margin-left:8px" id="uCount"></span></h3>
+        <div class="right"><input class="search" placeholder="Rechercher..." id="searchU" oninput="filterU()"></div>
+      </div>
+      <table><thead><tr><th style="width:280px">Utilisateur</th><th>Telephone</th><th>Quartier</th><th>Verifie</th><th style="width:80px">Actions</th></tr></thead><tbody id="uBody"><tr><td colspan="5" class="empty">Chargement...</td></tr></tbody></table>
+    </div>
+  </div>
+
+  <!-- ADS -->
+  <div class="tab-content" id="tab-ads">
+    <div class="panel">
+      <div class="panel-header"><h3>ADs <span style="color:var(--muted);font-weight:400;font-size:12px;margin-left:8px" id="aCount"></span></h3>
+        <div class="right">
+          <select class="filter" id="filterA" onchange="filterA()"><option value="">Tous</option><option value="actif">Actif</option><option value="en_cours_de_finalisation">Finalisation</option><option value="trajet_organise">Organise</option><option value="annule">Annule</option></select>
+          <input class="search" placeholder="Rechercher..." id="searchA" oninput="filterA()">
+        </div>
+      </div>
+      <table><thead><tr><th>Trajet</th><th>Proprietaire</th><th>Date</th><th>Role</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="aBody"><tr><td colspan="6" class="empty">Chargement...</td></tr></tbody></table>
+    </div>
+  </div>
+
+  <!-- REPORTS -->
+  <div class="tab-content" id="tab-reports">
+    <div class="panel">
+      <div class="panel-header"><h3>Signalements <span style="color:var(--muted);font-weight:400;font-size:12px;margin-left:8px" id="rCount"></span></h3>
+        <div class="right">
+          <select class="filter" id="filterR" onchange="filterR()"><option value="">Tous</option><option value="en_attente">En attente</option><option value="traite">Traite</option></select>
+        </div>
+      </div>
+      <table><thead><tr><th>Signale</th><th>Par</th><th>Motif</th><th>Statut</th><th>Date</th><th>Actions</th></tr></thead><tbody id="rBody"><tr><td colspan="6" class="empty">Chargement...</td></tr></tbody></table>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="tab-content" id="tab-settings">
+    <!-- General -->
+    <div class="panel" style="max-width:700px">
+      <div class="panel-header"><h3>Informations generales</h3></div>
+      <div style="padding:24px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div class="field"><label>Application</label><div class="val">SIRA KELEN</div></div>
+          <div class="field"><label>Version</label><div class="val">MVP 1.0</div></div>
+          <div class="field"><label>Environnement</label><div class="val"><span class="pill green">Production</span></div></div>
+          <div class="field"><label>Date de lancement</label><div class="val">Septembre 2026</div></div>
+        </div>
+        <div class="field" style="margin-top:8px"><label>Description</label><div class="val" style="font-size:13px;color:var(--ink-soft)">Application de covoiturage pour les trajets quotidiens a Bamako, Mali. Connecte conducteurs et passagers pour des deplacements securises et economiques.</div></div>
+      </div>
+    </div>
+
+    <!-- Services -->
+    <div class="panel" style="max-width:700px">
+      <div class="panel-header"><h3>Services connectes</h3></div>
+      <div style="padding:24px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div style="padding:18px;border:1.5px solid var(--line);border-radius:var(--r-s);display:flex;align-items:center;gap:14px">
+            <div style="width:42px;height:42px;border-radius:10px;background:#E8F5E9;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+            <div><div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Email</div><div style="font-size:13px;font-weight:700;margin-top:2px" id="sEmail">Gmail SMTP</div><div style="font-size:11px;color:var(--green);font-weight:600">Configure</div></div>
+          </div>
+          <div style="padding:18px;border:1.5px solid var(--line);border-radius:var(--r-s);display:flex;align-items:center;gap:14px">
+            <div style="width:42px;height:42px;border-radius:10px;background:#FFF3E0;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+            <div><div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">SMS</div><div style="font-size:13px;font-weight:700;margin-top:2px">Twilio</div><div style="font-size:11px;color:var(--orange);font-weight:600">Mode dev</div></div>
+          </div>
+          <div style="padding:18px;border:1.5px solid var(--line);border-radius:var(--r-s);display:flex;align-items:center;gap:14px">
+            <div style="width:42px;height:42px;border-radius:10px;background:#E3F2FD;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1976D2" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+            <div><div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Base de donnees</div><div style="font-size:13px;font-weight:700;margin-top:2px">PostgreSQL 17</div><div style="font-size:11px;color:var(--green);font-weight:600" id="sDbStatus">Connecte</div></div>
+          </div>
+          <div style="padding:18px;border:1.5px solid var(--line);border-radius:var(--r-s);display:flex;align-items:center;gap:14px">
+            <div style="width:42px;height:42px;border-radius:10px;background:#F3E5F5;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7B1FA2" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+            <div><div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Photos</div><div style="font-size:13px;font-weight:700;margin-top:2px">Multer / Local</div><div style="font-size:11px;color:var(--green);font-weight:600">Actif</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="panel" style="max-width:700px">
+      <div class="panel-header"><h3>Etat du systeme</h3></div>
+      <div style="padding:24px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+          <div style="padding:18px;border:1.5px solid var(--line);border-radius:var(--r-s);text-align:center">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">API Backend</div>
+            <div style="font-size:20px;font-weight:800;margin-top:8px" id="stApi">-</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Port 8080</div>
+          </div>
+          <div style="padding:18px;border:1.5px solid var(--line);border-radius:var(--r-s);text-align:center">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Base de donnees</div>
+            <div style="font-size:20px;font-weight:800;margin-top:8px" id="stDb">-</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Port 5433</div>
+          </div>
+          <div style="padding:18px;border:1.5px solid var(--line);border-radius:var(--r-s);text-align:center">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Stockage</div>
+            <div style="font-size:20px;font-weight:800;margin-top:8px;color:var(--green)">OK</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">uploads/</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Account -->
+    <div class="panel" style="max-width:700px">
+      <div class="panel-header"><h3>Compte administrateur</h3></div>
+      <div style="padding:24px">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+          <div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--ink),#333);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px">A</div>
+          <div><div style="font-weight:700;font-size:15px" id="sAdminName">Admin SIRA</div><div style="font-size:12px;color:var(--muted)" id="sAdminEmail">admin@sirakele.com</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="field"><label>Derniere connexion</label><div class="val" id="sLastLogin">-</div></div>
+          <div class="field"><label>Role</label><div class="val"><span class="pill ok">Administrateur</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Platform Stats -->
+    <div class="panel" style="max-width:700px">
+      <div class="panel-header"><h3>Resume plateforme</h3></div>
+      <div style="padding:24px">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+          <div style="text-align:center;padding:16px;background:var(--bg);border-radius:var(--r-s)">
+            <div style="font-family:var(--mono);font-size:24px;font-weight:800;color:var(--orange)" id="sStatUsers">-</div>
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-top:4px">Users</div>
+          </div>
+          <div style="text-align:center;padding:16px;background:var(--bg);border-radius:var(--r-s)">
+            <div style="font-family:var(--mono);font-size:24px;font-weight:800;color:var(--green)" id="sStatAds">-</div>
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-top:4px">ADs</div>
+          </div>
+          <div style="text-align:center;padding:16px;background:var(--bg);border-radius:var(--r-s)">
+            <div style="font-family:var(--mono);font-size:24px;font-weight:800" id="sStatDemandes">-</div>
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-top:4px">Demandes</div>
+          </div>
+          <div style="text-align:center;padding:16px;background:var(--bg);border-radius:var(--r-s)">
+            <div style="font-family:var(--mono);font-size:24px;font-weight:800;color:var(--danger)" id="sStatSignalements">-</div>
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-top:4px">Signalements</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="panel" style="max-width:700px;border-color:var(--danger)">
+      <div class="panel-header" style="border-bottom-color:#FFCDD2"><h3 style="color:var(--danger)">Zone dangereuse</h3></div>
+      <div style="padding:24px">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px;border:1.5px solid #FFCDD2;border-radius:var(--r-s);background:#FFF5F5">
+          <div><div style="font-weight:700;font-size:13px">Reinitialiser les statistiques</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Remet les compteurs a zero</div></div>
+          <button style="padding:8px 16px;border:1.5px solid var(--danger);border-radius:var(--r-s);background:transparent;color:var(--danger);font-size:11px;font-weight:700;cursor:pointer">Reinitialiser</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="modal" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2 id="mTitle">Detail</h2>
+    <div id="mContent"></div>
+    <div class="btn-row" id="mActions"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const API='http://localhost:8080';
+if(!localStorage.getItem('adminToken')){window.location.href='login.html'}
+let allU=[],allA=[],allR=[];
+const adminUser=JSON.parse(localStorage.getItem('adminUser')||'{}');
+document.getElementById('dateDisplay').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+function showTab(n,el){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.item').forEach(i=>i.classList.remove('active'));document.getElementById('tab-'+n).classList.add('active');if(el)el.classList.add('active');document.getElementById('pageTitle').textContent={overview:'Apercu general',users:'Utilisateurs',ads:'Avis de Deplacement',reports:'Signalements',settings:'Parametres'}[n]||n}
+function goTab(n){showTab(n,document.querySelectorAll('.item')[{users:1,ads:2}[n]])}
+function fmtDate(d){if(!d)return'-';return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'})}
+function pill(s){return{actif:'<span class="pill green">Actif</span>',en_cours_de_finalisation:'<span class="pill warn">Finalisation</span>',trajet_organise:'<span class="pill ok">Organise</span>',annule:'<span class="pill soft">Annule</span>',en_attente:'<span class="pill warn">En attente</span>',acceptee:'<span class="pill green">Acceptee</span>',refusee:'<span class="pill bad">Refusee</span>',traite:'<span class="pill ok">Traite</span>'}[s]||'<span class="pill">'+s+'</span>'}
+function toast(m,t='success'){const e=document.getElementById('toast');e.textContent=m;e.className='toast '+t+' show';setTimeout(()=>e.classList.remove('show'),3000)}
+function showModal(t,c,a){document.getElementById('mTitle').textContent=t;document.getElementById('mContent').innerHTML=c;document.getElementById('mActions').innerHTML=a;document.getElementById('modal').classList.add('show')}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+
+async function loadStats(){try{const r=await fetch(API+'/admin/stats');const d=await r.json();document.getElementById('kpiUsers').textContent=d.totalUsers;document.getElementById('kpiAds').textContent=d.adsActifs;document.getElementById('kpiAdsSub').textContent='sur '+d.totalAds;document.getElementById('kpiDemandes').textContent=d.demandesAcceptees;document.getElementById('kpiDemandesSub').textContent='sur '+d.totalDemandes;document.getElementById('kpiMatching').textContent=d.matchingRate+'%';document.getElementById('kpiSignalements').textContent=d.totalSignalements;document.getElementById('kpiSigSub').textContent=d.totalSignalements>0?d.totalSignalements+' en attente':'Aucun';const b=document.getElementById('reportBadge');if(d.totalSignalements>0){b.textContent=d.totalSignalements;b.style.display='inline'}else{b.style.display='none'}document.getElementById('stApi').innerHTML='<span style="color:var(--green)">En ligne</span>';document.getElementById('stDb').innerHTML='<span style="color:var(--green)">Connecte</span>';document.getElementById('sBackend').textContent=API+' — En ligne';document.getElementById('sStatUsers').textContent=d.totalUsers;document.getElementById('sStatAds').textContent=d.totalAds;document.getElementById('sStatDemandes').textContent=d.totalDemandes;document.getElementById('sStatSignalements').textContent=d.totalSignalements;document.getElementById('sLastLogin').textContent=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});if(adminUser.prenom){document.getElementById('sAdminName').textContent=adminUser.prenom+' '+(adminUser.nom||'');document.getElementById('sAdminEmail').textContent=adminUser.email||'admin@sirakele.com'}}catch(e){document.getElementById('stApi').innerHTML='<span style="color:var(--danger)">Hors ligne</span>';document.getElementById('stDb').innerHTML='<span style="color:var(--danger)">Injoignable</span>'}}
+
+async function loadUsers(){try{const r=await fetch(API+'/admin/users');allU=await r.json();renderU(allU)}catch(e){}}
+function renderU(l){
+  document.getElementById('uCount').textContent=l.length+' inscrits';
+  const avatar=(u)=>{
+    if(u.photoUrl) return '<img src="'+API+u.photoUrl+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover">';
+    return '<div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">'+((u.prenom||'?')[0]).toUpperCase()+'</div>';
+  };
+  document.getElementById('ovUsers').innerHTML=l.slice(0,5).map(u=>'<tr><td class="strong">'+(u.prenom||'')+' '+(u.nom||'')+'</td><td>'+(u.telephone||'-')+'</td><td>'+(u.quartier||'-')+'</td><td>'+(u.verifie?'<span class="pill green">Oui</span>':'<span class="pill bad">Non</span>')+'</td><td>'+fmtDate(u.creeLe)+'</td></tr>').join('');
+  document.getElementById('uBody').innerHTML=l.map(u=>'<tr><td><div style="display:flex;align-items:center;gap:12px">'+avatar(u)+'<div><div style="font-weight:700;font-size:13px">'+(u.prenom||'')+' '+(u.nom||'')+'</div><div style="font-size:11px;color:var(--muted)">'+(u.quartier||'-')+'</div></div></div></td><td>'+(u.telephone||'-')+'</td><td>'+(u.quartier||'-')+'</td><td>'+(u.verifie?'<span class="pill green">Oui</span>':'<span class="pill bad">Non</span>')+'</td><td><button class="act primary" onclick=\'showU('+JSON.stringify(u).replace(/'/g,"\\'")+')\'>Voir</button></td></tr>').join('');
+}
+function filterU(){const q=document.getElementById('searchU').value.toLowerCase();renderU(allU.filter(u=>(u.prenom+' '+u.nom+' '+u.telephone+' '+u.quartier).toLowerCase().includes(q)))}
+function showU(u){
+  const img=u.photoUrl?'<img src="'+API+u.photoUrl+'" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--orange)"><br><br>':'<div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:32px;margin:0 auto">'+((u.prenom||'?')[0]).toUpperCase()+'</div><br><br>';
+  showModal('Profil utilisateur',
+    '<div style="text-align:center">'+img+'</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px">'+
+    '<div class="field"><label>Prenom</label><div class="val">'+(u.prenom||'-')+'</div></div>'+
+    '<div class="field"><label>Nom</label><div class="val">'+(u.nom||'-')+'</div></div>'+
+    '<div class="field"><label>Telephone</label><div class="val">+223 '+(u.telephone||'-')+'</div></div>'+
+    '<div class="field"><label>Quartier</label><div class="val">'+(u.quartier||'-')+'</div></div>'+
+    '</div>'+
+    '<div class="field"><label>Statut</label><div class="val">'+(u.verifie?'<span class="pill green">Verifie</span>':'<span class="pill bad">Non verifie</span>')+'</div></div>'+
+    '<div class="field"><label>Inscrit le</label><div class="val">'+fmtDate(u.creeLe)+'</div></div>',
+    '<button class="btn-cancel" onclick="closeModal()">Fermer</button>'
+  );
+}
+
+async function loadAds(){try{const r=await fetch(API+'/admin/ads');allA=await r.json();renderA(allA)}catch(e){}}
+function renderA(l){document.getElementById('aCount').textContent=l.length+' ADs';document.getElementById('ovAds').innerHTML=l.slice(0,5).map(a=>'<tr><td class="strong">'+(a.depart||'-')+' → '+(a.destination||'-')+'</td><td>'+(a.proprietaire?(a.proprietaire.prenom||'')+' '+(a.proprietaire.nom||''):'-')+'</td><td>'+(a.dateDeplacement||'-')+' '+(a.heureDepart||'')+'</td><td>'+pill(a.statut)+'</td></tr>').join('');document.getElementById('aBody').innerHTML=l.map(a=>'<tr><td class="strong">'+(a.depart||'-')+' → '+(a.destination||'-')+'</td><td>'+(a.proprietaire?(a.proprietaire.prenom||'')+' '+(a.proprietaire.nom||''):'-')+'</td><td>'+(a.dateDeplacement||'-')+' '+(a.heureDepart||'')+'</td><td>'+(a.role||'-')+'</td><td>'+pill(a.statut)+'</td><td><button class="act primary" onclick="showA(\''+(a.depart||'')+'\',\''+(a.destination||'')+'\',\''+(a.dateDeplacement||'')+'\',\''+(a.heureDepart||'')+'\',\''+(a.role||'')+'\',\''+(a.statut||'')+'\')">Voir</button></td></tr>').join('')}
+function filterA(){const q=document.getElementById('searchA').value.toLowerCase();const f=document.getElementById('filterA').value;renderA(allA.filter(a=>((a.depart+' '+a.destination+' '+(a.proprietaire?(a.proprietaire.prenom+' '+a.proprietaire.nom):''))).toLowerCase().includes(q)&&(!f||a.statut===f)))}
+function showA(dep,dest,date,heure,role,stat){showModal('Detail AD','<div class="field"><label>Trajet</label><div class="val">'+dep+' → '+dest+'</div></div><div class="field"><label>Date</label><div class="val">'+date+' '+heure+'</div></div><div class="field"><label>Role</label><div class="val">'+role+'</div></div><div class="field"><label>Statut</label><div class="val">'+pill(stat)+'</div></div>','<button class="btn-cancel" onclick="closeModal()">Fermer</button>')}
+
+async function loadReports(){try{const r=await fetch(API+'/admin/signalements');allR=await r.json();renderR(allR)}catch(e){}}
+function renderR(l){document.getElementById('rCount').textContent=l.length+' signalements';document.getElementById('rBody').innerHTML=l.length?l.map(r=>'<tr><td class="strong">'+(r.utilisateurSignale?(r.utilisateurSignale.prenom||'')+' '+(r.utilisateurSignale.nom||''):'-')+'</td><td>'+(r.auteur?(r.auteur.prenom||'')+' '+(r.auteur.nom||''):'-')+'</td><td>'+(r.motif||'-')+'</td><td>'+pill(r.statut)+'</td><td>'+fmtDate(r.creeLe)+'</td><td>'+(r.statut==='en_attente'?'<button class="act danger">Traiter</button>':'<span style="color:var(--muted);font-size:10px">Archive</span>')+'</td></tr>').join(''):'<tr><td colspan="6" class="empty">Aucun signalement</td></tr>'}
+function filterR(){const f=document.getElementById('filterR').value;renderR(allR.filter(r=>!f||r.statut===f))}
+
+function logout(){localStorage.removeItem('adminToken');localStorage.removeItem('adminUser');window.location.href='login.html'}
+loadStats();loadUsers();loadAds();loadReports();
+</script>
+</body>
+</html>

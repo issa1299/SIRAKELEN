@@ -12,7 +12,12 @@
           "package_name": "ml.sirakele.sirakele"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "743499372628-5je52m5maeosssmbidmeqhqu7ko8u9nf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAfDWtDnj1DF7ktJzHDhnWZALWRnJtplBY"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "743499372628-5je52m5maeosssmbidmeqhqu7ko8u9nf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -41,7 +42,7 @@ class ApiService {
   /// Tunnel ADB (adb reverse tcp:8080 tcp:8080) : le téléphone appelle
   /// localhost:8080 qui est redirigé vers le PC. Fonctionne quel que soit
   /// le Wi-Fi, sans pare-feu.
-  static const String baseUrl = 'http://192.168.1.225:8080';
+  static const String baseUrl = 'http://192.168.1.81:8080';
 
   static Future<Map<String, dynamic>> register({
     required String prenom,
@@ -174,6 +175,10 @@ class ApiService {
     required String heureDepart,
     String? moyenTransport,
     int? placesDisponibles,
+    double? departLat,
+    double? departLng,
+    double? arriveeLat,
+    double? arriveeLng,
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/ads'),
@@ -182,7 +187,11 @@ class ApiService {
         'userId': userId,
         'role': role,
         'depart': depart,
+        'departLat': departLat,
+        'departLng': departLng,
         'destination': destination,
+        'arriveeLat': arriveeLat,
+        'arriveeLng': arriveeLng,
         'dateDeplacement': dateDeplacement,
         'heureDepart': heureDepart,
         'moyenTransport': ?moyenTransport,
@@ -394,14 +403,16 @@ class ApiService {
     String? prenom,
     String? nom,
     String? quartier,
+    String? photoUrl,
   }) async {
     final response = await http.patch(
       Uri.parse('$baseUrl/users/$id'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'prenom': ?prenom,
-        'nom': ?nom,
-        'quartier': ?quartier,
+        if (prenom != null) 'prenom': prenom,
+        if (nom != null) 'nom': nom,
+        if (quartier != null) 'quartier': quartier,
+        if (photoUrl != null) 'photoUrl': photoUrl,
       }),
     );
     final body = jsonDecode(response.body) as Map<String, dynamic>;
@@ -409,6 +420,55 @@ class ApiService {
       return body;
     }
     throw ApiException(_messageErreur(body) ?? 'Erreur de mise à jour');
+  }
+
+  // === GOOGLE / APPLE OAuth ===
+  static Future<Map<String, dynamic>> googleLogin({
+    required String googleId,
+    required String email,
+    required String prenom,
+    required String nom,
+    String? photoUrl,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/google'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'googleId': googleId,
+        'email': email,
+        'prenom': prenom,
+        'nom': nom,
+        'photoUrl': photoUrl,
+      }),
+    );
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode == 200) {
+      return body;
+    }
+    throw ApiException(_messageErreur(body) ?? 'Connexion Google impossible');
+  }
+
+  static Future<Map<String, dynamic>> appleLogin({
+    required String appleId,
+    String? email,
+    String? prenom,
+    String? nom,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/apple'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'appleId': appleId,
+        'email': email,
+        'prenom': prenom,
+        'nom': nom,
+      }),
+    );
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode == 200) {
+      return body;
+    }
+    throw ApiException(_messageErreur(body) ?? 'Connexion Apple impossible');
   }
 
   // === CODE DE RÉCUPÉRATION ===
@@ -432,6 +492,22 @@ class ApiService {
     final body = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode == 200) return body;
     throw ApiException(_messageErreur(body) ?? 'Code de récupération incorrect');
+  }
+
+  // === PHOTO DE PROFIL ===
+  static Future<String> uploadPhoto(String userId, File imageFile) async {
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/upload/photo/$userId'),
+    );
+    request.files.add(await http.MultipartFile.fromPath('photo', imageFile.path));
+    final streamed = await request.send();
+    final response = await http.Response.fromStream(streamed);
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode == 201) {
+      return body['url'] as String;
+    }
+    throw ApiException(_messageErreur(body) ?? 'Erreur d\'upload');
   }
 
   static String? _messageErreur(Map<String, dynamic> body) {

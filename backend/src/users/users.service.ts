@@ -60,6 +60,40 @@ export class UsersService {
     });
   }
 
+  async findByGoogleId(googleId: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { googleId } });
+  }
+
+  async findByAppleId(appleId: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { appleId } });
+  }
+
+  async updateRaw(user: User): Promise<User> {
+    return this.usersRepository.save(user);
+  }
+
+  async createOAuth(data: {
+    prenom: string;
+    nom: string;
+    email?: string;
+    googleId?: string;
+    appleId?: string;
+    photoUrl?: string;
+  }): Promise<User> {
+    const user = this.usersRepository.create({
+      prenom: data.prenom.trim(),
+      nom: data.nom.trim(),
+      telephone: '',
+      email: data.email?.toLowerCase().trim() ?? null,
+      quartier: '',
+      verifie: true,
+      googleId: data.googleId ?? null,
+      appleId: data.appleId ?? null,
+      photoUrl: data.photoUrl ?? null,
+    });
+    return this.usersRepository.save(user);
+  }
+
   async marquerVerifie(id: string): Promise<User> {
     const user = await this.findOne(id);
     user.verifie = true;

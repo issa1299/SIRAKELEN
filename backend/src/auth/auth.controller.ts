@@ -5,7 +5,7 @@ import {
   HttpStatus,
   Post,
 } from '@nestjs/common';
-import { IsString, Matches } from 'class-validator';
+import { IsString, Matches, IsOptional } from 'class-validator';
 
 class TelephoneDto {
   @IsString()
@@ -36,6 +36,34 @@ class VerifierEmailDto {
   @IsString()
   @Matches(/^[0-9]{4,6}$/, { message: 'Le code doit contenir 4 à 6 chiffres' })
   code: string;
+}
+
+class GoogleLoginDto {
+  @IsString()
+  googleId: string;
+  @IsString()
+  email: string;
+  @IsString()
+  prenom: string;
+  @IsString()
+  nom: string;
+  @IsOptional()
+  @IsString()
+  photoUrl?: string;
+}
+
+class AppleLoginDto {
+  @IsString()
+  appleId: string;
+  @IsOptional()
+  @IsString()
+  email?: string;
+  @IsOptional()
+  @IsString()
+  prenom?: string;
+  @IsOptional()
+  @IsString()
+  nom?: string;
 }
 
 import { AuthService } from './auth.service';
@@ -78,5 +106,17 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async verifierCodeRecuperation(@Body() dto: CodeRecuperationDto) {
     return this.authService.verifierCodeRecuperation(dto.telephone, dto.codeRecuperation);
+  }
+
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  async googleLogin(@Body() dto: GoogleLoginDto) {
+    return this.authService.googleLogin(dto);
+  }
+
+  @Post('apple')
+  @HttpCode(HttpStatus.OK)
+  async appleLogin(@Body() dto: AppleLoginDto) {
+    return this.authService.appleLogin(dto);
   }
 }

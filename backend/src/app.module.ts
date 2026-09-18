@@ -14,6 +14,8 @@ import { AuthModule } from './auth/auth.module';
 import { AdsModule } from './ads/ads.module';
 import { DemandesModule } from './demandes/demandes.module';
 import { SecuriteModule } from './securite/securite.module';
+import { UploadModule } from './upload/upload.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { SecuriteModule } from './securite/securite.module';
     AdsModule,
     DemandesModule,
     SecuriteModule,
+    UploadModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

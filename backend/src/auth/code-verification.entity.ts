@@ -16,7 +16,7 @@ export class CodeVerification {
   @Column({ length: 20, nullable: true })
   telephone: string;
 
-  @Column({ length: 100 })
+  @Column({ length: 100, nullable: true })
   email: string;
 
   @Column({ length: 64 })

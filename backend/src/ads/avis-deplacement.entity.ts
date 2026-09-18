@@ -35,8 +35,20 @@ export class AvisDeplacement {
   @Column({ length: 150 })
   depart: string;
 
+  @Column({ type: 'double precision', nullable: true })
+  departLat: number | null;
+
+  @Column({ type: 'double precision', nullable: true })
+  departLng: number | null;
+
   @Column({ length: 150 })
   destination: string;
+
+  @Column({ type: 'double precision', nullable: true })
+  arriveeLat: number | null;
+
+  @Column({ type: 'double precision', nullable: true })
+  arriveeLng: number | null;
 
   @Column({ type: 'date' })
   dateDeplacement: string;

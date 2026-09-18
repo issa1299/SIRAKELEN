@@ -1,8 +1,12 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../main.dart';
 import '../services/api_service.dart';
 import 'register_screen.dart';
 import 'otp_screen.dart';
+import 'contact_urgence_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,7 +17,6 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _controller = TextEditingController();
-  bool _useEmail = false;
   String? _erreur;
   bool _chargement = false;
 
@@ -27,24 +30,12 @@ class _LoginScreenState extends State<LoginScreen> {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(text);
   }
 
-  bool _isPhone(String text) {
-    return RegExp(r'^[0-9]{8}$').hasMatch(text);
-  }
-
   Future<void> _continuer() async {
     final text = _controller.text.trim();
 
-    if (_useEmail) {
-      if (!_isEmail(text)) {
-        setState(() => _erreur = 'Email invalide');
-        return;
-      }
-    } else {
-      final clean = text.replaceAll(' ', '');
-      if (!_isPhone(clean)) {
-        setState(() => _erreur = 'Numéro de téléphone invalide (8 chiffres)');
-        return;
-      }
+    if (!_isEmail(text)) {
+      setState(() => _erreur = 'Email invalide');
+      return;
     }
 
     setState(() {
@@ -53,37 +44,28 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final user = await (_useEmail
-          ? ApiService.findByEmail(text)
-          : ApiService.findByTelephone(text.replaceAll(' ', '')));
+      final user = await ApiService.findByEmail(text);
 
       if (!mounted) return;
       if (user == null) {
         setState(() {
-          _erreur = 'Aucun compte avec cet identifiant. Crée un compte d\'abord.';
+          _erreur = 'Aucun compte avec cet identifiant. Cree un compte d\'abord.';
           _chargement = false;
         });
         return;
       }
 
-      // Envoyer le code OTP
-      final identifiant = _useEmail ? text : text.replaceAll(' ', '');
-      if (_useEmail) {
-        await ApiService.envoyerCodeOtpEmail(identifiant);
-      } else {
-        await ApiService.envoyerCodeOtp(identifiant);
-      }
+      await ApiService.envoyerCodeOtpEmail(text);
 
       if (!mounted) return;
-      // Naviguer vers l'écran OTP
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => OtpScreen(
-            telephone: identifiant,
+            telephone: text,
             userId: user['id'] as String? ?? '',
             prenom: user['prenom'] as String? ?? '',
-            useEmail: _useEmail,
+            useEmail: true,
           ),
         ),
       ).then((_) {
@@ -97,6 +79,120 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (_) {
       setState(() {
         _erreur = 'Connexion au serveur impossible';
+        _chargement = false;
+      });
+    }
+  }
+
+  // === GOOGLE SIGN IN ===
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _chargement = true;
+      _erreur = null;
+    });
+    try {
+      final googleUser = await GoogleSignIn(
+        scopes: ['email', 'profile'],
+        clientId: '743499372628-5je52m5maeosssmbidmeqhqu7ko8u9nf.apps.googleusercontent.com',
+      ).signIn();
+      if (googleUser == null) {
+        setState(() => _chargement = false);
+        return;
+      }
+      final auth = await googleUser.authentication;
+      if (auth.idToken == null) {
+        setState(() {
+          _erreur = 'Erreur d\'authentification Google';
+          _chargement = false;
+        });
+        return;
+      }
+
+      final result = await ApiService.googleLogin(
+        googleId: auth.idToken!,
+        email: googleUser.email,
+        prenom: googleUser.displayName?.split(' ').first ?? '',
+        nom: googleUser.displayName?.split(' ').skip(1).join(' ') ?? '',
+        photoUrl: googleUser.photoUrl,
+      );
+
+      if (!mounted) return;
+      final userId = result['id'] as String;
+      final prenom = result['prenom'] as String;
+      final isNew = result['isNew'] as bool;
+
+      await Session.sauver(userId, prenom);
+
+      if (isNew) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ContactUrgenceScreen(userId: userId, invitation: true),
+          ),
+          (route) => false,
+        );
+      } else {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ContactUrgenceScreen(userId: userId, invitation: true),
+          ),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _erreur = 'Connexion Google impossible : $e';
+        _chargement = false;
+      });
+    }
+  }
+
+  // === APPLE SIGN IN ===
+  Future<void> _signInWithApple() async {
+    setState(() {
+      _chargement = true;
+      _erreur = null;
+    });
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      String prenom = '';
+      String nom = '';
+      if (credential.givenName != null) prenom = credential.givenName!;
+      if (credential.familyName != null) nom = credential.familyName!;
+
+      final result = await ApiService.appleLogin(
+        appleId: credential.userIdentifier ?? '',
+        email: credential.email,
+        prenom: prenom.isNotEmpty ? prenom : null,
+        nom: nom.isNotEmpty ? nom : null,
+      );
+
+      if (!mounted) return;
+      final userId = result['id'] as String;
+      final userPrenom = result['prenom'] as String;
+      final isNew = result['isNew'] as bool;
+
+      await Session.sauver(userId, userPrenom);
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ContactUrgenceScreen(userId: userId, invitation: true),
+        ),
+        (route) => false,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _erreur = 'Connexion Apple impossible';
         _chargement = false;
       });
     }
@@ -123,117 +219,70 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Entrez votre numéro de téléphone ou votre email.',
+              'Connectez-vous avec Google, Apple ou votre email.',
               style: TextStyle(fontSize: 14, color: kTextSecondary),
             ),
             const SizedBox(height: 28),
 
-            // Toggle chips
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: kGreyLight,
-                borderRadius: BorderRadius.circular(12),
+            // === BOUTONS GOOGLE / APPLE ===
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: OutlinedButton.icon(
+                onPressed: _chargement ? null : _signInWithGoogle,
+                icon: const Icon(Icons.g_mobiledata_rounded, size: 24, color: Colors.red),
+                label: const Text('Continuer avec Google', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: kTextPrimary,
+                  side: const BorderSide(color: kBorder),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() {
-                        _useEmail = false;
-                        _controller.clear();
-                        _erreur = null;
-                      }),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: !_useEmail ? Colors.white : Colors.transparent,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: !_useEmail
-                              ? [BoxShadow(color: kCardShadow, blurRadius: 8, offset: const Offset(0, 2))]
-                              : null,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.phone_outlined,
-                              size: 18,
-                              color: !_useEmail ? kOrange : kTextSecondary,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Téléphone',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: !_useEmail ? kOrange : kTextSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+            ),
+            const SizedBox(height: 10),
+            if (!Platform.isAndroid)
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton.icon(
+                  onPressed: _chargement ? null : _signInWithApple,
+                  icon: const Icon(Icons.apple_rounded, size: 24),
+                  label: const Text('Continuer avec Apple', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: kTextPrimary,
+                    side: const BorderSide(color: kBorder),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() {
-                        _useEmail = true;
-                        _controller.clear();
-                        _erreur = null;
-                      }),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: _useEmail ? Colors.white : Colors.transparent,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: _useEmail
-                              ? [BoxShadow(color: kCardShadow, blurRadius: 8, offset: const Offset(0, 2))]
-                              : null,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.email_outlined,
-                              size: 18,
-                              color: _useEmail ? kOrange : kTextSecondary,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Email',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: _useEmail ? kOrange : kTextSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
+
+            const SizedBox(height: 24),
+
+            // Separateur
+            Row(
+              children: [
+                Expanded(child: Divider(color: kBorder)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text('ou', style: TextStyle(fontSize: 13, color: kTextSecondary)),
+                ),
+                Expanded(child: Divider(color: kBorder)),
+              ],
             ),
 
             const SizedBox(height: 24),
 
-            // Input field
+            // Champ email uniquement
             TextField(
               controller: _controller,
-              keyboardType: _useEmail ? TextInputType.emailAddress : TextInputType.phone,
+              keyboardType: TextInputType.emailAddress,
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-              decoration: InputDecoration(
-                labelText: _useEmail ? 'Email' : 'Numéro de téléphone',
-                prefixText: _useEmail ? null : '+223  ',
-                hintText: _useEmail ? 'exemple@domaine.com' : '70 12 34 56',
-                prefixIcon: Icon(
-                  _useEmail ? Icons.email_outlined : Icons.phone_outlined,
-                  size: 20,
-                ),
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                hintText: 'exemple@domaine.com',
+                prefixIcon: Icon(Icons.email_outlined, size: 20),
               ),
             ),
 
@@ -295,7 +344,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(color: kTextSecondary, fontSize: 14),
                     children: [
                       TextSpan(
-                        text: 'Créer un compte',
+                        text: 'Creer un compte',
                         style: TextStyle(
                           color: kOrange,
                           fontWeight: FontWeight.w700,

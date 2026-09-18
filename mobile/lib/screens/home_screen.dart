@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import '../main.dart';
 import '../services/api_service.dart';
+import '../services/carte_service.dart';
+import '../services/whatsapp_helper.dart';
 import 'publier_screen.dart';
 import 'profil_autre_screen.dart';
 
@@ -199,37 +203,64 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: kOrangeLight,
-                child: Text(
-                  '${proprietaire['prenom'][0]}',
-                  style: const TextStyle(
-                    color: kOrange,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProfilAutreScreen(
+                      targetUserId: proprietaire['id'] as String,
+                      viewerUserId: widget.userId,
+                    ),
                   ),
+                ),
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundColor: kOrangeLight,
+                  backgroundImage: (proprietaire['photoUrl'] != null && (proprietaire['photoUrl'] as String).isNotEmpty)
+                      ? NetworkImage('${ApiService.baseUrl}${proprietaire['photoUrl']}')
+                      : null,
+                  child: (proprietaire['photoUrl'] == null || (proprietaire['photoUrl'] as String).isEmpty)
+                      ? Text(
+                          '${proprietaire['prenom'][0]}',
+                          style: const TextStyle(
+                            color: kOrange,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14,
+                          ),
+                        )
+                      : null,
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${proprietaire['prenom']} ${proprietaire['nom']}',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: kTextPrimary,
+                child: GestureDetector(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProfilAutreScreen(
+                        targetUserId: proprietaire['id'] as String,
+                        viewerUserId: widget.userId,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${ad['depart']} → ${ad['destination']} · ${ad['heureDepart']}',
-                      style: TextStyle(fontSize: 11, color: kTextSecondary),
-                    ),
-                  ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${proprietaire['prenom']} ${proprietaire['nom']}',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: kTextPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${ad['depart']} → ${ad['destination']} · ${ad['heureDepart']}',
+                        style: TextStyle(fontSize: 11, color: kTextSecondary),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Container(
@@ -251,27 +282,25 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           if (acceptee) ...[
             const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: kGreenLight,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.call, color: kGreen, size: 18),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Contacte ${proprietaire['prenom']} au ${proprietaire['telephone']} ou via WhatsApp.',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF125A1E),
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                ],
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  await WhatsAppHelper.ouvrir(
+                    telephone: '${proprietaire['telephone']}',
+                    message: 'Bonjour ${proprietaire['prenom']}, je te contacte au sujet du trajet SIRA KELEN.',
+                  );
+                },
+                icon: const Icon(Icons.chat_rounded, color: Colors.white, size: 18),
+                label: Text(
+                  'Contacter ${proprietaire['prenom']} via WhatsApp',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF25D366),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
               ),
             ),
           ],
@@ -318,51 +347,102 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: kOrangeLight,
-                child: Text(
-                  '${demandeur['prenom'][0]}',
-                  style: const TextStyle(
-                    color: kOrange,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProfilAutreScreen(
+                      targetUserId: demandeur['id'] as String,
+                      viewerUserId: widget.userId,
+                    ),
                   ),
+                ),
+                child: CircleAvatar(
+                  radius: 20,
+                  backgroundColor: kOrangeLight,
+                  backgroundImage: (demandeur['photoUrl'] != null && (demandeur['photoUrl'] as String).isNotEmpty)
+                      ? NetworkImage('${ApiService.baseUrl}${demandeur['photoUrl']}')
+                      : null,
+                  child: (demandeur['photoUrl'] == null || (demandeur['photoUrl'] as String).isEmpty)
+                      ? Text(
+                          '${demandeur['prenom'][0]}',
+                          style: const TextStyle(
+                            color: kOrange,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
+                        )
+                      : null,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            '${demandeur['prenom']} ${demandeur['nom']}',
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: kTextPrimary,
+                child: GestureDetector(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProfilAutreScreen(
+                        targetUserId: demandeur['id'] as String,
+                        viewerUserId: widget.userId,
+                      ),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              '${demandeur['prenom']} ${demandeur['nom']}',
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: kTextPrimary,
+                              ),
                             ),
                           ),
-                        ),
-                        if (demandeur['verifie'] == true) ...[
-                          const SizedBox(width: 4),
-                          const Icon(Icons.verified, color: kGreen, size: 14),
+                          if (demandeur['verifie'] == true) ...[
+                            const SizedBox(width: 4),
+                            const Icon(Icons.verified, color: kGreen, size: 14),
+                          ],
                         ],
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'veut rejoindre ton trajet ${d['ad']['depart']} → ${d['ad']['destination']}',
-                      style: TextStyle(fontSize: 11, color: kTextSecondary),
-                    ),
-                  ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'veut rejoindre ton trajet ${d['ad']['depart']} → ${d['ad']['destination']}',
+                        style: TextStyle(fontSize: 11, color: kTextSecondary),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 8),
+          // Voir profil button
+          Align(
+            alignment: Alignment.centerRight,
+            child: GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProfilAutreScreen(
+                    targetUserId: demandeur['id'] as String,
+                    viewerUserId: widget.userId,
+                  ),
+                ),
+              ),
+              child: Text(
+                'Voir le profil →',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: kOrange,
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -375,8 +455,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           d['id'] as String, widget.userId);
                       if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text(
-                              'Accepté ! Contacte ton partenaire par téléphone ou WhatsApp.'),
+                          content: Text('Demande acceptée ! Contacte ton partenaire.'),
                           backgroundColor: kGreen));
                       await _chargerMonAd();
                     } catch (e) {
@@ -422,6 +501,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _carteCompatibilite(Map<String, dynamic> comp) {
     final niveau = comp['niveau'] as String;
+    final myRole = _adActif?['role'] as String?;
+    final theirRole = comp['role'] as String?;
     Color pillBg;
     Color pillText;
     String label;
@@ -441,6 +522,20 @@ class _HomeScreenState extends State<HomeScreen> {
         pillText = kTextSecondary;
         label = 'FAIBLE';
     }
+
+    // GPS coords
+    final double? theirDepLat = (comp['departLat'] as num?)?.toDouble();
+    final double? theirDepLng = (comp['departLng'] as num?)?.toDouble();
+    final double? theirArrLat = (comp['arriveeLat'] as num?)?.toDouble();
+    final double? theirArrLng = (comp['arriveeLng'] as num?)?.toDouble();
+    final bool hasGps = theirDepLat != null && theirDepLng != null && theirArrLat != null && theirArrLng != null;
+
+    // Determine itinerary type
+    bool isDetour = false;
+    if (myRole == 'conducteur' && theirRole == 'passager') {
+      isDetour = true;
+    }
+
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -459,100 +554,217 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: kBorder),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: kOrangeLight,
-              child: Text(
-                '${(comp['nom'] as String).split(' ').first[0]}',
-                style: const TextStyle(
-                  color: kOrange,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 15,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          comp['nom'] as String,
-                          overflow: TextOverflow.ellipsis,
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: kOrangeLight,
+                  backgroundImage: (comp['photoUrl'] != null && (comp['photoUrl'] as String).isNotEmpty)
+                      ? NetworkImage('${ApiService.baseUrl}${comp['photoUrl']}')
+                      : null,
+                  child: (comp['photoUrl'] == null || (comp['photoUrl'] as String).isEmpty)
+                      ? Text(
+                          '${(comp['nom'] as String).split(' ').first[0]}',
                           style: const TextStyle(
-                            fontSize: 13,
+                            color: kOrange,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              comp['nom'] as String,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: kTextPrimary,
+                              ),
+                            ),
+                          ),
+                          if (comp['verifie'] == true) ...[
+                            const SizedBox(width: 4),
+                            const Icon(Icons.verified, color: kGreen, size: 14),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        '${comp['depart']} → ${comp['destination']} · ${comp['heure']}',
+                        style: TextStyle(fontSize: 11, color: kTextSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: pillBg,
+                        borderRadius: BorderRadius.circular(20),
+                        border: niveau == 'faible'
+                            ? Border.all(color: kBorder)
+                            : null,
+                      ),
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          color: pillText,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: _adActif != null &&
+                              _adActif!['statut'] == 'en_cours_de_finalisation'
+                          ? null
+                          : () => _envoyerInteret(comp),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: kOrange,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Text(
+                          'Intéressé',
+                          style: TextStyle(
+                            fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: kTextPrimary,
+                            color: Colors.white,
                           ),
                         ),
                       ),
-                      if (comp['verifie'] == true) ...[
-                        const SizedBox(width: 4),
-                        const Icon(Icons.verified, color: kGreen, size: 14),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    '${comp['depart']} → ${comp['destination']} · ${comp['heure']}',
-                    style: TextStyle(fontSize: 11, color: kTextSecondary),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 10),
-            Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: pillBg,
-                    borderRadius: BorderRadius.circular(20),
-                    border: niveau == 'faible'
-                        ? Border.all(color: kBorder)
-                        : null,
-                  ),
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      color: pillText,
                     ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: _adActif != null &&
-                          _adActif!['statut'] == 'en_cours_de_finalisation'
-                      ? null
-                      : () => _envoyerInteret(comp),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: kOrange,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Text(
-                      'Intéressé',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
+                  ],
                 ),
               ],
             ),
+            // Mini-carte avec itineraire
+            if (hasGps) ...[
+              const SizedBox(height: 10),
+              Container(
+                height: 130,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                child: _carteItineraireCompat(
+                  theirDepLat: theirDepLat,
+                  theirDepLng: theirDepLng,
+                  theirArrLat: theirArrLat,
+                  theirArrLng: theirArrLng,
+                  monDepLat: (comp['monDepartLat'] as num?)?.toDouble(),
+                  monDepLng: (comp['monDepartLng'] as num?)?.toDouble(),
+                  monArrLat: (comp['monArriveeLat'] as num?)?.toDouble(),
+                  monArrLng: (comp['monArriveeLng'] as num?)?.toDouble(),
+                  isDetour: isDetour,
+                ),
+              ),
+              // Distance approximative (confidentialite)
+              const SizedBox(height: 6),
+              _distanceInfoRow(comp),
+            ],
           ],
         ),
       ),
+    );
+  }
+
+  Widget _carteItineraireCompat({
+    required double theirDepLat,
+    required double theirDepLng,
+    required double theirArrLat,
+    required double theirArrLng,
+    required double? monDepLat,
+    required double? monDepLng,
+    required double? monArrLat,
+    required double? monArrLng,
+    required bool isDetour,
+  }) {
+    final theirDep = LatLng(theirDepLat, theirDepLng);
+    final theirArr = LatLng(theirArrLat, theirArrLng);
+
+    // Center de la carte
+    final allPoints = <LatLng>[theirDep, theirArr];
+    if (monDepLat != null && monDepLng != null) allPoints.add(LatLng(monDepLat, monDepLng));
+    if (monArrLat != null && monArrLng != null) allPoints.add(LatLng(monArrLat, monArrLng));
+
+    final bounds = LatLngBounds.fromPoints(allPoints);
+    final center = bounds.center;
+
+    return FlutterMap(
+      options: MapOptions(
+        initialCenter: center,
+        initialZoom: 12,
+        interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
+      ),
+      children: [
+        TileLayer(
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'ml.sirakele.sirakele',
+        ),
+        MarkerLayer(
+          markers: [
+            Marker(point: theirDep, width: 20, height: 20, child: const Icon(Icons.circle, color: kGreen, size: 12)),
+            Marker(point: theirArr, width: 20, height: 20, child: const Icon(Icons.circle, color: Color(0xFF2962FF), size: 12)),
+            if (monDepLat != null && monDepLng != null)
+              Marker(
+                point: LatLng(monDepLat, monDepLng),
+                width: 16,
+                height: 16,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: kOrange,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _distanceInfoRow(Map<String, dynamic> comp) {
+    final theirDepLat = (comp['departLat'] as num?)?.toDouble();
+    final theirDepLng = (comp['departLng'] as num?)?.toDouble();
+    final monDepLat = (comp['monDepartLat'] as num?)?.toDouble();
+    final monDepLng = (comp['monDepartLng'] as num?)?.toDouble();
+
+    String proximite = '';
+    if (theirDepLat != null && monDepLat != null) {
+      final distKm = const Distance().as(
+        LengthUnit.Kilometer,
+        LatLng(theirDepLat, theirDepLng!),
+        LatLng(monDepLat, monDepLng!),
+      );
+      proximite = CarteService.distanceApproximative(distKm);
+    }
+
+    return Row(
+      children: [
+        Icon(Icons.near_me_rounded, size: 14, color: kOrange),
+        const SizedBox(width: 4),
+        Text(
+          proximite.isNotEmpty ? 'Depart a proximite ($proximite)' : 'Meme itineraire',
+          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: kOrange),
+        ),
+      ],
     );
   }
 
@@ -741,24 +953,49 @@ class _HomeScreenState extends State<HomeScreen> {
                                   const Icon(Icons.person, color: kGreen, size: 16),
                                   const SizedBox(width: 8),
                                   Expanded(
-                                    child: Text(
-                                      'Partenaire : ${_partenaire!['prenom']} ${_partenaire!['nom']} · ${_partenaire!['telephone']}',
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF125A1E),
+                                    child: GestureDetector(
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => ProfilAutreScreen(
+                                            targetUserId: _partenaire!['id'] as String,
+                                            viewerUserId: widget.userId,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'Partenaire : ${_partenaire!['prenom']} ${_partenaire!['nom']}',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFF125A1E),
+                                          decoration: TextDecoration.underline,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'Contactez-le par téléphone ou WhatsApp.',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Color(0xFF125A1E),
-                                  height: 1.4,
+                              const SizedBox(height: 8),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: () async {
+                                    await WhatsAppHelper.ouvrir(
+                                      telephone: '${_partenaire!['telephone']}',
+                                      message: 'Bonjour ${_partenaire!['prenom']}, je te contacte au sujet du trajet SIRA KELEN.',
+                                    );
+                                  },
+                                  icon: const Icon(Icons.chat_rounded, color: Colors.white, size: 16),
+                                  label: const Text(
+                                    'Contacter via WhatsApp',
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF25D366),
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
                                 ),
                               ),
                             ],

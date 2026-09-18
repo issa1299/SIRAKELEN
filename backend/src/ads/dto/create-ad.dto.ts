@@ -3,6 +3,7 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
@@ -25,10 +26,26 @@ export class CreateAdDto {
   @MaxLength(150)
   depart: string;
 
+  @IsOptional()
+  @IsNumber()
+  departLat?: number;
+
+  @IsOptional()
+  @IsNumber()
+  departLng?: number;
+
   @IsString()
   @IsNotEmpty({ message: 'La destination est obligatoire' })
   @MaxLength(150)
   destination: string;
+
+  @IsOptional()
+  @IsNumber()
+  arriveeLat?: number;
+
+  @IsOptional()
+  @IsNumber()
+  arriveeLng?: number;
 
   @IsDateString({}, { message: 'Date de déplacement invalide' })
   dateDeplacement: string;

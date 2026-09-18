@@ -18,16 +18,16 @@ export class User {
   @Column({ length: 80 })
   prenom: string;
 
-  @Column({ length: 80 })
+  @Column({ length: 80, nullable: true })
   nom: string;
 
-  @Column({ length: 20, unique: true })
+  @Column({ length: 20, nullable: true, unique: true })
   telephone: string;
 
   @Column({ length: 100, nullable: true, unique: true })
   email: string;
 
-  @Column({ length: 120 })
+  @Column({ length: 120, nullable: true })
   quartier: string;
 
   @Column({ nullable: true })
@@ -35,6 +35,18 @@ export class User {
 
   @Column({ default: false })
   verifie: boolean;
+
+  @Column({ default: false })
+  admin: boolean;
+
+  @Column({ length: 120, nullable: true })
+  motDePasse: string;
+
+  @Column({ length: 120, nullable: true, unique: true })
+  googleId: string;
+
+  @Column({ length: 120, nullable: true, unique: true })
+  appleId: string;
 
   @Column({ length: 4, nullable: true })
   codeRecuperation: string;

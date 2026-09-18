@@ -187,6 +187,73 @@ export class AuthService {
     return { id: user.id, prenom: user.prenom };
   }
 
+  // === GOOGLE / APPLE OAuth ===
+  async googleLogin(payload: {
+    googleId: string;
+    email: string;
+    prenom: string;
+    nom: string;
+    photoUrl?: string;
+  }): Promise<{ id: string; prenom: string; isNew: boolean }> {
+    let user = await this.usersService.findByGoogleId(payload.googleId);
+    if (user) {
+      return { id: user.id, prenom: user.prenom, isNew: false };
+    }
+
+    // Chercher par email
+    if (payload.email) {
+      user = await this.usersService.findByEmail(payload.email);
+      if (user) {
+        // Lier le Google ID au compte existant
+        user.googleId = payload.googleId;
+        if (payload.photoUrl) user.photoUrl = payload.photoUrl;
+        await this.usersService.updateRaw(user);
+        return { id: user.id, prenom: user.prenom, isNew: false };
+      }
+    }
+
+    // Creer un nouveau compte
+    const newUser = await this.usersService.createOAuth({
+      prenom: payload.prenom,
+      nom: payload.nom,
+      email: payload.email,
+      googleId: payload.googleId,
+      photoUrl: payload.photoUrl,
+    });
+    return { id: newUser.id, prenom: newUser.prenom, isNew: true };
+  }
+
+  async appleLogin(payload: {
+    appleId: string;
+    email?: string;
+    prenom?: string;
+    nom?: string;
+  }): Promise<{ id: string; prenom: string; isNew: boolean }> {
+    let user = await this.usersService.findByAppleId(payload.appleId);
+    if (user) {
+      return { id: user.id, prenom: user.prenom, isNew: false };
+    }
+
+    // Chercher par email
+    if (payload.email) {
+      user = await this.usersService.findByEmail(payload.email);
+      if (user) {
+        user.appleId = payload.appleId;
+        await this.usersService.updateRaw(user);
+        return { id: user.id, prenom: user.prenom, isNew: false };
+      }
+    }
+
+    // Creer un nouveau compte
+    const newUser = await this.usersService.createOAuth({
+      prenom: payload.prenom ?? 'Utilisateur',
+      nom: payload.nom ?? 'Apple',
+      email: payload.email,
+      appleId: payload.appleId,
+    });
+    return { id: newUser.id, prenom: newUser.prenom, isNew: true };
+  }
+
   private hasher(code: string): string {
     return createHash('sha256').update(code).digest('hex');
   }

@@ -8,7 +8,7 @@ import { Repository, Not, In } from 'typeorm';
 import { AvisDeplacement, RoleAd, StatutAd } from './avis-deplacement.entity';
 import { UsersService } from '../users/users.service';
 import { CreateAdDto } from './dto/create-ad.dto';
-import { calculerScore, NiveauCompatibilite } from './matching';
+import { evaluerCompatibilite, NiveauCompatibilite } from './matching';
 
 @Injectable()
 export class AdsService {
@@ -67,7 +67,11 @@ export class AdsService {
       proprietaire: user,
       role: dto.role,
       depart: dto.depart.trim(),
+      departLat: dto.departLat ?? null,
+      departLng: dto.departLng ?? null,
       destination: dto.destination.trim(),
+      arriveeLat: dto.arriveeLat ?? null,
+      arriveeLng: dto.arriveeLng ?? null,
       dateDeplacement: dto.dateDeplacement,
       heureDepart: dto.heureDepart,
       moyenTransport: dto.moyenTransport,
@@ -100,6 +104,7 @@ export class AdsService {
       heure: string;
       places: number | null;
       niveau: NiveauCompatibilite;
+      scoreFinal: number;
     }>
   > {
     const mesAds = await this.adsRepository.find({
@@ -107,7 +112,6 @@ export class AdsService {
     });
     if (mesAds.length === 0) return [];
 
-    // Tous les AD actifs des autres utilisateurs.
     const autresAds = await this.adsRepository.find({
       where: { statut: StatutAd.ACTIF },
       relations: { proprietaire: true },
@@ -122,30 +126,49 @@ export class AdsService {
       role: string;
       depart: string;
       destination: string;
+      departLat: number | null;
+      departLng: number | null;
+      arriveeLat: number | null;
+      arriveeLng: number | null;
+      monDepartLat: number | null;
+      monDepartLng: number | null;
+      monArriveeLat: number | null;
+      monArriveeLng: number | null;
       date: string;
       heure: string;
       places: number | null;
       niveau: NiveauCompatibilite;
+      scoreFinal: number;
     }> = [];
 
     for (const monAd of mesAds) {
       for (const autre of autresAds) {
-        // Jamais avec soi-même.
         if (autre.proprietaire.id === userId) continue;
-        // Rôles opposés : conducteur ↔ passager.
         if (autre.role === monAd.role) continue;
-        // Chaque AD correspond à une date précise : même date obligatoire.
         if (autre.dateDeplacement !== monAd.dateDeplacement) continue;
 
-        const { niveau } = calculerScore(
-          monAd.depart,
-          monAd.destination,
-          monAd.heureDepart,
-          autre.depart,
-          autre.destination,
-          autre.heureDepart,
+        const resultat = evaluerCompatibilite(
+          {
+            departLat: monAd.departLat,
+            departLng: monAd.departLng,
+            arriveeLat: monAd.arriveeLat,
+            arriveeLng: monAd.arriveeLng,
+            depart: monAd.depart,
+            destination: monAd.destination,
+            heureDepart: monAd.heureDepart,
+          },
+          {
+            departLat: autre.departLat,
+            departLng: autre.departLng,
+            arriveeLat: autre.arriveeLat,
+            arriveeLng: autre.arriveeLng,
+            depart: autre.depart,
+            destination: autre.destination,
+            heureDepart: autre.heureDepart,
+          },
         );
-        if (!niveau) continue;
+
+        if (!resultat.niveau) continue;
 
         resultats.push({
           adId: autre.id,
@@ -156,18 +179,26 @@ export class AdsService {
           role: autre.role,
           depart: autre.depart,
           destination: autre.destination,
+          departLat: autre.departLat,
+          departLng: autre.departLng,
+          arriveeLat: autre.arriveeLat,
+          arriveeLng: autre.arriveeLng,
+          monDepartLat: monAd.departLat,
+          monDepartLng: monAd.departLng,
+          monArriveeLat: monAd.arriveeLat,
+          monArriveeLng: monAd.arriveeLng,
           date: autre.dateDeplacement,
           heure: autre.heureDepart,
           places: autre.placesDisponibles,
-          niveau,
+          niveau: resultat.niveau,
+          scoreFinal: resultat.scoreFinal,
         });
       }
     }
 
-    // Tri : fort > moyen > faible.
     const ordre = { fort: 0, moyen: 1, faible: 2 };
     return resultats.sort(
-      (a, b) => ordre[a.niveau] - ordre[b.niveau],
+      (a, b) => ordre[a.niveau] - ordre[b.niveau] || b.scoreFinal - a.scoreFinal,
     );
   }
 

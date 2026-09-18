@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../main.dart';
 import '../services/api_service.dart';
 
@@ -18,6 +20,9 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
   bool _chargement = true;
   bool _enregistrement = false;
   String? _erreur;
+  String? _photoUrl;
+  File? _photoFile;
+  final _picker = ImagePicker();
 
   @override
   void initState() {
@@ -39,12 +44,39 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
       _prenom.text = user['prenom'] as String? ?? '';
       _nom.text = user['nom'] as String? ?? '';
       _quartier.text = user['quartier'] as String? ?? '';
+      _photoUrl = user['photoUrl'] as String?;
       if (!mounted) return;
       setState(() => _chargement = false);
     } catch (_) {
       if (!mounted) return;
       setState(() => _chargement = false);
     }
+  }
+
+  Future<void> _choisirPhoto() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera_rounded),
+              title: const Text('Prendre une photo'),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded),
+              title: const Text('Choisir dans la galerie'),
+              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+    final picked = await _picker.pickImage(source: source, maxWidth: 512, maxHeight: 512, imageQuality: 80);
+    if (picked == null) return;
+    setState(() => _photoFile = File(picked.path));
   }
 
   Future<void> _enregistrer() async {
@@ -54,20 +86,25 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
       _erreur = null;
     });
     try {
+      String? newPhotoUrl = _photoUrl;
+      if (_photoFile != null) {
+        newPhotoUrl = await ApiService.uploadPhoto(widget.userId, _photoFile!);
+      }
       await ApiService.updateProfil(
         widget.userId,
         prenom: _prenom.text.trim(),
         nom: _nom.text.trim(),
         quartier: _quartier.text.trim(),
+        photoUrl: newPhotoUrl,
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Profil mis à jour'),
           backgroundColor: kGreen));
       Navigator.pop(context);
-    } catch (_) {
+    } catch (e) {
       setState(() {
-        _erreur = 'Enregistrement impossible';
+        _erreur = 'Erreur : ${e.toString()}';
         _enregistrement = false;
       });
     }
@@ -87,7 +124,46 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 20),
+                    // Photo de profil
+                    Center(
+                      child: GestureDetector(
+                        onTap: _choisirPhoto,
+                        child: Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 50,
+                              backgroundColor: kOrangeLight,
+                              backgroundImage: _photoFile != null
+                                  ? FileImage(_photoFile!)
+                                  : (_photoUrl != null && _photoUrl!.isNotEmpty
+                                      ? NetworkImage('${ApiService.baseUrl}$_photoUrl') as ImageProvider
+                                      : null),
+                              child: (_photoFile == null && (_photoUrl == null || _photoUrl!.isEmpty))
+                                  ? const Icon(Icons.person_rounded, size: 50, color: kOrange)
+                                  : null,
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: const BoxDecoration(
+                                  color: kOrange,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 18),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Center(
+                      child: Text('Appuyez pour changer la photo', style: TextStyle(fontSize: 12, color: kTextSecondary)),
+                    ),
+                    const SizedBox(height: 24),
                     TextFormField(
                       controller: _prenom,
                       style: const TextStyle(fontSize: 15),

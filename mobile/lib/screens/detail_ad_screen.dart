@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/api_service.dart';
+import '../services/whatsapp_helper.dart';
+import 'profil_autre_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DetailAdScreen extends StatefulWidget {
   final String adId;
@@ -192,28 +195,56 @@ class _DetailAdScreenState extends State<DetailAdScreen> {
 
             // Partner section (when finalizing)
             if (isFinalizing && _partenaire != null) ...[
-              _recapRow(Icons.person_rounded, 'Partenaire', '${_partenaire!['prenom']} ${_partenaire!['nom']}'),
-              _recapRow(Icons.phone_rounded, 'Téléphone', '${_partenaire!['telephone']}'),
-              const SizedBox(height: 12),
-              // Contact banner
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: kOrangeLight,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: kOrange.withAlpha(60)),
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProfilAutreScreen(
+                      targetUserId: _partenaire!['id'] as String,
+                      viewerUserId: widget.userId,
+                    ),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline_rounded, color: kOrange, size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Contacte ${_partenaire!['prenom']} par téléphone ou WhatsApp pour organiser le trajet.',
-                        style: const TextStyle(fontSize: 13, color: kOrangeDark, fontWeight: FontWeight.w500),
+                    const Icon(Icons.person_rounded, color: kOrange, size: 18),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${_partenaire!['prenom']} ${_partenaire!['nom']}',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: kOrange,
+                        decoration: TextDecoration.underline,
                       ),
                     ),
                   ],
+                ),
+              ),
+              _recapRow(Icons.phone_rounded, 'Téléphone', '${_partenaire!['telephone']}'),
+              const SizedBox(height: 12),
+              // WhatsApp button
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    await WhatsAppHelper.ouvrir(
+                      telephone: '${_partenaire!['telephone']}',
+                      message: 'Bonjour ${_partenaire!['prenom']}, je te contacte au sujet du trajet SIRA KELEN.',
+                    );
+                  },
+                  icon: const Icon(Icons.chat_rounded, color: Colors.white, size: 20),
+                  label: const Text(
+                    'Contacter via WhatsApp',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF25D366),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 2,
+                  ),
                 ),
               ),
               // Emergency contact
@@ -259,7 +290,10 @@ class _DetailAdScreenState extends State<DetailAdScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () async {
+                            final tel = Uri.parse('tel:${_contactUrgence!['telephone']}');
+                            if (await canLaunchUrl(tel)) await launchUrl(tel);
+                          },
                           icon: const Icon(Icons.phone_rounded, size: 16, color: Color(0xFFB35A00)),
                           label: Text(
                             'Appeler le ${_contactUrgence!['telephone']}',

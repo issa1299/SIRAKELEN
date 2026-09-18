@@ -1,34 +1,38 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Resend } from 'resend';
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private readonly resend: Resend | null;
+  private readonly transporter: nodemailer.Transporter;
   private readonly from: string;
 
   constructor(private readonly config: ConfigService) {
-    const apiKey = config.get<string>('RESEND_API_KEY');
-    this.from = config.get<string>('RESEND_FROM') || 'SIRA KELEN <onboarding@resend.dev>';
+    const user = config.get<string>('SMTP_USER') || '';
+    const pass = config.get<string>('SMTP_PASS') || '';
 
-    if (apiKey) {
-      this.resend = new Resend(apiKey);
-      this.logger.log('Resend configuré');
+    this.from = config.get<string>('SMTP_FROM') || `SIRA KELEN <${user}>`;
+
+    if (user && pass) {
+      this.transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: { user, pass },
+      });
+      this.logger.log('Gmail SMTP configuré');
     } else {
-      this.resend = null;
-      this.logger.warn('[MODE DEV] RESEND_API_KEY non défini — codes dans la console');
+      this.logger.warn('[MODE DEV] SMTP non configuré — codes dans la console');
     }
   }
 
   async envoyerVerification(email: string, code: string): Promise<void> {
-    if (!this.resend) {
+    if (!this.transporter) {
       this.logger.warn(`[MODE DEV] Code pour ${email} : ${code}`);
       return;
     }
 
     try {
-      await this.resend.emails.send({
+      await this.transporter.sendMail({
         from: this.from,
         to: email,
         subject: 'Code de vérification SIRA KELEN',
@@ -39,9 +43,10 @@ export class EmailService {
           <p style="color:#999">Code valable 5 minutes</p>
         </div>`,
       });
+
       this.logger.log(`Email envoyé à ${email}`);
     } catch (error: any) {
-      this.logger.error(`Resend échoué: ${error.message}`);
+      this.logger.error(`Gmail SMTP échoué: ${error.message}`);
       this.logger.warn(`[MODE DEV] Code pour ${email} : ${code}`);
     }
   }
