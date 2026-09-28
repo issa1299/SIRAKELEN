@@ -24,11 +24,25 @@ export class UploadController {
         destination: './uploads/photos',
         filename: (_req, file, cb) => {
           const unique = randomUUID();
-          cb(null, `${unique}${extname(file.originalname)}`);
+          let ext = extname(file.originalname);
+          if (!ext) {
+            const parType: Record<string, string> = {
+              'image/jpeg': '.jpg',
+              'image/png': '.png',
+              'image/webp': '.webp',
+              'image/heic': '.heic',
+              'image/heif': '.heif',
+              'image/gif': '.gif',
+              'image/bmp': '.bmp',
+            };
+            ext = parType[file.mimetype] ?? '.jpg';
+          }
+          cb(null, `${unique}${ext}`);
         },
       }),
       fileFilter: (_req, file, cb) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
+        // Accepte tous les formats d'image (jpg, png, webp, heic, gif, bmp...).
+        if (!file.mimetype.startsWith('image/')) {
           cb(null, false);
         } else {
           cb(null, true);
@@ -43,7 +57,7 @@ export class UploadController {
   ) {
     if (!file) {
       throw new BadRequestException(
-        'Photo invalide. Formats acceptés : jpg, png, webp (max 5 Mo).',
+        'Fichier invalide. Choisis une image (max 5 Mo).',
       );
     }
     const filename = file.filename;
