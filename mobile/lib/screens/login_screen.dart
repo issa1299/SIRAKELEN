@@ -93,23 +93,13 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final googleUser = await GoogleSignIn(
         scopes: ['email', 'profile'],
-        clientId: '743499372628-5je52m5maeosssmbidmeqhqu7ko8u9nf.apps.googleusercontent.com',
       ).signIn();
       if (googleUser == null) {
         setState(() => _chargement = false);
         return;
       }
-      final auth = await googleUser.authentication;
-      if (auth.idToken == null) {
-        setState(() {
-          _erreur = 'Erreur d\'authentification Google';
-          _chargement = false;
-        });
-        return;
-      }
-
       final result = await ApiService.googleLogin(
-        googleId: auth.idToken!,
+        googleId: googleUser.id,
         email: googleUser.email,
         prenom: googleUser.displayName?.split(' ').first ?? '',
         nom: googleUser.displayName?.split(' ').skip(1).join(' ') ?? '',

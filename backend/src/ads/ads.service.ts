@@ -6,9 +6,15 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, In } from 'typeorm';
 import { AvisDeplacement, RoleAd, StatutAd } from './avis-deplacement.entity';
+import { Demande, StatutDemande } from '../demandes/demande.entity';
 import { UsersService } from '../users/users.service';
 import { CreateAdDto } from './dto/create-ad.dto';
-import { evaluerCompatibilite, NiveauCompatibilite } from './matching';
+import {
+  evaluerCompatibilite,
+  prefiltrageRapide,
+  MATCHING_CONFIG,
+  NiveauCompatibilite,
+} from './matching';
 
 @Injectable()
 export class AdsService {
@@ -105,6 +111,11 @@ export class AdsService {
       places: number | null;
       niveau: NiveauCompatibilite;
       scoreFinal: number;
+      scoreDirection: number;
+      scoreRecouvrement: number;
+      ecartMinutes: number | null;
+      distDepartKm: number | null;
+      distArriveeKm: number | null;
     }>
   > {
     const mesAds = await this.adsRepository.find({
@@ -112,8 +123,11 @@ export class AdsService {
     });
     if (mesAds.length === 0) return [];
 
+    // Prefiltrage cote base : memes dates, statut ACTIF (performances :
+    // on ne charge jamais tout l'historique, seulement les candidats du jour).
+    const dates = [...new Set(mesAds.map((a) => a.dateDeplacement))];
     const autresAds = await this.adsRepository.find({
-      where: { statut: StatutAd.ACTIF },
+      where: { statut: StatutAd.ACTIF, dateDeplacement: In(dates) },
       relations: { proprietaire: true },
     });
 
@@ -139,34 +153,44 @@ export class AdsService {
       places: number | null;
       niveau: NiveauCompatibilite;
       scoreFinal: number;
+      scoreDirection: number;
+      scoreRecouvrement: number;
+      ecartMinutes: number | null;
+      distDepartKm: number | null;
+      distArriveeKm: number | null;
     }> = [];
 
     for (const monAd of mesAds) {
+      const monPoint = {
+        departLat: monAd.departLat,
+        departLng: monAd.departLng,
+        arriveeLat: monAd.arriveeLat,
+        arriveeLng: monAd.arriveeLng,
+        depart: monAd.depart,
+        destination: monAd.destination,
+        heureDepart: monAd.heureDepart,
+      };
+      let evalues = 0;
       for (const autre of autresAds) {
         if (autre.proprietaire.id === userId) continue;
         if (autre.role === monAd.role) continue;
         if (autre.dateDeplacement !== monAd.dateDeplacement) continue;
+        if (evalues >= MATCHING_CONFIG.MAX_CANDIDATS) break;
 
-        const resultat = evaluerCompatibilite(
-          {
-            departLat: monAd.departLat,
-            departLng: monAd.departLng,
-            arriveeLat: monAd.arriveeLat,
-            arriveeLng: monAd.arriveeLng,
-            depart: monAd.depart,
-            destination: monAd.destination,
-            heureDepart: monAd.heureDepart,
-          },
-          {
-            departLat: autre.departLat,
-            departLng: autre.departLng,
-            arriveeLat: autre.arriveeLat,
-            arriveeLng: autre.arriveeLng,
-            depart: autre.depart,
-            destination: autre.destination,
-            heureDepart: autre.heureDepart,
-          },
-        );
+        const candPoint = {
+          departLat: autre.departLat,
+          departLng: autre.departLng,
+          arriveeLat: autre.arriveeLat,
+          arriveeLng: autre.arriveeLng,
+          depart: autre.depart,
+          destination: autre.destination,
+          heureDepart: autre.heureDepart,
+        };
+        // ETAPE 0 : prefiltrage rapide (bbox + horaire), sans trigonometrie.
+        if (!prefiltrageRapide(monPoint, candPoint)) continue;
+        evalues++;
+
+        const resultat = evaluerCompatibilite(monPoint, candPoint);
 
         if (!resultat.niveau) continue;
 
@@ -191,7 +215,18 @@ export class AdsService {
           heure: autre.heureDepart,
           places: autre.placesDisponibles,
           niveau: resultat.niveau,
-          scoreFinal: resultat.scoreFinal,
+          scoreFinal: Math.round(resultat.scoreFinal * 10) / 10,
+          scoreDirection: Math.round(resultat.scoreDirection),
+          scoreRecouvrement: Math.round(resultat.scoreRecouvrement),
+          ecartMinutes: resultat.ecartMinutes,
+          distDepartKm:
+            resultat.distDepartKm == null
+              ? null
+              : Math.round(resultat.distDepartKm * 100) / 100,
+          distArriveeKm:
+            resultat.distArriveeKm == null
+              ? null
+              : Math.round(resultat.distArriveeKm * 100) / 100,
         });
       }
     }
@@ -236,6 +271,15 @@ export class AdsService {
       );
     }
     ad.statut = StatutAd.ANNULE;
-    return this.adsRepository.save(ad);
+    const sauve = await this.adsRepository.save(ad);
+    // Purge : les demandes en attente sur un AD annule deviennent invalides.
+    await this.adsRepository.manager
+      .getRepository(Demande)
+      .update(
+        { ad: { id: adId }, statut: StatutDemande.EN_ATTENTE },
+        { statut: StatutDemande.ANNULEE },
+      )
+      .catch(() => null);
+    return sauve;
   }
 }

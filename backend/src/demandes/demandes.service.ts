@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Repository, DataSource } from 'typeorm';
 import { Demande, StatutDemande } from './demande.entity';
 import { AvisDeplacement, StatutAd } from '../ads/avis-deplacement.entity';
 import { UsersService } from '../users/users.service';
@@ -17,6 +17,7 @@ export class DemandesService {
     @InjectRepository(AvisDeplacement)
     private readonly adsRepository: Repository<AvisDeplacement>,
     private readonly usersService: UsersService,
+    private readonly dataSource: DataSource,
   ) {}
 
   /** Le demandeur envoie une demande pour rejoindre un AD. */
@@ -83,49 +84,101 @@ export class DemandesService {
     });
   }
 
-  /** Le propriétaire accepte une demande : l'AD passe en finalisation. */
+  /** Le propriétaire accepte une demande : premier accord valide = RESERVATION.
+   * Transaction + verrou pessimiste : deux acceptations simultanees ne peuvent
+   * pas reserver le meme AD. Les demandes devenues invalides sont purgees. */
   async accepter(demandeId: string, proprietaireId: string) {
-    const demande = await this.demandesRepository.findOne({
-      where: { id: demandeId },
-      relations: { ad: { proprietaire: true }, demandeur: true },
-    });
-    if (!demande) {
-      throw new NotFoundException('Demande introuvable');
-    }
-    if (demande.ad.proprietaire.id !== proprietaireId) {
-      throw new BadRequestException('Cet AD ne t’appartient pas');
-    }
-    if (demande.statut !== StatutDemande.EN_ATTENTE) {
-      throw new BadRequestException('Cette demande n’est plus en attente');
-    }
-    if (demande.ad.statut !== StatutAd.ACTIF) {
-      throw new BadRequestException(
-        'Cet AD n’accepte plus de nouvelles demandes',
-      );
-    }
+    return this.dataSource.transaction(async (manager) => {
+      const demandesRepo = manager.getRepository(Demande);
+      const adsRepo = manager.getRepository(AvisDeplacement);
 
-    demande.statut = StatutDemande.ACCEPTEE;
-    await this.demandesRepository.save(demande);
+      // Verrou sur l'AD pour eviter deux accords simultanes.
+      const adVerrouille = await adsRepo.findOne({
+        where: { id: (await demandesRepo.findOne({
+          where: { id: demandeId },
+          relations: { ad: true },
+        }))?.ad.id },
+        lock: { mode: 'pessimistic_write' },
+      });
 
-    // L'AD passe en cours de finalisation.
-    demande.ad.statut = StatutAd.EN_COURS_DE_FINALISATION;
-    await this.adsRepository.save(demande.ad);
+      const demande = await demandesRepo.findOne({
+        where: { id: demandeId },
+        relations: { ad: { proprietaire: true }, demandeur: true },
+      });
+      if (!demande) {
+        throw new NotFoundException('Demande introuvable');
+      }
+      if (demande.ad.proprietaire.id !== proprietaireId) {
+        throw new BadRequestException('Cet AD ne t’appartient pas');
+      }
+      if (demande.statut !== StatutDemande.EN_ATTENTE) {
+        throw new BadRequestException('Cette demande n’est plus en attente');
+      }
+      // Re-verification sous verrou : premier accord gagne.
+      const adFrais = adVerrouille ?? demande.ad;
+      if (adFrais.statut !== StatutAd.ACTIF) {
+        throw new BadRequestException('Ce trajet est déjà réservé');
+      }
 
-    // Les autres demandes en attente sur ce AD sont refusées automatiquement.
-    const autres = await this.demandesRepository.find({
-      where: {
-        ad: { id: demande.ad.id },
-        statut: StatutDemande.EN_ATTENTE,
-      },
-    });
-    for (const autre of autres) {
-      autre.statut = StatutDemande.REFUSEE;
-      await this.demandesRepository.save(autre);
-    }
+      demande.statut = StatutDemande.ACCEPTEE;
+      await demandesRepo.save(demande);
 
-    return this.demandesRepository.findOne({
-      where: { id: demandeId },
-      relations: { demandeur: true, ad: true },
+      // Reservation de l'AD proprietaire (verrouille).
+      adFrais.statut = StatutAd.EN_COURS_DE_FINALISATION;
+      await adsRepo.save(adFrais);
+
+      // Reservation symetrique : l'AD du demandeur (role oppose, meme date)
+      // est lui aussi verrouille pour eviter les doubles reservations.
+      const adsDemandeur = await adsRepo.find({
+        where: {
+          proprietaire: { id: demande.demandeur.id },
+          statut: StatutAd.ACTIF,
+          dateDeplacement: adFrais.dateDeplacement,
+        },
+      });
+      for (const adD of adsDemandeur) {
+        if (adD.role !== adFrais.role) {
+          adD.statut = StatutAd.EN_COURS_DE_FINALISATION;
+          await adsRepo.save(adD);
+        }
+      }
+      const idsAdsDemandeur = adsDemandeur.map((a) => a.id);
+
+      // Purge 1 : autres demandes en attente SUR cet AD -> refusees.
+      await demandesRepo
+        .createQueryBuilder()
+        .update(Demande)
+        .set({ statut: StatutDemande.REFUSEE })
+        .where('statut = :s', { s: StatutDemande.EN_ATTENTE })
+        .andWhere('adId = :adId', { adId: adFrais.id })
+        .andWhere('id != :id', { id: demande.id })
+        .execute();
+
+      // Purge 2 : autres demandes ENVOYEES par le demandeur (ailleurs) -> annulees.
+      await demandesRepo
+        .createQueryBuilder()
+        .update(Demande)
+        .set({ statut: StatutDemande.ANNULEE })
+        .where('statut = :s', { s: StatutDemande.EN_ATTENTE })
+        .andWhere('demandeurId = :dId', { dId: demande.demandeur.id })
+        .andWhere('id != :id', { id: demande.id })
+        .execute();
+
+      // Purge 3 : demandes RECUES sur les AD du demandeur (devenus reserves) -> refusees.
+      if (idsAdsDemandeur.length > 0) {
+        await demandesRepo
+          .createQueryBuilder()
+          .update(Demande)
+          .set({ statut: StatutDemande.REFUSEE })
+          .where('statut = :s', { s: StatutDemande.EN_ATTENTE })
+          .andWhere('adId IN (:...ids)', { ids: idsAdsDemandeur })
+          .execute();
+      }
+
+      return demandesRepo.findOne({
+        where: { id: demandeId },
+        relations: { demandeur: true, ad: true },
+      });
     });
   }
 
@@ -168,7 +221,7 @@ export class DemandesService {
     return this.demandesRepository.save(demande);
   }
 
-  /** Le propriétaire marque le trajet comme organisé. */
+  /** Le propriétaire marque le trajet comme organisé (final, immutable). */
   async marquerOrganise(adId: string, proprietaireId: string) {
     const ad = await this.adsRepository.findOne({
       where: { id: adId },
@@ -186,6 +239,16 @@ export class DemandesService {
       );
     }
     ad.statut = StatutAd.TRAJET_ORGANISE;
-    return this.adsRepository.save(ad);
+    const sauve = await this.adsRepository.save(ad);
+    // Purge : plus aucune demande en attente ne doit subsister sur un trajet clos.
+    await this.demandesRepository
+      .createQueryBuilder()
+      .update(Demande)
+      .set({ statut: StatutDemande.ANNULEE })
+      .where('statut = :s', { s: StatutDemande.EN_ATTENTE })
+      .andWhere('adId = :adId', { adId })
+      .execute()
+      .catch(() => null);
+    return sauve;
   }
 }

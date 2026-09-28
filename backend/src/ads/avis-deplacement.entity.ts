@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 
@@ -13,6 +14,14 @@ export enum RoleAd {
   PASSAGER = 'passager',
 }
 
+/**
+ * Etats precis d'un AD.
+ * - ACTIF : visible dans le matching, accepte de nouvelles demandes.
+ * - EN_COURS_DE_FINALISATION : RESERVE par un premier accord valide.
+ *   Verrouille : n'accepte plus de nouvelles demandes, exclu du matching.
+ * - TRAJET_ORGANISE : trajet confirme (final, immutable).
+ * - ANNULE : retire du matching, demandes en attente invalidees.
+ */
 export enum StatutAd {
   ACTIF = 'actif',
   EN_COURS_DE_FINALISATION = 'en_cours_de_finalisation',
@@ -21,6 +30,7 @@ export enum StatutAd {
 }
 
 @Entity('avis_deplacement')
+@Index(['statut', 'dateDeplacement', 'role'])
 export class AvisDeplacement {
   @PrimaryGeneratedColumn('uuid')
   id: string;

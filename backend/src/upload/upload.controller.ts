@@ -7,6 +7,7 @@ import {
   Body,
   Get,
   Res,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -28,7 +29,7 @@ export class UploadController {
       }),
       fileFilter: (_req, file, cb) => {
         if (!file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
-          cb(new Error('Seuls les formats jpg, png, webp sont acceptés'), false);
+          cb(null, false);
         } else {
           cb(null, true);
         }
@@ -40,6 +41,11 @@ export class UploadController {
     @Param('userId') userId: string,
     @UploadedFile() file: any,
   ) {
+    if (!file) {
+      throw new BadRequestException(
+        'Photo invalide. Formats acceptés : jpg, png, webp (max 5 Mo).',
+      );
+    }
     const filename = file.filename;
     const url = `/upload/photos/${filename}`;
     return { url, filename };
