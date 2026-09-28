@@ -35,20 +35,13 @@ export class UploadController {
               'image/gif': '.gif',
               'image/bmp': '.bmp',
             };
-            ext = parType[file.mimetype] ?? '.jpg';
+            ext = parType[file.mimetype] ?? '';
           }
           cb(null, `${unique}${ext}`);
         },
       }),
-      fileFilter: (_req, file, cb) => {
-        // Accepte tous les formats d'image (jpg, png, webp, heic, gif, bmp...).
-        // Pas de limite de taille : l'app compresse deja avant envoi.
-        if (!file.mimetype.startsWith('image/')) {
-          cb(null, false);
-        } else {
-          cb(null, true);
-        }
-      },
+      // Aucun filtre : tous les fichiers sont acceptes (l'appareil photo
+      // envoie parfois un mimetype generique selon l'appareil).
     }),
   )
   async uploadPhoto(
@@ -56,9 +49,7 @@ export class UploadController {
     @UploadedFile() file: any,
   ) {
     if (!file) {
-      throw new BadRequestException(
-        'Fichier invalide. Choisis une image.',
-      );
+      throw new BadRequestException('Aucun fichier reçu. Reessaie.');
     }
     const filename = file.filename;
     const url = `/upload/photos/${filename}`;
