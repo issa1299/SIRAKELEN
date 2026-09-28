@@ -28,6 +28,18 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
   void initState() {
     super.initState();
     _charger();
+    // Si Android a tue l'app pendant la prise de photo, recupere le fichier.
+    if (Platform.isAndroid) _recupererPhotoPerdue();
+  }
+
+  Future<void> _recupererPhotoPerdue() async {
+    try {
+      final reponse = await _picker.retrieveLostData();
+      if (reponse.file != null) {
+        if (!mounted) return;
+        setState(() => _photoFile = File(reponse.file!.path));
+      }
+    } catch (_) {}
   }
 
   @override

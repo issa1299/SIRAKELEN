@@ -42,13 +42,13 @@ export class UploadController {
       }),
       fileFilter: (_req, file, cb) => {
         // Accepte tous les formats d'image (jpg, png, webp, heic, gif, bmp...).
+        // Pas de limite de taille : l'app compresse deja avant envoi.
         if (!file.mimetype.startsWith('image/')) {
           cb(null, false);
         } else {
           cb(null, true);
         }
       },
-      limits: { fileSize: 5 * 1024 * 1024 },
     }),
   )
   async uploadPhoto(
@@ -57,7 +57,7 @@ export class UploadController {
   ) {
     if (!file) {
       throw new BadRequestException(
-        'Fichier invalide. Choisis une image (max 5 Mo).',
+        'Fichier invalide. Choisis une image.',
       );
     }
     const filename = file.filename;
