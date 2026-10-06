@@ -42,7 +42,7 @@ class ApiService {
   /// Tunnel ADB (adb reverse tcp:8080 tcp:8080) : le téléphone appelle
   /// localhost:8080 qui est redirigé vers le PC. Fonctionne quel que soit
   /// le Wi-Fi, sans pare-feu.
-  static const String baseUrl = 'http://192.168.1.194:8080';
+  static const String baseUrl = 'http://192.168.1.6:8080';
 
   static Future<Map<String, dynamic>> register({
     required String prenom,
