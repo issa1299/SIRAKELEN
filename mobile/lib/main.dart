@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/welcome_screen.dart';
@@ -26,6 +27,14 @@ const Color kTextSecondary = Color(0xFF6B6B6B);
 /// l'app démarre et l'OTP est simulé (mode dev).
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Barres systeme aux couleurs de l'app (plus de bande blanche en haut/bas).
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: kCream,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
+    systemNavigationBarColor: kCream,
+    systemNavigationBarIconBrightness: Brightness.dark,
+  ));
   try {
     await Firebase.initializeApp();
     AuthService.firebaseDisponible = true;
@@ -164,7 +173,8 @@ class SirakeleApp extends StatelessWidget {
         scaffoldBackgroundColor: kCream,
         fontFamily: 'Inter',
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.transparent,
+          backgroundColor: kCream,
+          scrolledUnderElevation: 0,
           elevation: 0,
           centerTitle: true,
           titleTextStyle: TextStyle(
@@ -245,13 +255,15 @@ class SirakeleApp extends StatelessWidget {
           filled: true,
           fillColor: Colors.white,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          // Bordure invisible au repos : le label flottant ne decoupe plus
+          // de patch blanc, le champ reste un bloc blanc uni.
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: kBorder),
+            borderSide: BorderSide.none,
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: kBorder),
+            borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
@@ -264,6 +276,10 @@ class SirakeleApp extends StatelessWidget {
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: const BorderSide(color: kRed, width: 2),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
           ),
           hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
           labelStyle: const TextStyle(color: kTextSecondary, fontSize: 14),
