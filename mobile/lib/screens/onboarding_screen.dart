@@ -79,6 +79,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
+  void _suivant() {
+    _autoScrollTimer?.cancel();
+    _controller.animateToPage(_page + 1,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOutCubic);
+  }
+
   void _passer() {
     _autoScrollTimer?.cancel();
     _controller.animateToPage(_slides.length - 1,
@@ -109,22 +116,57 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Stack(
           children: [
-            PageView(
-              controller: _controller,
-              onPageChanged: _onPageChanged,
-              physics: const BouncingScrollPhysics(),
-              children: List.generate(_slides.length, (i) {
-                final s = _slides[i];
-                final isLast = i == _slides.length - 1;
-                return _Slide(
-                  data: s,
-                  page: i,
-                  total: _slides.length,
-                  isLast: isLast,
-                  onCreerCompte: _creerCompte,
-                  onSeConnecter: _seConnecter,
-                );
-              }),
+            Column(
+              children: [
+                // Barre de progression + compteur
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(28, 12, 28, 0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(3),
+                          child: LinearProgressIndicator(
+                            value: (_page + 1) / _slides.length,
+                            minHeight: 6,
+                            backgroundColor: kOrangeLight,
+                            valueColor: const AlwaysStoppedAnimation<Color>(kOrange),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        '${_page + 1}/${_slides.length}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: PageView(
+                    controller: _controller,
+                    onPageChanged: _onPageChanged,
+                    physics: const BouncingScrollPhysics(),
+                    children: List.generate(_slides.length, (i) {
+                      final s = _slides[i];
+                      final isLast = i == _slides.length - 1;
+                      return _Slide(
+                        data: s,
+                        page: i,
+                        total: _slides.length,
+                        isLast: isLast,
+                        onSuivant: _suivant,
+                        onCreerCompte: _creerCompte,
+                        onSeConnecter: _seConnecter,
+                      );
+                    }),
+                  ),
+                ),
+              ],
             ),
             if (_page < _slides.length - 1)
               Positioned(
@@ -201,6 +243,7 @@ class _Slide extends StatelessWidget {
   final int page;
   final int total;
   final bool isLast;
+  final VoidCallback onSuivant;
   final VoidCallback onCreerCompte;
   final VoidCallback onSeConnecter;
 
@@ -209,6 +252,7 @@ class _Slide extends StatelessWidget {
     required this.page,
     required this.total,
     required this.isLast,
+    required this.onSuivant,
     required this.onCreerCompte,
     required this.onSeConnecter,
   });
@@ -298,24 +342,32 @@ class _Slide extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 36),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(total, (i) {
-                final active = i == page;
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 350),
-                  curve: Curves.easeInOutCubic,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: active ? 32 : 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: active ? kOrange : Colors.grey[300],
-                    borderRadius: BorderRadius.circular(4),
+            if (!isLast) ...[
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: onSuivant,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kOrange,
+                    foregroundColor: Colors.white,
+                    elevation: 2,
+                    shadowColor: kOrange.withAlpha(80),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
-                );
-              }),
-            ),
-            const SizedBox(height: 36),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Suivant', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                      SizedBox(width: 8),
+                      Icon(Icons.arrow_forward_rounded, size: 20),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             if (isLast) ...[
               SizedBox(
                 width: double.infinity,

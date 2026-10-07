@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../main.dart';
 import '../services/api_service.dart';
+import '../widgets/google_logo.dart';
 import 'otp_screen.dart';
 import 'login_screen.dart';
 import 'contact_urgence_screen.dart';
@@ -195,15 +196,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
             SizedBox(
               width: double.infinity,
               height: 50,
-              child: OutlinedButton.icon(
+              child: OutlinedButton(
                 onPressed: _chargement ? null : _signInWithGoogle,
-                icon: const Icon(Icons.g_mobiledata_rounded, size: 24, color: Colors.red),
-                label: const Text('S\'inscrire avec Google', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                 style: OutlinedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: kTextPrimary,
                   side: const BorderSide(color: kBorder),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GoogleLogo(size: 20),
+                    SizedBox(width: 10),
+                    Text('S\'inscrire avec Google', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  ],
                 ),
               ),
             ),

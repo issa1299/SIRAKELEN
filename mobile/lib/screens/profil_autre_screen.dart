@@ -26,6 +26,7 @@ class _ProfilAutreScreenState extends State<ProfilAutreScreen> {
   };
   List<dynamic> _trajets = [];
   bool _chargement = true;
+  bool _contactDebloque = false;
 
   @override
   void initState() {
@@ -38,11 +39,26 @@ class _ProfilAutreScreenState extends State<ProfilAutreScreen> {
       final user = await ApiService.getUser(widget.targetUserId);
       final stats = await ApiService.getStats(widget.targetUserId);
       final trajets = await ApiService.getTrajetsPublics(widget.targetUserId);
+      // Contact visible uniquement si une demande acceptee lie les deux.
+      bool debloque = false;
+      try {
+        final recuesCible = await ApiService.getDemandesRecues(widget.targetUserId);
+        debloque = recuesCible.any((d) =>
+            (d['demandeur']?['id'] as String? ?? '') == widget.viewerUserId &&
+            d['statut'] == 'acceptee');
+        if (!debloque) {
+          final recuesMoi = await ApiService.getDemandesRecues(widget.viewerUserId);
+          debloque = recuesMoi.any((d) =>
+              (d['demandeur']?['id'] as String? ?? '') == widget.targetUserId &&
+              d['statut'] == 'acceptee');
+        }
+      } catch (_) {}
       if (!mounted) return;
       setState(() {
         _user = user;
         _stats = stats;
         _trajets = trajets;
+        _contactDebloque = debloque;
         _chargement = false;
       });
     } catch (_) {
@@ -271,7 +287,7 @@ class _ProfilAutreScreenState extends State<ProfilAutreScreen> {
         ),
         const SizedBox(height: 16),
 
-        // Contact
+        // Contact (verrouille jusqu'a acceptation)
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -287,19 +303,41 @@ class _ProfilAutreScreenState extends State<ProfilAutreScreen> {
                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.8, color: kTextSecondary),
               ),
               const SizedBox(height: 12),
-              if (telephone.isNotEmpty)
-                _ligneContact(
-                  icone: Icons.phone_outlined,
-                  valeur: '+223 $telephone',
-                  actions: [
-                    _boutonAction(Icons.call_rounded, kGreen, () => _appeler(telephone)),
-                    const SizedBox(width: 8),
-                    _boutonAction(Icons.chat_rounded, const Color(0xFF25D366), () => _whatsapp(telephone, prenom)),
-                  ],
+              if (_contactDebloque) ...[
+                if (telephone.isNotEmpty)
+                  _ligneContact(
+                    icone: Icons.phone_outlined,
+                    valeur: '+223 $telephone',
+                    actions: [
+                      _boutonAction(Icons.call_rounded, kGreen, () => _appeler(telephone)),
+                      const SizedBox(width: 8),
+                      _boutonAction(Icons.chat_rounded, const Color(0xFF25D366), () => _whatsapp(telephone, prenom)),
+                    ],
+                  ),
+                if (email.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  _ligneContact(icone: Icons.email_outlined, valeur: email),
+                ],
+              ] else ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: kCream,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.lock_outline_rounded, size: 18, color: kOrange),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Numéro et email visibles après acceptation de la demande.',
+                          style: TextStyle(fontSize: 12, color: kTextSecondary, height: 1.4),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              if (email.isNotEmpty) ...[
-                const SizedBox(height: 10),
-                _ligneContact(icone: Icons.email_outlined, valeur: email),
               ],
             ],
           ),
