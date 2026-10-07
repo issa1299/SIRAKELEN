@@ -5,6 +5,7 @@ import '../main.dart';
 import '../services/api_service.dart';
 import '../services/carte_service.dart';
 import '../services/whatsapp_helper.dart';
+import 'notifications_screen.dart';
 import 'publier_screen.dart';
 import 'profil_autre_screen.dart';
 
@@ -217,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   radius: 18,
                   backgroundColor: kOrangeLight,
                   backgroundImage: (proprietaire['photoUrl'] != null && (proprietaire['photoUrl'] as String).isNotEmpty)
-                      ? NetworkImage('${ApiService.baseUrl}${proprietaire['photoUrl']}')
+                      ? NetworkImage(ApiService.resolvePhoto(proprietaire['photoUrl'] as String)!)
                       : null,
                   child: (proprietaire['photoUrl'] == null || (proprietaire['photoUrl'] as String).isEmpty)
                       ? Text(
@@ -361,7 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   radius: 20,
                   backgroundColor: kOrangeLight,
                   backgroundImage: (demandeur['photoUrl'] != null && (demandeur['photoUrl'] as String).isNotEmpty)
-                      ? NetworkImage('${ApiService.baseUrl}${demandeur['photoUrl']}')
+                      ? NetworkImage(ApiService.resolvePhoto(demandeur['photoUrl'] as String)!)
                       : null,
                   child: (demandeur['photoUrl'] == null || (demandeur['photoUrl'] as String).isEmpty)
                       ? Text(
@@ -563,7 +564,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   radius: 20,
                   backgroundColor: kOrangeLight,
                   backgroundImage: (comp['photoUrl'] != null && (comp['photoUrl'] as String).isNotEmpty)
-                      ? NetworkImage('${ApiService.baseUrl}${comp['photoUrl']}')
+                      ? NetworkImage(ApiService.resolvePhoto(comp['photoUrl'] as String)!)
                       : null,
                   child: (comp['photoUrl'] == null || (comp['photoUrl'] as String).isEmpty)
                       ? Text(
@@ -843,10 +844,46 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                  CircleAvatar(
-                    radius: 22,
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.notifications_none_rounded, color: kOrange),
+                  GestureDetector(
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => NotificationsScreen(userId: widget.userId),
+                        ),
+                      );
+                      _chargerMonAd();
+                    },
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const CircleAvatar(
+                          radius: 22,
+                          backgroundColor: Colors.white,
+                          child: Icon(Icons.notifications_none_rounded, color: kOrange),
+                        ),
+                        if (_demandesRecues.isNotEmpty)
+                          Positioned(
+                            right: -2,
+                            top: -2,
+                            child: Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: const BoxDecoration(
+                                color: kRed,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                '${_demandesRecues.length}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ],
               ),

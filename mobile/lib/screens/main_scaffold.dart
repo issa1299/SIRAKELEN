@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import 'home_screen.dart';
 import 'profil_screen.dart';
-import 'notifications_screen.dart';
 import 'publier_screen.dart';
 
 class MainScaffold extends StatefulWidget {
@@ -17,7 +16,6 @@ class MainScaffold extends StatefulWidget {
 
 class _MainScaffoldState extends State<MainScaffold> {
   int _onglet = 0;
-  int _notificationsNonLues = 0;
   Key _homeKey = UniqueKey();
 
   void _recharger() {
@@ -88,26 +86,6 @@ class _MainScaffoldState extends State<MainScaffold> {
           ),
         ),
       ),
-      floatingActionButton: _onglet == 0 && widget.userId.isNotEmpty
-          ? FloatingActionButton(
-              heroTag: 'notifs',
-              onPressed: () async {
-                final avant = _notificationsNonLues;
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) =>
-                          NotificationsScreen(userId: widget.userId)),
-                );
-                if (mounted && avant > 0) {
-                  setState(() => _notificationsNonLues = 0);
-                }
-              },
-              backgroundColor: kOrange,
-              elevation: 4,
-              child: const Icon(Icons.notifications_none_rounded, color: Colors.white),
-            )
-          : null,
     );
   }
 }

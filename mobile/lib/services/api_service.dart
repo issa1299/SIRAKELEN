@@ -44,6 +44,14 @@ class ApiService {
   /// le Wi-Fi, sans pare-feu.
   static const String baseUrl = 'http://192.168.1.6:8080';
 
+  /// Resout une photo : URL absolue (Google...) telle quelle,
+  /// chemin local prefixe par le serveur, null si vide.
+  static String? resolvePhoto(String? path) {
+    if (path == null || path.isEmpty) return null;
+    if (path.startsWith('http')) return path;
+    return '$baseUrl$path';
+  }
+
   static Future<Map<String, dynamic>> register({
     required String prenom,
     required String nom,

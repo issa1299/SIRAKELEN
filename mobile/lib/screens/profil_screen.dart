@@ -53,6 +53,15 @@ class _ProfilScreenState extends State<ProfilScreen> {
     }
   }
 
+  String _membreDepuis() {
+    final brut = _user!['creeLe'] as String?;
+    if (brut == null || brut.isEmpty) return '';
+    final d = DateTime.tryParse(brut);
+    if (d == null) return '';
+    const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    return '${mois[d.month - 1]} ${d.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_chargement) {
@@ -71,246 +80,369 @@ class _ProfilScreenState extends State<ProfilScreen> {
     final aContact = _contact != null;
     final prenom = user['prenom'] as String? ?? '';
     final nom = user['nom'] as String? ?? '';
+    final telephone = (user['telephone'] as String? ?? '').replaceAll(' ', '');
+    final email = user['email'] as String? ?? '';
+    final quartier = user['quartier'] as String? ?? '';
+    final verifie = user['verifie'] == true;
+    final depuis = _membreDepuis();
+    final photo = ApiService.resolvePhoto(user['photoUrl'] as String?);
     final initials = '${prenom.isNotEmpty ? prenom[0] : ''}${nom.isNotEmpty ? nom[0] : ''}'.toUpperCase();
 
     return Scaffold(
       backgroundColor: kCream,
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            // Avatar and name
-            Center(
-              child: Column(
+        child: RefreshIndicator(
+          onRefresh: _charger,
+          color: kOrange,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              // Bannière + avatar
+              Stack(
+                clipBehavior: Clip.none,
                 children: [
                   Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
+                    height: 130,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
                         colors: [kOrange, kOrangeDark],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: kOrange.withAlpha(50),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
                     ),
-                    child: ClipOval(
-                      child: (user['photoUrl'] != null && (user['photoUrl'] as String).isNotEmpty)
-                          ? Image.network(
-                              '${ApiService.baseUrl}${user['photoUrl']}',
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Center(
-                                child: Text(
-                                  initials,
-                                  style: const TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            )
-                          : Center(
-                              child: Text(
-                                initials,
-                                style: const TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    '$prenom $nom',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: kTextPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '+223 ${user['telephone']}',
-                    style: TextStyle(fontSize: 13, color: kTextSecondary),
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: user['verifie'] == true ? kGreenLight : const Color(0xFFFFE8D4),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                    child: Stack(
                       children: [
-                        Icon(
-                          user['verifie'] == true
-                              ? Icons.verified_rounded
-                              : Icons.hourglass_top_rounded,
-                          size: 14,
-                          color: user['verifie'] == true ? kGreen : const Color(0xFFB35A00),
+                        Positioned(
+                          right: -30,
+                          top: -30,
+                          child: Container(
+                            width: 130,
+                            height: 130,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withAlpha(25),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          user['verifie'] == true ? 'VÉRIFIÉ' : 'EN ATTENTE',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: user['verifie'] == true ? kGreen : const Color(0xFFB35A00),
+                        Positioned(
+                          left: 40,
+                          bottom: -40,
+                          child: Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withAlpha(20),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                        const Positioned(
+                          left: 20,
+                          top: 18,
+                          child: Text(
+                            'Mon profil',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Stats
-            Row(
-              children: [
-                _stat(_stats['adPublies'].toString(), 'AD publiés'),
-                const SizedBox(width: 10),
-                _stat(_stats['trajetsOrganises'].toString(), 'Trajets organisés'),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Emergency contact alert
-            if (!aContact)
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF3E6),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: kOrange.withAlpha(60)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.phone_in_talk_rounded, color: kOrange, size: 20),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Aucun contact d\'urgence. Ajoute un contact pour ta sécurité.',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: kOrange,
-                          height: 1.4,
-                        ),
+                  Positioned(
+                    left: 20,
+                    bottom: -34,
+                    child: Container(
+                      width: 84,
+                      height: 84,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 4),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(20),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: photo != null
+                            ? Image.network(
+                                photo,
+                                width: 84,
+                                height: 84,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => _initiale(initials),
+                              )
+                            : _initiale(initials),
                       ),
                     ),
-                    GestureDetector(
+                  ),
+                  Positioned(
+                    right: 16,
+                    bottom: -24,
+                    child: GestureDetector(
                       onTap: () async {
                         await Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (_) => ContactUrgenceScreen(userId: widget.userId)),
+                          MaterialPageRoute(builder: (_) => ModifierProfilScreen(userId: widget.userId)),
                         );
                         _charger();
                       },
-                      child: const Text(
-                        'Ajouter',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: kOrange,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withAlpha(15), blurRadius: 10, offset: const Offset(0, 3)),
+                          ],
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.edit_outlined, size: 15, color: kOrange),
+                            SizedBox(width: 6),
+                            Text('Modifier', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: kOrange)),
+                          ],
                         ),
                       ),
                     ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 48),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Nom + badge
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            '$prenom $nom',
+                            style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800, color: kTextPrimary),
+                          ),
+                        ),
+                        if (verifie) ...[
+                          const SizedBox(width: 6),
+                          const Icon(Icons.verified_rounded, color: kGreen, size: 20),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: verifie ? kGreenLight : const Color(0xFFFFE8D4),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            verifie ? 'COMPTE VÉRIFIÉ' : 'EN ATTENTE DE VÉRIFICATION',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: verifie ? kGreen : const Color(0xFFB35A00),
+                            ),
+                          ),
+                        ),
+                        if (depuis.isNotEmpty) ...[
+                          const SizedBox(width: 10),
+                          Text(
+                            'Membre depuis $depuis',
+                            style: TextStyle(fontSize: 12, color: kTextSecondary),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Carte infos
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: kBorder),
+                      ),
+                      child: Column(
+                        children: [
+                          if (telephone.isNotEmpty) _info(Icons.phone_outlined, '+223 $telephone'),
+                          if (email.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            _info(Icons.email_outlined, email),
+                          ],
+                          if (quartier.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            _info(Icons.location_on_outlined, quartier),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Stats
+                    Row(
+                      children: [
+                        _stat(_stats['adPublies'].toString(), 'AD publiés'),
+                        const SizedBox(width: 10),
+                        _stat(_stats['trajetsOrganises'].toString(), 'Trajets organisés'),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Alerte contact urgence
+                    if (!aContact)
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF3E6),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: kOrange.withAlpha(60)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.phone_in_talk_rounded, color: kOrange, size: 20),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Text(
+                                'Aucun contact d\'urgence. Ajoute un contact pour ta sécurité.',
+                                style: TextStyle(fontSize: 12, color: kOrange, height: 1.4),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () async {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => ContactUrgenceScreen(userId: widget.userId)),
+                                );
+                                _charger();
+                              },
+                              child: const Text(
+                                'Ajouter',
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: kOrange),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (!aContact) const SizedBox(height: 12),
+
+                    // Menu
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: kBorder),
+                      ),
+                      child: Column(
+                        children: [
+                          _menu(Icons.description_outlined, 'Mes Avis de Déplacement', () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => MesAdScreen(userId: widget.userId)),
+                            );
+                            _charger();
+                          }),
+                          _menu(Icons.edit_outlined, 'Modifier mon profil', () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => ModifierProfilScreen(userId: widget.userId)),
+                            );
+                            _charger();
+                          }),
+                          _menu(Icons.phone_in_talk_rounded, 'Contact d\'urgence', () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => ContactUrgenceScreen(userId: widget.userId)),
+                            );
+                            _charger();
+                          }),
+                          _menu(Icons.logout_rounded, 'Déconnexion', () async {
+                            await Session.effacer();
+                            if (!context.mounted) return;
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (_) => const LoginScreen()),
+                              (route) => false,
+                            );
+                            widget.onDeconnexion();
+                          }, danger: true, isLast: true),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
-            const SizedBox(height: 12),
-
-            // Menu card
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: kBorder),
-              ),
-              child: Column(
-                children: [
-                  _menu(Icons.description_outlined, 'Mes Avis de Déplacement', () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => MesAdScreen(userId: widget.userId)),
-                    );
-                    _charger();
-                  }),
-                  _menu(Icons.edit_outlined, 'Modifier mon profil', () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => ModifierProfilScreen(userId: widget.userId)),
-                    );
-                    _charger();
-                  }),
-                  _menu(Icons.phone_in_talk_rounded, 'Contact d\'urgence', () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => ContactUrgenceScreen(userId: widget.userId)),
-                    );
-                    _charger();
-                  }),
-                  _menu(Icons.logout_rounded, 'Déconnexion', () async {
-                    await Session.effacer();
-                    if (!context.mounted) return;
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      (route) => false,
-                    );
-                    widget.onDeconnexion();
-                  }, danger: true, isLast: true),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _initiale(String initials) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(colors: [kOrange, kOrangeDark]),
+      ),
+      child: Center(
+        child: Text(
+          initials.isEmpty ? '?' : initials,
+          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  Widget _info(IconData icone, String valeur) {
+    return Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(color: kOrangeLight, borderRadius: BorderRadius.circular(10)),
+          child: Icon(icone, size: 18, color: kOrange),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            valeur,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: kTextPrimary),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _stat(String valeur, String label) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: kBorder),
         ),
         child: Column(
           children: [
             Text(
               valeur,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: kOrange,
-              ),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: kOrange),
             ),
             const SizedBox(height: 3),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: kTextSecondary,
-              ),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: kTextSecondary),
             ),
           ],
         ),
@@ -323,7 +455,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.vertical(
-        bottom: isLast ? const Radius.circular(13) : Radius.zero,
+        bottom: isLast ? const Radius.circular(15) : Radius.zero,
       ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
@@ -334,10 +466,14 @@ class _ProfilScreenState extends State<ProfilScreen> {
               ),
         child: Row(
           children: [
-            Icon(
-              icone,
-              size: 20,
-              color: danger ? kRed : kOrange,
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: danger ? kRedLight : kOrangeLight,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icone, size: 18, color: danger ? kRed : kOrange),
             ),
             const SizedBox(width: 14),
             Expanded(
