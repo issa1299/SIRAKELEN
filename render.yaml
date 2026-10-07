@@ -1,0 +1,21 @@
+# Deploiement Render en 1 clic (Blueprint).
+# 1. Creer un projet Supabase (gratuit) et copier l'URL de connexion Postgres.
+# 2. Sur Render : New > Blueprint > selectionner ce repo.
+# 3. Renseigner DATABASE_URL + SMTP_PASS.
+services:
+  - type: web
+    name: sirakele-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: DATABASE_URL
+        sync: false
+      - key: SMTP_USER
+        value: diassanaissiaka68@gmail.com
+      - key: SMTP_PASS
+        sync: false

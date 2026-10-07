@@ -22,16 +22,30 @@ import { AdminModule } from './admin/admin.module';
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres' as const,
-        host: config.get<string>('DB_HOST'),
-        port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
-        username: config.get<string>('DB_USER'),
-        password: config.get<string>('DB_PASSWORD'),
-        database: config.get<string>('DB_NAME'),
-        entities: [User, AvisDeplacement, Demande, Signalement, ContactUrgence, CodeVerification],
-        synchronize: true,
-      }),
+      useFactory: (config: ConfigService) => {
+        // Production (Supabase/Render) : une seule URL + SSL obligatoire.
+        const databaseUrl = config.get<string>('DATABASE_URL');
+        if (databaseUrl) {
+          return {
+            type: 'postgres' as const,
+            url: databaseUrl,
+            ssl: { rejectUnauthorized: false },
+            entities: [User, AvisDeplacement, Demande, Signalement, ContactUrgence, CodeVerification],
+            synchronize: true,
+          };
+        }
+        // Developpement local : variables separees, sans SSL.
+        return {
+          type: 'postgres' as const,
+          host: config.get<string>('DB_HOST'),
+          port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
+          username: config.get<string>('DB_USER'),
+          password: config.get<string>('DB_PASSWORD'),
+          database: config.get<string>('DB_NAME'),
+          entities: [User, AvisDeplacement, Demande, Signalement, ContactUrgence, CodeVerification],
+          synchronize: true,
+        };
+      },
     }),
     UsersModule,
     AuthModule,

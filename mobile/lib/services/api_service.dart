@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,13 +37,21 @@ class ApiException implements Exception {
 }
 
 class ApiService {
-  /// IP locale du PC de développement (même Wi-Fi obligatoire).
-  /// - Émulateur Android : 10.0.2.2 = localhost du PC
-  /// - Vrai téléphone : l'IP locale du PC (ex. 192.168.1.204)
-  /// Tunnel ADB (adb reverse tcp:8080 tcp:8080) : le téléphone appelle
-  /// localhost:8080 qui est redirigé vers le PC. Fonctionne quel que soit
-  /// le Wi-Fi, sans pare-feu.
-  static const String baseUrl = 'http://192.168.1.6:8080';
+  /// URL du serveur, chargee depuis assets/config.json au demarrage.
+  /// Valeur de secours si le fichier est absent.
+  static const String _baseUrlDefaut = 'http://192.168.1.2:8080';
+  static String baseUrl = _baseUrlDefaut;
+
+  /// A appeler une fois dans main() avant runApp().
+  /// Pour changer de serveur : editer assets/config.json, rebuild.
+  static Future<void> chargerConfig() async {
+    try {
+      final brut = await rootBundle.loadString('assets/config.json');
+      final conf = jsonDecode(brut) as Map<String, dynamic>;
+      final url = (conf['apiBaseUrl'] as String?)?.trim();
+      if (url != null && url.isNotEmpty) baseUrl = url;
+    } catch (_) {}
+  }
 
   /// Resout une photo : URL absolue (Google...) telle quelle,
   /// chemin local prefixe par le serveur, null si vide.

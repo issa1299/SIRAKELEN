@@ -27,6 +27,7 @@ const Color kTextSecondary = Color(0xFF6B6B6B);
 /// l'app démarre et l'OTP est simulé (mode dev).
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await ApiService.chargerConfig();
   // Barres systeme aux couleurs de l'app (plus de bande blanche en haut/bas).
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: kCream,
