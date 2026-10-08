@@ -57,7 +57,7 @@ body{font-family:var(--font);background:var(--bg);min-height:100vh;display:flex;
   <div class="footer">SIRA KELEN &mdash; Dashboard administrateur</div>
 </div>
 <script>
-const API='http://localhost:8080';
+const API='https://sirakele-api.onrender.com';
 if(localStorage.getItem('adminToken')){window.location.href='dashboard.html'}
 async function login(e){
   e.preventDefault();
