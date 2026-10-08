@@ -351,72 +351,86 @@ class _PublierScreenState extends State<PublierScreen> {
                     ),
                   ],
                 ),
-              // Marqueurs
+              // Marqueurs pins D / A
               MarkerLayer(
                 markers: [
                   if (_departPoint != null)
                     Marker(
                       point: _departPoint!,
-                      width: 36,
-                      height: 36,
-                      child: const Icon(Icons.circle, color: kGreen, size: 18),
+                      width: 40,
+                      height: 40,
+                      child: _pin('D', kGreen),
                     ),
                   if (_arriveePoint != null)
                     Marker(
                       point: _arriveePoint!,
-                      width: 36,
-                      height: 36,
-                      child: const Icon(Icons.circle, color: Color(0xFF2962FF), size: 18),
+                      width: 40,
+                      height: 40,
+                      child: _pin('A', const Color(0xFF2962FF)),
                     ),
                 ],
               ),
             ],
           ),
 
-          // AppBar transparente
+          // Header carte blanche
           Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
+            top: MediaQuery.of(context).padding.top + 8,
+            left: 12,
+            right: 12,
             child: Container(
-              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.black.withAlpha(80), Colors.transparent],
-                ),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [BoxShadow(color: Colors.black.withAlpha(25), blurRadius: 12, offset: const Offset(0, 3))],
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-                    onPressed: _etape == 0 ? () => setState(() { _role = null; }) : _retour,
-                  ),
-                  Expanded(
-                    child: Text(
-                      isDepart ? 'Ou partez-vous ?' : 'Ou allez-vous ?',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: _etape == 0 ? () => setState(() { _role = null; }) : _retour,
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(color: kCream, shape: BoxShape.circle),
+                          child: const Icon(Icons.arrow_back_rounded, color: kTextPrimary, size: 20),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isDepart ? 'Où partez-vous ?' : 'Où allez-vous ?',
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w800,
+                                color: kTextPrimary,
+                              ),
+                            ),
+                            Text(
+                              isDepart
+                                  ? 'Étape 1 sur 2 · Touchez la carte ou cherchez'
+                                  : 'Étape 2 sur 2 · Choisissez l\'arrivée',
+                              style: TextStyle(fontSize: 12, color: kTextSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(200),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _stepDot(0, '1'),
-                        Container(width: 16, height: 1, color: Colors.grey[300]),
-                        _stepDot(1, '2'),
-                      ],
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: LinearProgressIndicator(
+                      value: (_etape + 1) / 2,
+                      minHeight: 6,
+                      backgroundColor: kOrangeLight,
+                      valueColor: const AlwaysStoppedAnimation<Color>(kOrange),
                     ),
                   ),
                 ],
@@ -426,7 +440,7 @@ class _PublierScreenState extends State<PublierScreen> {
 
           // Barre de recherche
           Positioned(
-            top: MediaQuery.of(context).padding.top + 56,
+            top: MediaQuery.of(context).padding.top + 168,
             left: 12,
             right: 12,
             child: Column(
@@ -459,7 +473,7 @@ class _PublierScreenState extends State<PublierScreen> {
                     onChanged: _rechercher,
                   ),
                 ),
-                if (_rechercheResultats.isNotEmpty || _rechercheEnCours)
+                if (_rechercheEnCours || _rechercheResultats.isNotEmpty || _rechercheController.text.trim().length >= 2)
                   Container(
                     margin: const EdgeInsets.only(top: 4),
                     constraints: const BoxConstraints(maxHeight: 220),
@@ -473,7 +487,23 @@ class _PublierScreenState extends State<PublierScreen> {
                             padding: EdgeInsets.all(16),
                             child: Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))),
                           )
-                        : ListView.separated(
+                        : _rechercheResultats.isEmpty
+                            ? const Padding(
+                                padding: EdgeInsets.all(16),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.search_off_rounded, color: kTextSecondary, size: 20),
+                                    SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        'Aucun lieu trouvé. Touchez la carte pour placer le point.',
+                                        style: TextStyle(fontSize: 13, color: kTextSecondary),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : ListView.separated(
                             shrinkWrap: true,
                             padding: EdgeInsets.zero,
                             itemCount: _rechercheResultats.length,
@@ -512,54 +542,78 @@ class _PublierScreenState extends State<PublierScreen> {
             left: 0,
             right: 0,
             child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              decoration: const BoxDecoration(
                 color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black.withAlpha(15), blurRadius: 10, offset: const Offset(0, -2))],
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 16, offset: Offset(0, -4))],
               ),
               child: SafeArea(
                 top: false,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: kBorder,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Récap départ (toujours visible à l'étape 2)
+                    if (!isDepart && _departPoint != null)
+                      _lignePoint('D', kGreen, 'Départ', _departNom),
+                    if (!isDepart && _departPoint != null)
+                      const SizedBox(height: 8),
                     if (pointActuel != null)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: kOrangeLight,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.circle, color: isDepart ? kGreen : const Color(0xFF2962FF), size: 12),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(isDepart ? 'Depart' : 'Destination',
-                                      style: TextStyle(fontSize: 11, color: kTextSecondary, fontWeight: FontWeight.w600)),
-                                  Text(nomActuel.isNotEmpty ? nomActuel : 'Point sur la carte',
-                                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-                                ],
-                              ),
-                            ),
-                            Icon(Icons.check_circle_rounded, color: kOrange, size: 22),
-                          ],
-                        ),
+                      _lignePoint(
+                        isDepart ? 'D' : 'A',
+                        isDepart ? kGreen : const Color(0xFF2962FF),
+                        isDepart ? 'Départ' : 'Destination',
+                        nomActuel.isNotEmpty ? nomActuel : 'Point sur la carte',
                       )
                     else
                       Text(
-                        isDepart ? 'Tape sur la carte ou recherche un lieu' : 'Tape sur la carte ou recherche une destination',
+                        isDepart ? 'Touchez la carte ou recherchez un lieu de départ' : 'Touchez la carte ou recherchez une destination',
                         style: TextStyle(color: kTextSecondary, fontSize: 13),
                       ),
+                    if (_itineraire != null && _departPoint != null && _arriveePoint != null) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: kOrangeLight,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.route_rounded, color: kOrange, size: 16),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${CarteService.formaterDistance(_itineraire!.distanceKm)} · ${CarteService.formaterDuree(_itineraire!.dureeMinutes)}',
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: kOrange),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
-                      height: 50,
+                      height: 52,
                       child: FilledButton(
                         onPressed: pointActuel == null ? null : _confirmerPoint,
-                        child: Text(isDepart ? 'Confirmer le depart' : 'Voir l\'apercu'),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(isDepart ? 'Confirmer le départ' : 'Voir l\'aperçu'),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.arrow_forward_rounded, size: 18),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -572,18 +626,57 @@ class _PublierScreenState extends State<PublierScreen> {
     );
   }
 
-  Widget _stepDot(int step, String label) {
-    final active = _etape >= step;
+  /// Pin D / A avec bordure blanche.
+  Widget _pin(String lettre, Color couleur) {
     return Container(
-      width: 22,
-      height: 22,
+      width: 36,
+      height: 36,
       decoration: BoxDecoration(
+        color: couleur,
         shape: BoxShape.circle,
-        color: active ? kOrange : Colors.grey[300],
+        border: Border.all(color: Colors.white, width: 3),
+        boxShadow: [BoxShadow(color: Colors.black.withAlpha(60), blurRadius: 6, offset: const Offset(0, 2))],
       ),
       child: Center(
-        child: Text(label,
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: active ? Colors.white : kTextSecondary)),
+        child: Text(
+          lettre,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  /// Ligne récap d'un point dans la bottom-sheet.
+  Widget _lignePoint(String lettre, Color couleur, String titre, String nom) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: kCream,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: kBorder),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 26,
+            height: 26,
+            decoration: BoxDecoration(color: couleur, shape: BoxShape.circle),
+            child: Center(
+              child: Text(lettre, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Colors.white)),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(titre, style: TextStyle(fontSize: 11, color: kTextSecondary, fontWeight: FontWeight.w600)),
+                Text(nom, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+              ],
+            ),
+          ),
+          Icon(Icons.check_circle_rounded, color: kOrange, size: 22),
+        ],
       ),
     );
   }

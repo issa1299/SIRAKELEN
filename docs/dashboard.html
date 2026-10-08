@@ -272,7 +272,7 @@ tbody tr:hover{background:rgba(255,119,0,.04)}
     </div>
 
     <div class="panel" style="max-width:720px">
-      <div class="panel-header"><h3>Compte administrateur</h3></div>
+      <div class="panel-header"><h3>Mon profil administrateur</h3></div>
       <div class="adminbig">
         <div class="av" id="sAdminAvatar">A</div>
         <div style="min-width:0"><div style="font-weight:800;font-size:15px" id="sAdminName">Admin SIRA</div><div style="font-size:12px;color:var(--muted)" id="sAdminEmail">admin@sirakele.com</div></div>
@@ -280,10 +280,17 @@ tbody tr:hover{background:rgba(255,119,0,.04)}
         <span class="pill ok">Administrateur</span>
       </div>
       <div class="grid2">
-        <div class="field" style="padding:12px 14px;background:var(--bg);border-radius:var(--r-s)"><label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">Dernière connexion</label><div style="font-size:14px;font-weight:600" id="sLastLogin">-</div></div>
-        <div class="field" style="padding:12px 14px;background:var(--bg);border-radius:var(--r-s)"><label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">Plateforme</label><div style="font-size:14px;font-weight:600">Production · v1.0</div></div>
+        <div class="field" style="padding:0"><label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Prénom</label><input class="search" style="width:100%" id="pfPrenom" placeholder="Prénom"></div>
+        <div class="field" style="padding:0"><label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Nom</label><input class="search" style="width:100%" id="pfNom" placeholder="Nom"></div>
       </div>
-      <div style="height:22px"></div>
+      <div style="padding:0 22px 6px"><button class="act primary" style="font-size:12px" onclick="sauverProfil()">Enregistrer le profil</button></div>
+      <div style="height:14px"></div>
+      <div class="panel-header" style="border-top:1px solid var(--line)"><h3>Changer le mot de passe</h3></div>
+      <div class="grid2" style="padding-top:22px">
+        <div class="field" style="padding:0"><label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Ancien mot de passe</label><input class="search" style="width:100%" type="password" id="pwAncien" placeholder="••••••••"></div>
+        <div class="field" style="padding:0"><label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Nouveau (min 4)</label><input class="search" style="width:100%" type="password" id="pwNouveau" placeholder="••••••••"></div>
+      </div>
+      <div style="padding:0 22px 22px"><button class="act primary" style="font-size:12px" onclick="changerMotDePasse()">Changer le mot de passe</button></div>
     </div>
 
     <div class="panel" style="max-width:720px">
@@ -336,7 +343,7 @@ function closeModal(){document.getElementById('modal').classList.remove('show')}
 function refreshAll(){toast('Actualisation…');loadStats();loadUsers();loadAds();loadReports()}
 function confirmLogout(){if(confirm('Se déconnecter du dashboard ?'))logout()}
 
-async function loadStats(){try{const r=await fetch(API+'/admin/stats');const d=await r.json();if(!r.ok)throw new Error();document.getElementById('kpiUsers').textContent=d.totalUsers;document.getElementById('kpiAds').textContent=d.adsActifs;document.getElementById('kpiAdsSub').textContent='sur '+d.totalAds;document.getElementById('kpiDemandes').textContent=d.demandesAcceptees;document.getElementById('kpiDemandesSub').textContent='sur '+d.totalDemandes;document.getElementById('kpiMatching').textContent=d.matchingRate+'%';document.getElementById('kpiSignalements').textContent=d.totalSignalements;document.getElementById('kpiSigSub').textContent=d.totalSignalements>0?d.totalSignalements+' en attente':'Aucun';const b=document.getElementById('reportBadge');if(d.totalSignalements>0){b.textContent=d.totalSignalements;b.style.display='inline'}else{b.style.display='none'}document.getElementById('stApi').innerHTML='<span style="color:var(--green)">En ligne</span>';document.getElementById('stDb').innerHTML='<span style="color:var(--green)">Connectée</span>';document.getElementById('apiDot').classList.add('on');document.getElementById('apiTxt').textContent='API en ligne';document.getElementById('sBackend').textContent='Render · en ligne';document.getElementById('sStatUsers').textContent=d.totalUsers;document.getElementById('sStatAds').textContent=d.totalAds;document.getElementById('sStatDemandes').textContent=d.totalDemandes;document.getElementById('sStatSignalements').textContent=d.totalSignalements;document.getElementById('sLastLogin').textContent=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});if(adminUser.prenom){document.getElementById('sAdminName').textContent=adminUser.prenom+' '+(adminUser.nom||'');document.getElementById('sAdminEmail').textContent=adminUser.email||'admin@sirakele.com';document.getElementById('sbName').textContent=adminUser.prenom+' '+(adminUser.nom||'');document.getElementById('sbEmail').textContent=adminUser.email||''}}catch(e){document.getElementById('stApi').innerHTML='<span style="color:var(--danger)">Hors ligne</span>';document.getElementById('stDb').innerHTML='<span style="color:var(--danger)">Injoignable</span>';document.getElementById('apiTxt').textContent='API hors ligne'}}
+async function loadStats(){try{const r=await fetch(API+'/admin/stats');const d=await r.json();if(!r.ok)throw new Error();document.getElementById('kpiUsers').textContent=d.totalUsers;document.getElementById('kpiAds').textContent=d.adsActifs;document.getElementById('kpiAdsSub').textContent='sur '+d.totalAds;document.getElementById('kpiDemandes').textContent=d.demandesAcceptees;document.getElementById('kpiDemandesSub').textContent='sur '+d.totalDemandes;document.getElementById('kpiMatching').textContent=d.matchingRate+'%';document.getElementById('kpiSignalements').textContent=d.totalSignalements;document.getElementById('kpiSigSub').textContent=d.totalSignalements>0?d.totalSignalements+' en attente':'Aucun';const b=document.getElementById('reportBadge');if(d.totalSignalements>0){b.textContent=d.totalSignalements;b.style.display='inline'}else{b.style.display='none'}document.getElementById('stApi').innerHTML='<span style="color:var(--green)">En ligne</span>';document.getElementById('stDb').innerHTML='<span style="color:var(--green)">Connectée</span>';document.getElementById('apiDot').classList.add('on');document.getElementById('apiTxt').textContent='API en ligne';document.getElementById('sBackend').textContent='Render · en ligne';document.getElementById('sStatUsers').textContent=d.totalUsers;document.getElementById('sStatAds').textContent=d.totalAds;document.getElementById('sStatDemandes').textContent=d.totalDemandes;document.getElementById('sStatSignalements').textContent=d.totalSignalements;const ll=document.getElementById('sLastLogin');if(ll)ll.textContent=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});if(adminUser.prenom){document.getElementById('sAdminName').textContent=adminUser.prenom+' '+(adminUser.nom||'');document.getElementById('sAdminEmail').textContent=adminUser.email||'admin@sirakele.com';document.getElementById('sbName').textContent=adminUser.prenom+' '+(adminUser.nom||'');document.getElementById('sbEmail').textContent=adminUser.email||'';document.getElementById('pfPrenom').value=adminUser.prenom||'';document.getElementById('pfNom').value=adminUser.nom||''}}catch(e){document.getElementById('stApi').innerHTML='<span style="color:var(--danger)">Hors ligne</span>';document.getElementById('stDb').innerHTML='<span style="color:var(--danger)">Injoignable</span>';document.getElementById('apiTxt').textContent='API hors ligne'}}
 
 async function loadUsers(){try{const r=await fetch(API+'/admin/users');allU=await r.json();renderU(allU)}catch(e){}}
 function renderU(l){
@@ -384,6 +391,36 @@ function filterR(){const f=document.getElementById('filterR').value;renderR(allR
 
 function logout(){localStorage.removeItem('adminToken');localStorage.removeItem('adminUser');window.location.href='login.html'}
 function confirmLogout(){if(confirm('Se déconnecter du dashboard ?'))logout()}
+async function sauverProfil(){
+  const prenom=document.getElementById('pfPrenom').value.trim();
+  const nom=document.getElementById('pfNom').value.trim();
+  if(!prenom){toast('Le prénom est obligatoire','error');return}
+  try{
+    const r=await fetch(API+'/admin/profil',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:adminUser.id,prenom,nom})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.message||'Erreur');
+    adminUser.prenom=d.prenom;adminUser.nom=d.nom;
+    localStorage.setItem('adminUser',JSON.stringify(adminUser));
+    document.getElementById('sAdminName').textContent=d.prenom+' '+(d.nom||'');
+    document.getElementById('sbName').textContent=d.prenom+' '+(d.nom||'');
+    document.getElementById('sbAvatar').textContent=(d.prenom||'A')[0].toUpperCase();
+    document.getElementById('sAdminAvatar').textContent=(d.prenom||'A')[0].toUpperCase();
+    toast('Profil mis à jour');
+  }catch(e){toast(e.message||'Erreur','error')}
+}
+async function changerMotDePasse(){
+  const ancien=document.getElementById('pwAncien').value;
+  const nouveau=document.getElementById('pwNouveau').value;
+  if(nouveau.length<4){toast('Le nouveau mot de passe doit contenir au moins 4 caractères','error');return}
+  try{
+    const r=await fetch(API+'/admin/mot-de-passe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:adminUser.id,ancien,nouveau})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.message||'Erreur');
+    document.getElementById('pwAncien').value='';
+    document.getElementById('pwNouveau').value='';
+    toast('Mot de passe modifié');
+  }catch(e){toast(e.message||'Erreur','error')}
+}
 loadStats();loadUsers();loadAds();loadReports();
 </script>
 </body>

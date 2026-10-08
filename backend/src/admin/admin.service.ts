@@ -69,4 +69,41 @@ export class AdminService {
       order: { creeLe: 'DESC' },
     });
   }
+
+  /** Modifie prenom / nom du compte admin. */
+  async updateProfil(id: string, prenom?: string, nom?: string) {
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user || !user.admin) {
+      throw new UnauthorizedException('Compte introuvable');
+    }
+    if (prenom != null && prenom.trim()) user.prenom = prenom.trim();
+    if (nom != null && nom.trim()) user.nom = nom.trim();
+    const sauve = await this.userRepo.save(user);
+    return {
+      id: sauve.id,
+      prenom: sauve.prenom,
+      nom: sauve.nom,
+      email: sauve.email,
+      admin: true,
+    };
+  }
+
+  /** Change le mot de passe admin apres verification de l'ancien. */
+  async changerMotDePasse(id: string, ancien: string, nouveau: string) {
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user || !user.admin) {
+      throw new UnauthorizedException('Compte introuvable');
+    }
+    if (!ancien || user.motDePasse !== ancien) {
+      throw new UnauthorizedException('Ancien mot de passe incorrect');
+    }
+    if (!nouveau || nouveau.length < 4) {
+      throw new UnauthorizedException(
+        'Le nouveau mot de passe doit contenir au moins 4 caractères',
+      );
+    }
+    user.motDePasse = nouveau;
+    await this.userRepo.save(user);
+    return { message: 'Mot de passe modifié' };
+  }
 }

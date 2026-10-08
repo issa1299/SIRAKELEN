@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body } from '@nestjs/common';
 import { AdminService } from './admin.service';
 
 @Controller('admin')
@@ -8,6 +8,22 @@ export class AdminController {
   @Post('login')
   login(@Body() body: { email: string; motDePasse: string }) {
     return this.adminService.login(body.email, body.motDePasse);
+  }
+
+  @Patch('profil')
+  profil(@Body() body: { id: string; prenom?: string; nom?: string }) {
+    return this.adminService.updateProfil(body.id, body.prenom, body.nom);
+  }
+
+  @Post('mot-de-passe')
+  motDePasse(
+    @Body() body: { id: string; ancien: string; nouveau: string },
+  ) {
+    return this.adminService.changerMotDePasse(
+      body.id,
+      body.ancien,
+      body.nouveau,
+    );
   }
 
   @Get('stats')

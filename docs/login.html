@@ -34,11 +34,12 @@ body{font-family:var(--font);background:var(--bg);min-height:100vh;-webkit-font-
 .field{margin-bottom:18px}
 .field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
 .inp{position:relative}
-.inp svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--muted)}
+.inp>svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--muted)}
 .inp input{width:100%;padding:13px 16px 13px 42px;border:1.5px solid var(--line);border-radius:12px;font-size:14px;font-family:var(--font);outline:none;transition:.15s;background:var(--white);color:var(--ink)}
 .inp input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,119,0,.12)}
-.inp .eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--muted);padding:6px;border-radius:8px}
+.inp .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--muted);padding:6px;border-radius:8px;display:flex}
 .inp .eye:hover{background:var(--bg);color:var(--ink)}
+.inp .eye svg{width:17px;height:17px}
 .btn{width:100%;padding:15px;border:none;border-radius:12px;font-size:15px;font-weight:800;font-family:var(--font);cursor:pointer;transition:.15s;margin-top:10px;background:var(--orange);color:#fff;box-shadow:0 8px 20px -8px rgba(255,119,0,.6)}
 .btn:hover{background:var(--orange-dark)}
 .btn:disabled{opacity:.6;cursor:not-allowed}
