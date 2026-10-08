@@ -4,7 +4,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../main.dart';
 import '../services/api_service.dart';
-import '../widgets/google_logo.dart';
 import 'register_screen.dart';
 import 'otp_screen.dart';
 import 'contact_urgence_screen.dart';
@@ -227,11 +226,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   side: const BorderSide(color: kBorder),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    GoogleLogo(size: 20),
-                    SizedBox(width: 10),
+                    Image.asset('assets/google_logo.png', width: 20, height: 20),
+                    const SizedBox(width: 10),
                     Text('Continuer avec Google', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                   ],
                 ),
