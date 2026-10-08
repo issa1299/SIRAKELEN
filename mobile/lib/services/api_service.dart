@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
@@ -37,6 +38,39 @@ class ApiException implements Exception {
 }
 
 class ApiService {
+  /// Delai max par tentative : le serveur gratuit met ~50s a se reveiller.
+  static const _delaiReveil = Duration(seconds: 75);
+
+  /// Appels robustes : 2 tentatives, messages d'erreur clairs.
+  static Future<http.Response> _avecReessai(
+      Future<http.Response> Function() appel) async {
+    try {
+      return await appel().timeout(_delaiReveil);
+    } on TimeoutException {
+      try {
+        return await appel().timeout(_delaiReveil);
+      } on TimeoutException {
+        throw ApiException('Serveur en démarrage, réessaie dans quelques secondes…');
+      } on SocketException {
+        throw ApiException('Vérifie ta connexion internet puis réessaie.');
+      }
+    } on SocketException {
+      throw ApiException('Vérifie ta connexion internet puis réessaie.');
+    } on ApiException {
+      rethrow;
+    }
+  }
+
+  static Future<http.Response> _post(Uri url,
+          {Map<String, String>? headers, Object? body}) =>
+      _avecReessai(() => http.post(url, headers: headers, body: body));
+
+  static Future<http.Response> _get(Uri url) =>
+      _avecReessai(() => http.get(url));
+
+  static Future<http.Response> _patch(Uri url,
+          {Map<String, String>? headers, Object? body}) =>
+      _avecReessai(() => http.patch(url, headers: headers, body: body));
   /// URL du serveur, chargee depuis assets/config.json au demarrage.
   /// Valeur de secours si le fichier est absent.
   static const String _baseUrlDefaut = 'http://192.168.1.2:8080';
@@ -68,7 +102,7 @@ class ApiService {
     required String quartier,
     required String email,
   }) async {
-    final response = await http.post(
+    final response = await _post(
       Uri.parse('$baseUrl/users'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
@@ -88,7 +122,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>?> findByTelephone(String telephone) async {
     final normalise = telephone.replaceAll(' ', '');
-    final response = await http.post(
+    final response = await _post(
       Uri.parse('$baseUrl/users/recherche'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'telephone': normalise}),
@@ -107,7 +141,7 @@ class ApiService {
   }
 
   static Future<void> envoyerCodeOtp(String telephone) async {
-    final response = await http.post(
+    final response = await _post(
       Uri.parse('$baseUrl/auth/envoyer-code'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'telephone': telephone.replaceAll(' ', '')}),
@@ -120,7 +154,7 @@ class ApiService {
   }
 
   static Future<void> verifierCodeOtp(String telephone, String code) async {
-    final response = await http.post(
+    final response = await _post(
       Uri.parse('$baseUrl/auth/verifier'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
@@ -138,7 +172,7 @@ class ApiService {
   // === NOUVEAUX : Email ===
   static Future<Map<String, dynamic>?> findByEmail(String email) async {
     final normalise = email.toLowerCase().trim();
-    final response = await http.post(
+    final response = await _post(
       Uri.parse('$baseUrl/users/recherche'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': normalise}),
@@ -154,7 +188,7 @@ class ApiService {
 
   static Future<void> envoyerCodeOtpEmail(String email) async {
     final normalise = email.toLowerCase().trim();
-    final response = await http.post(
+    final response = await _post(
       Uri.parse('$baseUrl/auth/envoyer-code-email'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': normalise}),
@@ -168,7 +202,7 @@ class ApiService {
 
   static Future<void> verifierCodeOtpEmail(String email, String code) async {
     final normalise = email.toLowerCase().trim();
-    final response = await http.post(
+    final response = await _post(
       Uri.parse('$baseUrl/auth/verifier-email'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
@@ -197,7 +231,7 @@ class ApiService {
     double? arriveeLat,
     double? arriveeLng,
   }) async {
-    final response = await http.post(
+    final response = await _post(
       Uri.parse('$baseUrl/ads'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
@@ -225,7 +259,7 @@ class ApiService {
   }
 
   static Future<List<dynamic>> mesAds(String userId) async {
-    final response = await http.get(Uri.parse('$baseUrl/ads/mine/$userId'));
+    final response = await _get(Uri.parse('$baseUrl/ads/mine/$userId'));
     if (response.statusCode == 200 && response.body.isNotEmpty) {
       return jsonDecode(response.body) as List<dynamic>;
     }
@@ -233,7 +267,7 @@ class ApiService {
   }
 
   static Future<void> envoyerDemande(String adId, String demandeurId) async {
-    final response = await http.post(
+    final response = await _post(
       Uri.parse('$baseUrl/demandes'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'adId': adId, 'demandeurId': demandeurId}),
@@ -247,7 +281,7 @@ class ApiService {
 
   static Future<List<dynamic>> getDemandesRecues(String userId) async {
     final response =
-        await http.get(Uri.parse('$baseUrl/demandes/recues/$userId'));
+        await _get(Uri.parse('$baseUrl/demandes/recues/$userId'));
     if (response.statusCode == 200 && response.body.isNotEmpty) {
       return jsonDecode(response.body) as List<dynamic>;
     }
@@ -255,7 +289,7 @@ class ApiService {
   }
 
   static Future<void> accepterDemande(String demandeId, String userId) async {
-    final r = await http.post(
+    final r = await _post(
         Uri.parse('$baseUrl/demandes/$demandeId/accepter/$userId'));
     if (r.statusCode >= 200 && r.statusCode < 300) return;
     final body = r.body.isNotEmpty
@@ -265,7 +299,7 @@ class ApiService {
   }
 
   static Future<void> refuserDemande(String demandeId, String userId) async {
-    final r = await http.post(
+    final r = await _post(
         Uri.parse('$baseUrl/demandes/$demandeId/refuser/$userId'));
     if (r.statusCode >= 200 && r.statusCode < 300) return;
     final body = r.body.isNotEmpty
@@ -275,7 +309,7 @@ class ApiService {
   }
 
   static Future<void> marquerOrganise(String adId, String userId) async {
-    final r = await http.post(
+    final r = await _post(
         Uri.parse('$baseUrl/demandes/ads/$adId/organise/$userId'));
     if (r.statusCode >= 200 && r.statusCode < 300) return;
     final body = r.body.isNotEmpty
@@ -286,7 +320,7 @@ class ApiService {
 
   static Future<List<dynamic>> getDemandesEnvoyees(String userId) async {
     final response =
-        await http.get(Uri.parse('$baseUrl/demandes/envoyees/$userId'));
+        await _get(Uri.parse('$baseUrl/demandes/envoyees/$userId'));
     if (response.statusCode == 200 && response.body.isNotEmpty) {
       return jsonDecode(response.body) as List<dynamic>;
     }
@@ -294,7 +328,7 @@ class ApiService {
   }
 
   static Future<void> annulerDemande(String demandeId, String userId) async {
-    final r = await http.post(
+    final r = await _post(
         Uri.parse('$baseUrl/demandes/$demandeId/annuler/$userId'));
     if (r.statusCode >= 200 && r.statusCode < 300) return;
     final body = r.body.isNotEmpty
@@ -328,7 +362,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>?> getContactUrgence(String userId) async {
     final response =
-        await http.get(Uri.parse('$baseUrl/securite/contact-urgence/$userId'));
+        await _get(Uri.parse('$baseUrl/securite/contact-urgence/$userId'));
     if (response.statusCode == 200 &&
         response.body.isNotEmpty &&
         response.body != 'null') {
@@ -339,7 +373,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> getStats(String userId) async {
     final response =
-        await http.get(Uri.parse('$baseUrl/securite/stats/$userId'));
+        await _get(Uri.parse('$baseUrl/securite/stats/$userId'));
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     }
@@ -351,7 +385,7 @@ class ApiService {
     required String auteurId,
     required String motif,
   }) async {
-    final response = await http.post(
+    final response = await _post(
       Uri.parse('$baseUrl/securite/signalements'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
@@ -369,7 +403,7 @@ class ApiService {
 
   static Future<List<dynamic>> getTrajetsPublics(String userId) async {
     final response =
-        await http.get(Uri.parse('$baseUrl/ads/publiques/$userId'));
+        await _get(Uri.parse('$baseUrl/ads/publiques/$userId'));
     if (response.statusCode == 200 && response.body.isNotEmpty) {
       return jsonDecode(response.body) as List<dynamic>;
     }
@@ -378,7 +412,7 @@ class ApiService {
 
   static Future<List<dynamic>> getCompatibilites(String userId) async {
     final response =
-        await http.get(Uri.parse('$baseUrl/ads/compatibilites/$userId'));
+        await _get(Uri.parse('$baseUrl/ads/compatibilites/$userId'));
     if (response.statusCode == 200 && response.body.isNotEmpty) {
       return jsonDecode(response.body) as List<dynamic>;
     }
@@ -386,7 +420,7 @@ class ApiService {
   }
 
   static Future<void> annulerAd(String adId, String userId) async {
-    final response = await http.post(
+    final response = await _post(
       Uri.parse('$baseUrl/ads/$adId/annuler/$userId'),
     );
     if (response.statusCode >= 200 && response.statusCode < 300) return;
@@ -397,7 +431,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> marquerVerifie(String id) async {
-    final response = await http.patch(
+    final response = await _patch(
       Uri.parse('$baseUrl/users/$id/verifier'),
     );
     if (response.statusCode == 200) {
@@ -407,7 +441,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> getUser(String id) async {
-    final response = await http.get(Uri.parse('$baseUrl/users/$id'));
+    final response = await _get(Uri.parse('$baseUrl/users/$id'));
     final body = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode == 200) {
       return body;
@@ -422,7 +456,7 @@ class ApiService {
     String? quartier,
     String? photoUrl,
   }) async {
-    final response = await http.patch(
+    final response = await _patch(
       Uri.parse('$baseUrl/users/$id'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
@@ -447,7 +481,7 @@ class ApiService {
     required String nom,
     String? photoUrl,
   }) async {
-    final response = await http.post(
+    final response = await _post(
       Uri.parse('$baseUrl/auth/google'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
@@ -471,7 +505,7 @@ class ApiService {
     String? prenom,
     String? nom,
   }) async {
-    final response = await http.post(
+    final response = await _post(
       Uri.parse('$baseUrl/auth/apple'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
@@ -490,7 +524,7 @@ class ApiService {
 
   // === CODE DE RÉCUPÉRATION ===
   static Future<void> definirCodeRecuperation(String telephone, String code) async {
-    final response = await http.post(
+    final response = await _post(
       Uri.parse('$baseUrl/auth/definir-code-recuperation'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'telephone': telephone, 'codeRecuperation': code}),
@@ -501,7 +535,7 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> verifierCodeRecuperation(String telephone, String code) async {
-    final response = await http.post(
+    final response = await _post(
       Uri.parse('$baseUrl/auth/verifier-code-recuperation'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'telephone': telephone, 'codeRecuperation': code}),
@@ -518,13 +552,19 @@ class ApiService {
       Uri.parse('$baseUrl/upload/photo/$userId'),
     );
     request.files.add(await http.MultipartFile.fromPath('photo', imageFile.path));
-    final streamed = await request.send();
-    final response = await http.Response.fromStream(streamed);
-    final body = jsonDecode(response.body) as Map<String, dynamic>;
-    if (response.statusCode == 201) {
-      return body['url'] as String;
+    try {
+      final streamed = await request.send().timeout(_delaiReveil);
+      final response = await http.Response.fromStream(streamed);
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      if (response.statusCode == 201) {
+        return body['url'] as String;
+      }
+      throw ApiException(_messageErreur(body) ?? 'Erreur d\'upload');
+    } on TimeoutException {
+      throw ApiException('Serveur en démarrage, réessaie dans quelques secondes…');
+    } on SocketException {
+      throw ApiException('Vérifie ta connexion internet puis réessaie.');
     }
-    throw ApiException(_messageErreur(body) ?? 'Erreur d\'upload');
   }
 
   static String? _messageErreur(Map<String, dynamic> body) {
