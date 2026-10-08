@@ -206,7 +206,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset('assets/google_logo.png', width: 20, height: 20),
+                    Image.asset('assets/googlelogo.webp', width: 20, height: 20),
                     const SizedBox(width: 10),
                     Text('S\'inscrire avec Google', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                   ],

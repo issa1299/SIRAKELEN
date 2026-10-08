@@ -68,7 +68,7 @@ flutter:
 
   assets:
     - assets/config.json
-    - assets/google_logo.png
+    - assets/googlelogo.webp
     - assets/logo-officiel.png
     - assets/app-icon-512.png
     - assets/1.jpeg
