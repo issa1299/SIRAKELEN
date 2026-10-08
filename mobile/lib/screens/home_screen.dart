@@ -108,6 +108,13 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (_) {}
   }
 
+  String _dateJour() {
+    final m = DateTime.now();
+    const jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+    const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    return '${jours[m.weekday - 1]} ${m.day} ${mois[m.month - 1]}';
+  }
+
   String _libelleStatut(String statut) {
     switch (statut) {
       case 'actif':
@@ -145,17 +152,118 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _sectionTitle(String title) {
+  Widget _sectionTitle(String title, {int? count}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.5,
-          color: kTextSecondary,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: kTextPrimary,
+              ),
+            ),
+          ),
+          if (count != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: kOrangeLight,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '$count',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: kOrange,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _allerPublier() async {
+    if (widget.userId.isEmpty) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => PublierScreen(userId: widget.userId)),
+    );
+    _chargerMonAd();
+  }
+
+  /// Hero étudiant : visible quand aucun AD actif.
+  Widget _heroPublier() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [kOrange, kOrangeDark],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: kOrange.withAlpha(70),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(230),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(Icons.route_rounded, color: kOrange, size: 24),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Où vas-tu aujourd\'hui ?',
+                  style: TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    height: 1.25,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Campus, centre-ville, maison… partage ton trajet et divise tes frais avec des étudiants près de chez toi.',
+            style: TextStyle(fontSize: 13, color: Colors.white, height: 1.5),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: FilledButton.icon(
+              onPressed: _allerPublier,
+              icon: const Icon(Icons.add_rounded, size: 20),
+              label: const Text('Publier mon trajet'),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: kOrange,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -821,23 +929,26 @@ class _HomeScreenState extends State<HomeScreen> {
               // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Bonjour',
-                        style: TextStyle(
-                          fontSize: 13,
+                        _dateJour(),
+                        style: const TextStyle(
+                          fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: kTextSecondary,
+                          color: kOrange,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        widget.prenom.isEmpty ? 'Bienvenue' : widget.prenom,
+                        widget.prenom.isEmpty
+                            ? 'Bienvenue'
+                            : 'Salut, ${widget.prenom}',
                         style: const TextStyle(
-                          fontSize: 22,
+                          fontSize: 24,
                           fontWeight: FontWeight.w800,
                           color: kTextPrimary,
                         ),
@@ -1084,7 +1195,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // Requests received
                 if (_demandesRecues.isNotEmpty) ...[
-                  _sectionTitle('${_demandesRecues.length} demande${_demandesRecues.length > 1 ? 's' : ''} reçue${_demandesRecues.length > 1 ? 's' : ''}'),
+                  _sectionTitle('Demandes reçues', count: _demandesRecues.length),
                   ..._demandesRecues.map(
                       (d) => _carteDemandeRecue(d as Map<String, dynamic>)),
                   const SizedBox(height: 8),
@@ -1093,7 +1204,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Requests sent
                 if (_demandesEnvoyees.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  _sectionTitle('MES DEMANDES ENVOYÉES'),
+                  _sectionTitle('Mes demandes envoyées', count: _demandesEnvoyees.length),
                   ..._demandesEnvoyees.map(
                       (d) => _carteDemandeEnvoyee(d as Map<String, dynamic>)),
                 ],
@@ -1101,7 +1212,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Compatibilities
                 if (_compatibilites.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  _sectionTitle('${_compatibilites.length} compatibilité${_compatibilites.length > 1 ? 's' : ''} trouvée${_compatibilites.length > 1 ? 's' : ''}'),
+                  _sectionTitle('Trajets compatibles', count: _compatibilites.length),
                   ..._compatibilites.map(
                       (c) => _carteCompatibilite(c as Map<String, dynamic>)),
                 ] else
@@ -1121,6 +1232,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ] else ...[
+                _heroPublier(),
+                const SizedBox(height: 16),
                 _emptyState(),
               ],
               const SizedBox(height: 24),
