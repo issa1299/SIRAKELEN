@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -39,6 +40,10 @@ class _PublierScreenState extends State<PublierScreen> {
   bool _rechercheEnCours = false;
   final _rechercheController = TextEditingController();
   ItineraireInfo? _itineraire;
+  // Epingle centrale : le point suit le centre de la carte.
+  LatLng? _centreTemp;
+  bool _nomEnCours = false;
+  Timer? _debounceGeo;
 
   static const LatLng _bamakoCenter = LatLng(12.6392, -8.0029);
 
@@ -55,7 +60,45 @@ class _PublierScreenState extends State<PublierScreen> {
     _heure.dispose();
     _places.dispose();
     _rechercheController.dispose();
+    _debounceGeo?.cancel();
     super.dispose();
+  }
+
+  /// Appelé quand l'utilisateur bouge la carte : le point suit le centre.
+  void _centreChange(LatLng centre) {
+    _centreTemp = centre;
+    _debounceGeo?.cancel();
+    _debounceGeo = Timer(const Duration(milliseconds: 700), () {
+      if (!mounted) return;
+      setState(() {
+        _nomEnCours = true;
+        if (_etape == 0) {
+          _departPoint = centre;
+          _departNom = '';
+        } else {
+          _arriveePoint = centre;
+          _arriveeNom = '';
+        }
+      });
+      CarteService.geocoderInverse(centre.latitude, centre.longitude).then((nom) {
+        if (!mounted) return;
+        setState(() {
+          _nomEnCours = false;
+          if (_etape == 0) {
+            if (_departPoint == centre) _departNom = nom;
+          } else {
+            if (_arriveePoint == centre) _arriveeNom = nom;
+          }
+        });
+      });
+      if (_etape == 1) _mettreAJourItineraire();
+    });
+  }
+
+  /// Centre de la carte = choix actuel (jamais vide).
+  LatLng _choixActuel() {
+    if (_etape == 0) return _centreTemp ?? _departPoint ?? _bamakoCenter;
+    return _centreTemp ?? _arriveePoint ?? _departPoint ?? _bamakoCenter;
   }
 
   String _formatDate(DateTime d) =>
@@ -89,16 +132,33 @@ class _PublierScreenState extends State<PublierScreen> {
       _arriveePoint = lieu.position;
       _arriveeNom = lieu.nom;
     }
+    _centreTemp = lieu.position;
+    _debounceGeo?.cancel();
     _mapController.move(lieu.position, 16);
     _mettreAJourItineraire();
   }
 
   void _confirmerPoint() {
-    if (_etape == 0 && _departPoint != null) {
-      setState(() => _etape = 1);
+    // Fige le centre actuel de la carte comme choix.
+    final choix = _choixActuel();
+    if (_etape == 0) {
+      setState(() {
+        _departPoint = choix;
+        _centreTemp = choix;
+        if (_departNom.isEmpty) _departNom = 'Point sur la carte';
+        _etape = 1;
+      });
       _rechercheController.clear();
       _rechercheResultats = [];
-    } else if (_etape == 1 && _arriveePoint != null) {
+      // Recentre la vue sur le départ pour l'étape destination.
+      _mapController.move(choix, 14);
+      _centreTemp = choix;
+    } else {
+      setState(() {
+        _arriveePoint = choix;
+        _centreTemp = choix;
+        if (_arriveeNom.isEmpty) _arriveeNom = 'Point sur la carte';
+      });
       _calculerApercu();
     }
   }
@@ -133,7 +193,9 @@ class _PublierScreenState extends State<PublierScreen> {
       );
       final point = LatLng(pos.latitude, pos.longitude);
       final nom = await CarteService.geocoderInverse(pos.latitude, pos.longitude);
+      if (!mounted) return;
       setState(() {
+        _centreTemp = point;
         if (_etape == 0) {
           _departPoint = point;
           _departNom = nom;
@@ -294,34 +356,19 @@ class _PublierScreenState extends State<PublierScreen> {
   // --- Ecran carte (2 etapes) ---
   Widget _ecranCarte() {
     final bool isDepart = _etape == 0;
-    final LatLng? pointActuel = isDepart ? _departPoint : _arriveePoint;
     final String nomActuel = isDepart ? _departNom : _arriveeNom;
 
     return Scaffold(
       body: Stack(
         children: [
-          // Carte
+          // Carte : l'utilisateur BOUGE la carte sous l'épingle fixe.
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
               initialCenter: _departPoint ?? _bamakoCenter,
               initialZoom: 13,
-              onTap: (_, latLng) {
-                setState(() {
-                  if (isDepart) {
-                    _departPoint = latLng;
-                    _departNom = '${latLng.latitude.toStringAsFixed(4)}, ${latLng.longitude.toStringAsFixed(4)}';
-                  } else {
-                    _arriveePoint = latLng;
-                    _arriveeNom = '${latLng.latitude.toStringAsFixed(4)}, ${latLng.longitude.toStringAsFixed(4)}';
-                  }
-                });
-                CarteService.geocoderInverse(latLng.latitude, latLng.longitude).then((nom) {
-                  if (mounted) setState(() {
-                    if (isDepart) _departNom = nom;
-                    else _arriveeNom = nom;
-                  });
-                });
+              onPositionChanged: (pos, aBouge) {
+                if (aBouge && pos.center != null) _centreChange(pos.center!);
               },
             ),
             children: [
@@ -351,26 +398,42 @@ class _PublierScreenState extends State<PublierScreen> {
                     ),
                   ],
                 ),
-              // Marqueurs pins D / A
+              // Départ déjà fixé (étape destination) + ligne réelle.
               MarkerLayer(
                 markers: [
-                  if (_departPoint != null)
+                  if (!isDepart && _departPoint != null)
                     Marker(
                       point: _departPoint!,
                       width: 40,
                       height: 40,
                       child: _pin('D', kGreen),
                     ),
-                  if (_arriveePoint != null)
-                    Marker(
-                      point: _arriveePoint!,
-                      width: 40,
-                      height: 40,
-                      child: _pin('A', const Color(0xFF2962FF)),
-                    ),
                 ],
               ),
             ],
+          ),
+
+          // Épingle FIXE au centre : c'est elle qu'on place en bougeant la carte.
+          IgnorePointer(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 36),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _pin(isDepart ? 'D' : 'A', isDepart ? kGreen : const Color(0xFF2962FF)),
+                    Container(
+                      width: 14,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withAlpha(50),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
 
           // Header carte blanche
@@ -524,19 +587,7 @@ class _PublierScreenState extends State<PublierScreen> {
             ),
           ),
 
-          // Bouton Ma position
-          Positioned(
-            bottom: 120,
-            right: 12,
-            child: FloatingActionButton(
-              mini: true,
-              backgroundColor: Colors.white,
-              onPressed: _utiliserMaPosition,
-              child: Icon(Icons.my_location_rounded, color: kOrange, size: 22),
-            ),
-          ),
-
-          // Barre du bas
+          // Barre du bas : guide l'utilisateur étape par étape.
           Positioned(
             bottom: 0,
             left: 0,
@@ -552,69 +603,164 @@ class _PublierScreenState extends State<PublierScreen> {
                 top: false,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: kBorder,
-                        borderRadius: BorderRadius.circular(2),
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: kBorder,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    // Récap départ (toujours visible à l'étape 2)
-                    if (!isDepart && _departPoint != null)
-                      _lignePoint('D', kGreen, 'Départ', _departNom),
-                    if (!isDepart && _departPoint != null)
-                      const SizedBox(height: 8),
-                    if (pointActuel != null)
-                      _lignePoint(
-                        isDepart ? 'D' : 'A',
-                        isDepart ? kGreen : const Color(0xFF2962FF),
-                        isDepart ? 'Départ' : 'Destination',
-                        nomActuel.isNotEmpty ? nomActuel : 'Point sur la carte',
-                      )
-                    else
-                      Text(
-                        isDepart ? 'Touchez la carte ou recherchez un lieu de départ' : 'Touchez la carte ou recherchez une destination',
-                        style: TextStyle(color: kTextSecondary, fontSize: 13),
+                    // Lieu sous l'épingle
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: kCream,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: kBorder),
                       ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: isDepart ? kGreen : const Color(0xFF2962FF),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Text(
+                                isDepart ? 'D' : 'A',
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  isDepart ? 'DÉPART · bouge la carte' : 'DESTINATION · bouge la carte',
+                                  style: TextStyle(fontSize: 11, color: kTextSecondary, fontWeight: FontWeight.w700),
+                                ),
+                                const SizedBox(height: 2),
+                                _nomEnCours || nomActuel.isEmpty
+                                    ? Row(
+                                        children: [
+                                          SizedBox(
+                                            width: 14,
+                                            height: 14,
+                                            child: CircularProgressIndicator(strokeWidth: 2, color: kOrange),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text('Recherche du lieu…',
+                                              style: TextStyle(fontSize: 14, color: kTextSecondary)),
+                                        ],
+                                      )
+                                    : Text(nomActuel,
+                                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Récap départ fixé à l'étape 2
+                    if (!isDepart && _departPoint != null) ...[
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: _retour,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: kGreen.withAlpha(15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.check_circle_rounded, color: kGreen, size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text('Départ : $_departNom',
+                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis),
+                              ),
+                              Text('Modifier',
+                                  style: TextStyle(fontSize: 12, color: kOrange, fontWeight: FontWeight.w700)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                     if (_itineraire != null && _departPoint != null && _arriveePoint != null) ...[
                       const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: kOrangeLight,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.route_rounded, color: kOrange, size: 16),
-                            const SizedBox(width: 6),
-                            Text(
-                              '${CarteService.formaterDistance(_itineraire!.distanceKm)} · ${CarteService.formaterDuree(_itineraire!.dureeMinutes)}',
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: kOrange),
-                            ),
-                          ],
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: kOrangeLight,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.route_rounded, color: kOrange, size: 16),
+                              const SizedBox(width: 6),
+                              Text(
+                                '${CarteService.formaterDistance(_itineraire!.distanceKm)} · ${CarteService.formaterDuree(_itineraire!.dureeMinutes)}',
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: kOrange),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
                     const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: FilledButton(
-                        onPressed: pointActuel == null ? null : _confirmerPoint,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(isDepart ? 'Confirmer le départ' : 'Voir l\'aperçu'),
-                            const SizedBox(width: 8),
-                            const Icon(Icons.arrow_forward_rounded, size: 18),
-                          ],
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 52,
+                            child: OutlinedButton.icon(
+                              onPressed: _utiliserMaPosition,
+                              icon: Icon(Icons.my_location_rounded, color: kOrange, size: 20),
+                              label: Text('Ma position',
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: kOrange)),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: kOrange.withAlpha(120)),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          flex: 2,
+                          child: SizedBox(
+                            height: 52,
+                            child: FilledButton(
+                              onPressed: _confirmerPoint,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(isDepart ? 'Confirmer le départ' : 'Voir l\'aperçu'),
+                                  const SizedBox(width: 8),
+                                  const Icon(Icons.arrow_forward_rounded, size: 18),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -642,41 +788,6 @@ class _PublierScreenState extends State<PublierScreen> {
           lettre,
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white),
         ),
-      ),
-    );
-  }
-
-  /// Ligne récap d'un point dans la bottom-sheet.
-  Widget _lignePoint(String lettre, Color couleur, String titre, String nom) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: kCream,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kBorder),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 26,
-            height: 26,
-            decoration: BoxDecoration(color: couleur, shape: BoxShape.circle),
-            child: Center(
-              child: Text(lettre, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Colors.white)),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(titre, style: TextStyle(fontSize: 11, color: kTextSecondary, fontWeight: FontWeight.w600)),
-                Text(nom, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
-              ],
-            ),
-          ),
-          Icon(Icons.check_circle_rounded, color: kOrange, size: 22),
-        ],
       ),
     );
   }
