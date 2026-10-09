@@ -192,215 +192,245 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kCream,
-      appBar: AppBar(title: const Text('Connexion')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 12),
-            // Logo + titre
-            Center(
-              child: Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: kOrange.withAlpha(50),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset('assets/logo-officiel.png', fit: BoxFit.cover),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Bon retour !',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.5,
-                color: kTextPrimary,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Connectez-vous pour retrouver vos trajets.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: kTextSecondary),
-            ),
-            const SizedBox(height: 24),
-
-            // === BOUTONS GOOGLE / APPLE ===
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: OutlinedButton(
-                onPressed: _chargement ? null : _signInWithGoogle,
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: kTextPrimary,
-                  side: const BorderSide(color: kBorder),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  elevation: 0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset('assets/googlelogo.webp', width: 20, height: 20),
-                    const SizedBox(width: 10),
-                    const Text('Continuer avec Google', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            if (!Platform.isAndroid)
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: OutlinedButton.icon(
-                  onPressed: _chargement ? null : _signInWithApple,
-                  icon: const Icon(Icons.apple_rounded, size: 22),
-                  label: const Text('Continuer avec Apple', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: kTextPrimary,
-                    side: const BorderSide(color: kBorder),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  ),
-                ),
-              ),
-            if (!Platform.isAndroid) const SizedBox(height: 4),
-
-            const SizedBox(height: 20),
-
-            // Separateur
-            Row(
-              children: [
-                const Expanded(child: Divider(color: kBorder)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('ou par email', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: kTextSecondary)),
-                ),
-                const Expanded(child: Divider(color: kBorder)),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            // Carte email
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: kBorder),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    controller: _controller,
-                    keyboardType: TextInputType.emailAddress,
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                    decoration: const InputDecoration(
-                      labelText: 'Adresse email',
-                      hintText: 'exemple@domaine.com',
-                      prefixIcon: Icon(Icons.email_outlined, size: 20),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: FilledButton(
-                      onPressed: _chargement ? null : _continuer,
-                      child: _chargement
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text('Recevoir mon code'),
-                                SizedBox(width: 8),
-                                Icon(Icons.arrow_forward_rounded, size: 18),
-                              ],
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            if (_erreur != null) ...[
-              const SizedBox(height: 14),
+      body: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Hero orange
               Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: kRedLight,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: kRed.withAlpha(50)),
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 20,
+                  left: 28,
+                  right: 28,
+                  bottom: 64,
                 ),
-                child: Row(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [kOrange, kOrangeDark],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Stack(
                   children: [
-                    const Icon(Icons.error_outline, color: kRed, size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        _erreur!,
-                        style: const TextStyle(
-                          color: kRed,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                    Positioned(
+                      right: -50,
+                      top: -60,
+                      child: Container(
+                        width: 170,
+                        height: 170,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(25),
+                          shape: BoxShape.circle,
                         ),
                       ),
                     ),
+                    Positioned(
+                      left: -30,
+                      bottom: -70,
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(20),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(40),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Image.asset('assets/logo-officiel.png', fit: BoxFit.cover),
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        const Text(
+                          'Bon retour !',
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.5,
+                            color: Colors.white,
+                            height: 1.15,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Heureux de te revoir, ton prochain trajet t\'attend.',
+                          style: TextStyle(fontSize: 14, color: Colors.white, height: 1.5),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
-            ],
-            const SizedBox(height: 20),
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                ),
-                child: Text.rich(
-                  TextSpan(
-                    text: 'Pas encore de compte ? ',
-                    style: TextStyle(color: kTextSecondary, fontSize: 14),
+              // Carte formulaire chevauchante
+              Transform.translate(
+                offset: const Offset(0, -40),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.fromLTRB(22, 24, 22, 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(25),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      TextSpan(
-                        text: 'Créer un compte',
-                        style: TextStyle(
-                          color: kOrange,
-                          fontWeight: FontWeight.w700,
+                      // Pastilles sociales
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _pastilleSocial(
+                            onTap: _chargement ? null : _signInWithGoogle,
+                            enfant: Image.asset('assets/googlelogo.webp', width: 22, height: 22),
+                          ),
+                          if (!Platform.isAndroid) ...[
+                            const SizedBox(width: 14),
+                            _pastilleSocial(
+                              onTap: _chargement ? null : _signInWithApple,
+                              enfant: const Icon(Icons.apple_rounded, size: 24, color: kTextPrimary),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          const Expanded(child: Divider(color: kBorder)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text('Ou connecte-toi avec', style: TextStyle(fontSize: 12, color: kTextSecondary)),
+                          ),
+                          const Expanded(child: Divider(color: kBorder)),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      const Text('Email', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: kTextPrimary)),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: _controller,
+                        keyboardType: TextInputType.emailAddress,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                        decoration: InputDecoration(
+                          hintText: 'exemple@domaine.com',
+                          filled: true,
+                          fillColor: const Color(0xFFF4F2EC),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: kOrange, width: 1.5)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                        ),
+                      ),
+                      if (_erreur != null) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: kRedLight,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline, color: kRed, size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(_erreur!, style: const TextStyle(color: kRed, fontSize: 12, fontWeight: FontWeight.w500)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 18),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: FilledButton(
+                          onPressed: _chargement ? null : _continuer,
+                          style: FilledButton.styleFrom(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+                          ),
+                          child: _chargement
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                                )
+                              : const Text('Se connecter', style: TextStyle(fontSize: 16)),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Center(
+                        child: TextButton(
+                          onPressed: () => Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                          ),
+                          child: Text.rich(
+                            TextSpan(
+                              text: 'Pas encore de compte ? ',
+                              style: TextStyle(color: kTextSecondary, fontSize: 13),
+                              children: const [
+                                TextSpan(
+                                  text: 'Créer un compte',
+                                  style: TextStyle(color: kOrange, fontWeight: FontWeight.w700),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _pastilleSocial({required VoidCallback? onTap, required Widget enfant}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          border: Border.all(color: kBorder),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withAlpha(15), blurRadius: 8, offset: const Offset(0, 3)),
           ],
         ),
+        child: Center(child: enfant),
       ),
     );
   }

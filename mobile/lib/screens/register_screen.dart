@@ -169,260 +169,232 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kCream,
-      appBar: AppBar(title: const Text('Créer un compte')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 12),
-            // Logo + titre
-            Center(
-              child: Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: kOrange.withAlpha(50),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+      body: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Hero orange
+              Container(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 20,
+                  left: 28,
+                  right: 28,
+                  bottom: 64,
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset('assets/logo-officiel.png', fit: BoxFit.cover),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Rejoins SIRA KELEN',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.5,
-                color: kTextPrimary,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              '30 secondes pour créer ton compte, gratuitement.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: kTextSecondary),
-            ),
-            const SizedBox(height: 24),
-
-            // === BOUTONS GOOGLE / APPLE ===
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: OutlinedButton(
-                onPressed: _chargement ? null : _signInWithGoogle,
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: kTextPrimary,
-                  side: const BorderSide(color: kBorder),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset('assets/googlelogo.webp', width: 20, height: 20),
-                    const SizedBox(width: 10),
-                    const Text('S\'inscrire avec Google', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            if (!Platform.isAndroid)
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: OutlinedButton.icon(
-                  onPressed: _chargement ? null : _signInWithApple,
-                  icon: const Icon(Icons.apple_rounded, size: 22),
-                  label: const Text('S\'inscrire avec Apple', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: kTextPrimary,
-                    side: const BorderSide(color: kBorder),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [kOrange, kOrangeDark],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
-              ),
-            if (!Platform.isAndroid) const SizedBox(height: 4),
-
-            const SizedBox(height: 20),
-
-            // Separateur
-            Row(
-              children: [
-                const Expanded(child: Divider(color: kBorder)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('ou avec tes infos', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: kTextSecondary)),
-                ),
-                const Expanded(child: Divider(color: kBorder)),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            // Carte formulaire
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: kBorder),
-              ),
-              child: Form(
-                key: _formKey,
-                child: Column(
+                child: Stack(
                   children: [
-                    _buildField(
-                      controller: _prenom,
-                      label: 'Prénom',
-                      icon: Icons.person_outline_rounded,
-                      hintText: 'Ex. Awa',
-                      validator: (v) =>
-                          v == null || v.trim().isEmpty ? 'Le prénom est obligatoire' : null,
-                    ),
-                    const SizedBox(height: 14),
-                    _buildField(
-                      controller: _nom,
-                      label: 'Nom',
-                      icon: Icons.badge_outlined,
-                      hintText: 'Ex. Traoré',
-                      validator: (v) =>
-                          v == null || v.trim().isEmpty ? 'Le nom est obligatoire' : null,
-                    ),
-                    const SizedBox(height: 14),
-                    _buildField(
-                      controller: _telephone,
-                      label: 'Numéro de téléphone',
-                      icon: Icons.phone_outlined,
-                      keyboardType: TextInputType.phone,
-                      maxLength: 8,
-                      prefixText: '+223  ',
-                      hintText: '70 12 34 56',
-                      validator: (v) {
-                        final chiffres = v?.replaceAll(' ', '') ?? '';
-                        if (chiffres.length != 8) {
-                          return 'Le numéro doit contenir 8 chiffres';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 14),
-                    _buildField(
-                      controller: _quartier,
-                      label: 'Quartier principal',
-                      icon: Icons.location_on_outlined,
-                      hintText: 'Ex. Kalaban Coro',
-                      validator: (v) =>
-                          v == null || v.trim().isEmpty ? 'Le quartier est obligatoire' : null,
-                    ),
-                    const SizedBox(height: 14),
-                    _buildField(
-                      controller: _email,
-                      label: 'Adresse email',
-                      icon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
-                      hintText: 'exemple@domaine.com',
-                      validator: (v) {
-                        final email = v ?? '';
-                        if (!email.contains('@') || !email.contains('.')) {
-                          return 'Email invalide';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 18),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: FilledButton(
-                        onPressed: _chargement ? null : _envoyerCode,
-                        child: _chargement
-                            ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text('Recevoir mon code'),
-                                  SizedBox(width: 8),
-                                  Icon(Icons.arrow_forward_rounded, size: 18),
-                                ],
-                              ),
+                    Positioned(
+                      right: -50,
+                      top: -60,
+                      child: Container(
+                        width: 170,
+                        height: 170,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(25),
+                          shape: BoxShape.circle,
+                        ),
                       ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.maybePop(context),
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withAlpha(230),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.arrow_back_rounded, color: kTextPrimary, size: 20),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Créer un compte',
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.5,
+                            color: Colors.white,
+                            height: 1.15,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Remplis tes infos ou inscris-toi avec ton compte social.',
+                          style: TextStyle(fontSize: 14, color: Colors.white, height: 1.5),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            ),
-
-            if (_erreur != null) ...[
-              const SizedBox(height: 14),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: kRedLight,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: kRed.withAlpha(50)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.error_outline, color: kRed, size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        _erreur!,
-                        style: const TextStyle(color: kRed, fontSize: 13, fontWeight: FontWeight.w500),
+              // Carte formulaire chevauchante
+              Transform.translate(
+                offset: const Offset(0, -40),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.fromLTRB(22, 24, 22, 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(25),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            const SizedBox(height: 20),
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                ),
-                child: Text.rich(
-                  TextSpan(
-                    text: 'Déjà un compte ? ',
-                    style: TextStyle(color: kTextSecondary, fontSize: 14),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      TextSpan(
-                        text: 'Se connecter',
-                        style: TextStyle(
-                          color: kOrange,
-                          fontWeight: FontWeight.w700,
+                      // Pastilles sociales
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _pastilleSocial(
+                            onTap: _chargement ? null : _signInWithGoogle,
+                            enfant: Image.asset('assets/googlelogo.webp', width: 22, height: 22),
+                          ),
+                          if (!Platform.isAndroid) ...[
+                            const SizedBox(width: 14),
+                            _pastilleSocial(
+                              onTap: _chargement ? null : _signInWithApple,
+                              enfant: const Icon(Icons.apple_rounded, size: 24, color: kTextPrimary),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          const Expanded(child: Divider(color: kBorder)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text('Ou inscris-toi avec', style: TextStyle(fontSize: 12, color: kTextSecondary)),
+                          ),
+                          const Expanded(child: Divider(color: kBorder)),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            _buildField(controller: _prenom, label: 'Prénom', hintText: 'Ex. Awa',
+                              validator: (v) => v == null || v.trim().isEmpty ? 'Le prénom est obligatoire' : null),
+                            const SizedBox(height: 12),
+                            _buildField(controller: _nom, label: 'Nom', hintText: 'Ex. Traoré',
+                              validator: (v) => v == null || v.trim().isEmpty ? 'Le nom est obligatoire' : null),
+                            const SizedBox(height: 12),
+                            _buildField(controller: _telephone, label: 'Numéro de téléphone', hintText: '70 12 34 56',
+                              prefixText: '+223  ', keyboardType: TextInputType.phone, maxLength: 8,
+                              validator: (v) {
+                                final chiffres = v?.replaceAll(' ', '') ?? '';
+                                if (chiffres.length != 8) return 'Le numéro doit contenir 8 chiffres';
+                                return null;
+                              }),
+                            const SizedBox(height: 12),
+                            _buildField(controller: _quartier, label: 'Quartier principal', hintText: 'Ex. Kalaban Coro',
+                              validator: (v) => v == null || v.trim().isEmpty ? 'Le quartier est obligatoire' : null),
+                            const SizedBox(height: 12),
+                            _buildField(controller: _email, label: 'Email', hintText: 'exemple@domaine.com',
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (v) {
+                                final email = v ?? '';
+                                if (!email.contains('@') || !email.contains('.')) return 'Email invalide';
+                                return null;
+                              }),
+                          ],
+                        ),
+                      ),
+                      if (_erreur != null) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(color: kRedLight, borderRadius: BorderRadius.circular(10)),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline, color: kRed, size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(_erreur!, style: const TextStyle(color: kRed, fontSize: 12, fontWeight: FontWeight.w500)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 18),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: FilledButton(
+                          onPressed: _chargement ? null : _envoyerCode,
+                          style: FilledButton.styleFrom(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+                          ),
+                          child: _chargement
+                              ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                              : const Text('S\'inscrire', style: TextStyle(fontSize: 16)),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Center(
+                        child: TextButton(
+                          onPressed: () => Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const LoginScreen()),
+                          ),
+                          child: Text.rich(
+                            TextSpan(
+                              text: 'Déjà un compte ? ',
+                              style: TextStyle(color: kTextSecondary, fontSize: 13),
+                              children: const [
+                                TextSpan(text: 'Se connecter', style: TextStyle(color: kOrange, fontWeight: FontWeight.w700)),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _pastilleSocial({required VoidCallback? onTap, required Widget enfant}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          border: Border.all(color: kBorder),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withAlpha(15), blurRadius: 8, offset: const Offset(0, 3)),
           ],
         ),
+        child: Center(child: enfant),
       ),
     );
   }
@@ -430,26 +402,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildField({
     required TextEditingController controller,
     required String label,
-    required IconData icon,
     String? hintText,
     String? prefixText,
     int? maxLength,
     TextInputType? keyboardType,
     String? Function(String?)? validator,
   }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      maxLength: maxLength,
-      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hintText,
-        prefixText: prefixText,
-        counterText: '',
-        prefixIcon: Icon(icon, size: 20),
-      ),
-      validator: validator,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: kTextPrimary)),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          maxLength: maxLength,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          decoration: InputDecoration(
+            hintText: hintText,
+            prefixText: prefixText,
+            counterText: '',
+            filled: true,
+            fillColor: const Color(0xFFF4F2EC),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: kOrange, width: 1.5)),
+            errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: kRed)),
+            focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: kRed, width: 1.5)),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          ),
+          validator: validator,
+        ),
+      ],
     );
   }
 }

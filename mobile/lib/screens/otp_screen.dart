@@ -189,197 +189,209 @@ class _OtpScreenState extends State<OtpScreen> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kCream,
-      appBar: AppBar(title: const Text('Vérification')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 20),
-            // Icon
-            Center(
-              child: Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: kOrangeLight,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.lock_outline_rounded,
-                  color: kOrange,
-                  size: 32,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Vérification du code',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: kTextPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              widget.useEmail
-                  ? 'Code envoyé à votre email'
-                  : 'Code envoyé au',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: kTextSecondary),
-            ),
-            Text(
-              widget.useEmail ? widget.telephone : '+223 ${widget.telephone}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: kTextPrimary,
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // OTP digit boxes
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(4, (i) {
-                return Container(
-                  width: 56,
-                  height: 60,
-                  margin: const EdgeInsets.symmetric(horizontal: 6),
-                  child: KeyboardListener(
-                    focusNode: FocusNode(),
-                    onKeyEvent: (event) {
-                      if (event is KeyDownEvent &&
-                          event.logicalKey == LogicalKeyboardKey.backspace &&
-                          _controllers[i].text.isEmpty &&
-                          i > 0) {
-                        _controllers[i - 1].clear();
-                        _focusNodes[i - 1].requestFocus();
-                      }
-                    },
-                    child: TextField(
-                      controller: _controllers[i],
-                      focusNode: _focusNodes[i],
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      maxLength: 1,
-                      style: const TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        color: kTextPrimary,
-                      ),
-                      decoration: InputDecoration(
-                        counterText: '',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(color: kBorder),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(color: kBorder),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(color: kOrange, width: 2),
-                        ),
-                      ),
-                      onChanged: (v) {
-                        if (v.isNotEmpty && i < 3) {
-                          _focusNodes[i + 1].requestFocus();
-                        }
-                        if (_code.length == 4) _confirmer();
-                      },
-                    ),
-                  ),
-                );
-              }),
-            ),
-
-            const SizedBox(height: 12),
-
-            // Timer
-            Center(
-              child: AnimatedBuilder(
-                animation: _timerController,
-                builder: (context, child) {
-                  final remaining = (60 - (_timerController.value * 60)).ceil();
-                  return Text(
-                    _canResend ? 'Vous pouvez renvoyer le code' : 'Renvoyer le code dans ${remaining}s',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: _canResend ? kOrange : kTextSecondary,
-                      fontWeight: _canResend ? FontWeight.w600 : FontWeight.w400,
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            if (_erreur != null) ...[
-              const SizedBox(height: 16),
+      body: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Hero orange
               Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: kRedLight,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: kRed.withAlpha(50)),
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 16,
+                  left: 20,
+                  right: 20,
+                  bottom: 64,
                 ),
-                child: Row(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [kOrange, kOrangeDark],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.error_outline, color: kRed, size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        _erreur!,
-                        style: const TextStyle(
-                          color: kRed,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                    GestureDetector(
+                      onTap: () => Navigator.maybePop(context),
+                      child: Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(230),
+                          shape: BoxShape.circle,
                         ),
+                        child: const Icon(Icons.arrow_back_rounded, color: kTextPrimary, size: 20),
                       ),
+                    ),
+                    const SizedBox(height: 18),
+                    const Text(
+                      'Vérifie ton code',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                        color: Colors.white,
+                        height: 1.15,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      widget.useEmail
+                          ? 'Code envoyé à ${widget.telephone}'
+                          : 'Code envoyé au +223 ${widget.telephone}',
+                      style: const TextStyle(fontSize: 14, color: Colors.white, height: 1.5),
                     ),
                   ],
                 ),
               ),
-            ],
-            const SizedBox(height: 28),
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: FilledButton(
-                onPressed: _chargement ? null : _confirmer,
-                child: _chargement
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
+              // Carte code chevauchante
+              Transform.translate(
+                offset: const Offset(0, -40),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.fromLTRB(22, 26, 22, 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(25),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Cases OTP
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: List.generate(4, (i) {
+                          return SizedBox(
+                            width: 62,
+                            height: 64,
+                            child: KeyboardListener(
+                              focusNode: FocusNode(),
+                              onKeyEvent: (event) {
+                                if (event is KeyDownEvent &&
+                                    event.logicalKey == LogicalKeyboardKey.backspace &&
+                                    _controllers[i].text.isEmpty &&
+                                    i > 0) {
+                                  _controllers[i - 1].clear();
+                                  _focusNodes[i - 1].requestFocus();
+                                }
+                              },
+                              child: TextField(
+                                controller: _controllers[i],
+                                focusNode: _focusNodes[i],
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.center,
+                                maxLength: 1,
+                                style: const TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w900,
+                                  color: kTextPrimary,
+                                ),
+                                decoration: InputDecoration(
+                                  counterText: '',
+                                  filled: true,
+                                  fillColor: const Color(0xFFF4F2EC),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: kOrange, width: 2),
+                                  ),
+                                ),
+                                onChanged: (v) {
+                                  if (v.isNotEmpty && i < 3) {
+                                    _focusNodes[i + 1].requestFocus();
+                                  }
+                                  if (_code.length == 4) _confirmer();
+                                },
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                      const SizedBox(height: 16),
+                      // Timer / renvoyer
+                      Center(
+                        child: AnimatedBuilder(
+                          animation: _timerController,
+                          builder: (context, child) {
+                            final remaining = (60 - (_timerController.value * 60)).ceil();
+                            return _canResend
+                                ? GestureDetector(
+                                    onTap: _chargement ? null : _renvoyerCode,
+                                    child: const Text(
+                                      'Pas reçu ? Renvoyer le code',
+                                      style: TextStyle(fontSize: 13, color: kOrange, fontWeight: FontWeight.w700),
+                                    ),
+                                  )
+                                : Text(
+                                    'Renvoyer le code dans ${remaining}s',
+                                    style: TextStyle(fontSize: 13, color: kTextSecondary),
+                                  );
+                          },
                         ),
-                      )
-                    : const Text('Confirmer'),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: TextButton(
-                onPressed: _canResend && !_chargement ? _renvoyerCode : null,
-                child: Text(
-                  'Rien reçu ? Renvoyer le code',
-                  style: TextStyle(
-                    color: _canResend ? kOrange : Colors.grey.shade400,
-                    fontWeight: FontWeight.w600,
+                      ),
+                      if (_erreur != null) ...[
+                        const SizedBox(height: 14),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: kRedLight,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline, color: kRed, size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _erreur!,
+                                  style: const TextStyle(color: kRed, fontSize: 12, fontWeight: FontWeight.w500),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 18),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: FilledButton(
+                          onPressed: _chargement ? null : _confirmer,
+                          style: FilledButton.styleFrom(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+                          ),
+                          child: _chargement
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                                )
+                              : const Text('Vérifier', style: TextStyle(fontSize: 16)),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+            ],
+          ),
         ),
       ),
     );
