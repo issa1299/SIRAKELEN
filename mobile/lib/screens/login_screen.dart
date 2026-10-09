@@ -198,40 +198,66 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
+            // Logo + titre
+            Center(
+              child: Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: kOrange.withAlpha(50),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.asset('assets/logo-officiel.png', fit: BoxFit.cover),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             const Text(
               'Bon retour !',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 26,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
                 color: kTextPrimary,
               ),
             ),
             const SizedBox(height: 6),
             Text(
-              'Connectez-vous avec Google, Apple ou votre email.',
+              'Connectez-vous pour retrouver vos trajets.',
+              textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: kTextSecondary),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 24),
 
             // === BOUTONS GOOGLE / APPLE ===
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 52,
               child: OutlinedButton(
                 onPressed: _chargement ? null : _signInWithGoogle,
                 style: OutlinedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: kTextPrimary,
                   side: const BorderSide(color: kBorder),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  elevation: 0,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image.asset('assets/googlelogo.webp', width: 20, height: 20),
                     const SizedBox(width: 10),
-                    Text('Continuer avec Google', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                    const Text('Continuer avec Google', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                   ],
                 ),
               ),
@@ -240,45 +266,84 @@ class _LoginScreenState extends State<LoginScreen> {
             if (!Platform.isAndroid)
               SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: 52,
                 child: OutlinedButton.icon(
                   onPressed: _chargement ? null : _signInWithApple,
-                  icon: const Icon(Icons.apple_rounded, size: 24),
-                  label: const Text('Continuer avec Apple', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  icon: const Icon(Icons.apple_rounded, size: 22),
+                  label: const Text('Continuer avec Apple', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                   style: OutlinedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: kTextPrimary,
                     side: const BorderSide(color: kBorder),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
                 ),
               ),
+            if (!Platform.isAndroid) const SizedBox(height: 4),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             // Separateur
             Row(
               children: [
-                Expanded(child: Divider(color: kBorder)),
+                const Expanded(child: Divider(color: kBorder)),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('ou', style: TextStyle(fontSize: 13, color: kTextSecondary)),
+                  child: Text('ou par email', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: kTextSecondary)),
                 ),
-                Expanded(child: Divider(color: kBorder)),
+                const Expanded(child: Divider(color: kBorder)),
               ],
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-            // Champ email uniquement
-            TextField(
-              controller: _controller,
-              keyboardType: TextInputType.emailAddress,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                hintText: 'exemple@domaine.com',
-                prefixIcon: Icon(Icons.email_outlined, size: 20),
+            // Carte email
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: kBorder),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: _controller,
+                    keyboardType: TextInputType.emailAddress,
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                    decoration: const InputDecoration(
+                      labelText: 'Adresse email',
+                      hintText: 'exemple@domaine.com',
+                      prefixIcon: Icon(Icons.email_outlined, size: 20),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: FilledButton(
+                      onPressed: _chargement ? null : _continuer,
+                      child: _chargement
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Recevoir mon code'),
+                                SizedBox(width: 8),
+                                Icon(Icons.arrow_forward_rounded, size: 18),
+                              ],
+                            ),
+                    ),
+                  ),
+                ],
               ),
             ),
 
@@ -309,25 +374,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ],
-            const SizedBox(height: 28),
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: FilledButton(
-                onPressed: _chargement ? null : _continuer,
-                child: _chargement
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text('Continuer'),
-              ),
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Center(
               child: TextButton(
                 onPressed: () => Navigator.pushReplacement(
@@ -340,7 +387,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(color: kTextSecondary, fontSize: 14),
                     children: [
                       TextSpan(
-                        text: 'Creer un compte',
+                        text: 'Créer un compte',
                         style: TextStyle(
                           color: kOrange,
                           fontWeight: FontWeight.w700,
@@ -351,6 +398,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 24),
           ],
         ),
       ),

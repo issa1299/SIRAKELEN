@@ -169,46 +169,71 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kCream,
-      appBar: AppBar(title: const Text('Creer un compte')),
+      appBar: AppBar(title: const Text('Créer un compte')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
+            // Logo + titre
+            Center(
+              child: Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: kOrange.withAlpha(50),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.asset('assets/logo-officiel.png', fit: BoxFit.cover),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             const Text(
-              'Bienvenue !',
+              'Rejoins SIRA KELEN',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
                 color: kTextPrimary,
               ),
             ),
             const SizedBox(height: 6),
             Text(
-              'Inscrivez-vous avec Google, Apple ou remplissez le formulaire.',
+              '30 secondes pour créer ton compte, gratuitement.',
+              textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: kTextSecondary),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 24),
 
             // === BOUTONS GOOGLE / APPLE ===
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 52,
               child: OutlinedButton(
                 onPressed: _chargement ? null : _signInWithGoogle,
                 style: OutlinedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: kTextPrimary,
                   side: const BorderSide(color: kBorder),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image.asset('assets/googlelogo.webp', width: 20, height: 20),
                     const SizedBox(width: 10),
-                    Text('S\'inscrire avec Google', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                    const Text('S\'inscrire avec Google', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                   ],
                 ),
               ),
@@ -217,103 +242,139 @@ class _RegisterScreenState extends State<RegisterScreen> {
             if (!Platform.isAndroid)
               SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: 52,
                 child: OutlinedButton.icon(
                   onPressed: _chargement ? null : _signInWithApple,
-                  icon: const Icon(Icons.apple_rounded, size: 24),
-                  label: const Text('S\'inscrire avec Apple', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  icon: const Icon(Icons.apple_rounded, size: 22),
+                  label: const Text('S\'inscrire avec Apple', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                   style: OutlinedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: kTextPrimary,
                     side: const BorderSide(color: kBorder),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
                 ),
               ),
+            if (!Platform.isAndroid) const SizedBox(height: 4),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             // Separateur
             Row(
               children: [
-                Expanded(child: Divider(color: kBorder)),
+                const Expanded(child: Divider(color: kBorder)),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('ou', style: TextStyle(fontSize: 13, color: kTextSecondary)),
+                  child: Text('ou avec tes infos', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: kTextSecondary)),
                 ),
-                Expanded(child: Divider(color: kBorder)),
+                const Expanded(child: Divider(color: kBorder)),
               ],
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-            // Formulaire classique
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  _buildField(
-                    controller: _prenom,
-                    label: 'Prenom',
-                    icon: Icons.person_outline_rounded,
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? 'Le prenom est obligatoire' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildField(
-                    controller: _nom,
-                    label: 'Nom',
-                    icon: Icons.badge_outlined,
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? 'Le nom est obligatoire' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildField(
-                    controller: _telephone,
-                    label: 'Numero de telephone',
-                    icon: Icons.phone_outlined,
-                    keyboardType: TextInputType.phone,
-                    maxLength: 8,
-                    prefixText: '+223  ',
-                    hintText: '70 12 34 56',
-                    validator: (v) {
-                      final chiffres = v?.replaceAll(' ', '') ?? '';
-                      if (chiffres.length != 8) {
-                        return 'Le numero doit contenir 8 chiffres';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _buildField(
-                    controller: _quartier,
-                    label: 'Quartier principal',
-                    icon: Icons.location_on_outlined,
-                    hintText: 'Kalaban Coro',
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? 'Le quartier est obligatoire' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildField(
-                    controller: _email,
-                    label: 'Email',
-                    icon: Icons.email_outlined,
-                    keyboardType: TextInputType.emailAddress,
-                    hintText: 'exemple@domaine.com',
-                    validator: (v) {
-                      final email = v ?? '';
-                      if (!email.contains('@') || !email.contains('.')) {
-                        return 'Email invalide';
-                      }
-                      return null;
-                    },
-                  ),
-                ],
+            // Carte formulaire
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: kBorder),
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    _buildField(
+                      controller: _prenom,
+                      label: 'Prénom',
+                      icon: Icons.person_outline_rounded,
+                      hintText: 'Ex. Awa',
+                      validator: (v) =>
+                          v == null || v.trim().isEmpty ? 'Le prénom est obligatoire' : null,
+                    ),
+                    const SizedBox(height: 14),
+                    _buildField(
+                      controller: _nom,
+                      label: 'Nom',
+                      icon: Icons.badge_outlined,
+                      hintText: 'Ex. Traoré',
+                      validator: (v) =>
+                          v == null || v.trim().isEmpty ? 'Le nom est obligatoire' : null,
+                    ),
+                    const SizedBox(height: 14),
+                    _buildField(
+                      controller: _telephone,
+                      label: 'Numéro de téléphone',
+                      icon: Icons.phone_outlined,
+                      keyboardType: TextInputType.phone,
+                      maxLength: 8,
+                      prefixText: '+223  ',
+                      hintText: '70 12 34 56',
+                      validator: (v) {
+                        final chiffres = v?.replaceAll(' ', '') ?? '';
+                        if (chiffres.length != 8) {
+                          return 'Le numéro doit contenir 8 chiffres';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 14),
+                    _buildField(
+                      controller: _quartier,
+                      label: 'Quartier principal',
+                      icon: Icons.location_on_outlined,
+                      hintText: 'Ex. Kalaban Coro',
+                      validator: (v) =>
+                          v == null || v.trim().isEmpty ? 'Le quartier est obligatoire' : null,
+                    ),
+                    const SizedBox(height: 14),
+                    _buildField(
+                      controller: _email,
+                      label: 'Adresse email',
+                      icon: Icons.email_outlined,
+                      keyboardType: TextInputType.emailAddress,
+                      hintText: 'exemple@domaine.com',
+                      validator: (v) {
+                        final email = v ?? '';
+                        if (!email.contains('@') || !email.contains('.')) {
+                          return 'Email invalide';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 18),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: FilledButton(
+                        onPressed: _chargement ? null : _envoyerCode,
+                        child: _chargement
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('Recevoir mon code'),
+                                  SizedBox(width: 8),
+                                  Icon(Icons.arrow_forward_rounded, size: 18),
+                                ],
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
             if (_erreur != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -335,25 +396,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
             ],
-            const SizedBox(height: 28),
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: FilledButton(
-                onPressed: _chargement ? null : _envoyerCode,
-                child: _chargement
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text('Recevoir mon code'),
-              ),
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Center(
               child: TextButton(
                 onPressed: () => Navigator.pushReplacement(
@@ -362,7 +405,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 child: Text.rich(
                   TextSpan(
-                    text: 'Deja un compte ? ',
+                    text: 'Déjà un compte ? ',
                     style: TextStyle(color: kTextSecondary, fontSize: 14),
                     children: [
                       TextSpan(
@@ -377,7 +420,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
           ],
         ),
       ),
