@@ -9,6 +9,7 @@ import { Demande } from './demandes/demande.entity';
 import { Signalement } from './signalements/signalement.entity';
 import { ContactUrgence } from './contact-urgence/contact-urgence.entity';
 import { CodeVerification } from './auth/code-verification.entity';
+import { Message } from './messages/message.entity';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { AdsModule } from './ads/ads.module';
@@ -16,6 +17,7 @@ import { DemandesModule } from './demandes/demandes.module';
 import { SecuriteModule } from './securite/securite.module';
 import { UploadModule } from './upload/upload.module';
 import { AdminModule } from './admin/admin.module';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
@@ -30,7 +32,7 @@ import { AdminModule } from './admin/admin.module';
             type: 'postgres' as const,
             url: databaseUrl,
             ssl: { rejectUnauthorized: false },
-            entities: [User, AvisDeplacement, Demande, Signalement, ContactUrgence, CodeVerification],
+            entities: [User, AvisDeplacement, Demande, Signalement, ContactUrgence, CodeVerification, Message],
             synchronize: true,
           };
         }
@@ -42,7 +44,7 @@ import { AdminModule } from './admin/admin.module';
           username: config.get<string>('DB_USER'),
           password: config.get<string>('DB_PASSWORD'),
           database: config.get<string>('DB_NAME'),
-          entities: [User, AvisDeplacement, Demande, Signalement, ContactUrgence, CodeVerification],
+          entities: [User, AvisDeplacement, Demande, Signalement, ContactUrgence, CodeVerification, Message],
           synchronize: true,
         };
       },
@@ -54,6 +56,7 @@ import { AdminModule } from './admin/admin.module';
     SecuriteModule,
     UploadModule,
     AdminModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

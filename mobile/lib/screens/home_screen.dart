@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import '../services/carte_service.dart';
 import '../services/whatsapp_helper.dart';
 import 'notifications_screen.dart';
+import 'chat_screen.dart';
 import 'publier_screen.dart';
 import 'profil_autre_screen.dart';
 
@@ -24,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> _demandesRecues = [];
   List<dynamic> _demandesEnvoyees = [];
   Map<String, dynamic>? _partenaire;
+  String? _partenaireDemandeId;
   bool _chargement = true;
 
   @override
@@ -63,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
             recues.where((d) => d['statut'] == 'en_attente').toList();
         _demandesEnvoyees = envoyees;
         _partenaire = null;
+        _partenaireDemandeId = null;
         if (_adActif != null &&
             _adActif!['statut'] == 'en_cours_de_finalisation') {
           final acceptee = recues
@@ -71,6 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (acceptee.isNotEmpty) {
             _partenaire =
                 (acceptee.first['demandeur'] as Map<String, dynamic>?);
+            _partenaireDemandeId = acceptee.first['id'] as String?;
           }
         }
         _chargement = false;
@@ -128,8 +132,25 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _envoyerInteret(Map<String, dynamic> comp) async {
-    try {
+  void _ouvrirChat({
+    required String demandeId,
+    required String partenaireNom,
+    required String trajetLabel,
+  }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChatScreen(
+          demandeId: demandeId,
+          userId: widget.userId,
+          partenaireNom: partenaireNom,
+          trajetLabel: trajetLabel,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _envoyerInteret(Map<String, dynamic> comp) async {    try {
       await ApiService.envoyerDemande(
           comp['adId'] as String, widget.userId);
       if (!mounted) return;
@@ -389,8 +410,31 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          if (acceptee) ...[
+          if (acceptee || statut == 'en_attente') ...[
             const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _ouvrirChat(
+                  demandeId: d['id'] as String,
+                  partenaireNom: '${proprietaire['prenom']} ${proprietaire['nom']}',
+                  trajetLabel: '${ad['depart']} → ${ad['destination']}',
+                ),
+                icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18, color: kOrange),
+                label: Text(
+                  'Discuter avec ${proprietaire['prenom']}',
+                  style: const TextStyle(color: kOrange, fontWeight: FontWeight.w700),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: kOrange.withAlpha(120)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ),
+          ],
+          if (acceptee) ...[
+            const SizedBox(height: 8),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -530,28 +574,53 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          // Voir profil button
-          Align(
-            alignment: Alignment.centerRight,
-            child: GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ProfilAutreScreen(
-                    targetUserId: demandeur['id'] as String,
-                    viewerUserId: widget.userId,
+          // Voir profil + Discuter
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              GestureDetector(
+                onTap: () => _ouvrirChat(
+                  demandeId: d['id'] as String,
+                  partenaireNom: '${demandeur['prenom']} ${demandeur['nom']}',
+                  trajetLabel: '${d['ad']['depart']} → ${d['ad']['destination']}',
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: kOrangeLight,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.chat_bubble_outline_rounded, size: 14, color: kOrange),
+                      SizedBox(width: 4),
+                      Text('Discuter', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: kOrange)),
+                    ],
                   ),
                 ),
               ),
-              child: Text(
-                'Voir le profil →',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: kOrange,
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProfilAutreScreen(
+                      targetUserId: demandeur['id'] as String,
+                      viewerUserId: widget.userId,
+                    ),
+                  ),
+                ),
+                child: Text(
+                  'Voir le profil →',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: kOrange,
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
           const SizedBox(height: 12),
           Row(
@@ -1127,26 +1196,48 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                               const SizedBox(height: 8),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton.icon(
-                                  onPressed: () async {
-                                    await WhatsAppHelper.ouvrir(
-                                      telephone: '${_partenaire!['telephone']}',
-                                      message: 'Bonjour ${_partenaire!['prenom']}, je te contacte au sujet du trajet SIRA KELEN.',
-                                    );
-                                  },
-                                  icon: const Icon(Icons.chat_rounded, color: Colors.white, size: 16),
-                                  label: const Text(
-                                    'Contacter via WhatsApp',
-                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12),
+                              Row(
+                                children: [
+                                  if (_partenaireDemandeId != null)
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        onPressed: () => _ouvrirChat(
+                                          demandeId: _partenaireDemandeId!,
+                                          partenaireNom: '${_partenaire!['prenom']} ${_partenaire!['nom']}',
+                                          trajetLabel: '${_adActif!['depart']} → ${_adActif!['destination']}',
+                                        ),
+                                        icon: const Icon(Icons.chat_bubble_outline_rounded, size: 16, color: kOrange),
+                                        label: const Text('Discuter', style: TextStyle(color: kOrange, fontWeight: FontWeight.w700, fontSize: 12)),
+                                        style: OutlinedButton.styleFrom(
+                                          side: BorderSide(color: kOrange.withAlpha(120)),
+                                          padding: const EdgeInsets.symmetric(vertical: 10),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                        ),
+                                      ),
+                                    ),
+                                  if (_partenaireDemandeId != null)
+                                    const SizedBox(width: 8),
+                                  Expanded(
+                                    child: ElevatedButton.icon(
+                                      onPressed: () async {
+                                        await WhatsAppHelper.ouvrir(
+                                          telephone: '${_partenaire!['telephone']}',
+                                          message: 'Bonjour ${_partenaire!['prenom']}, je te contacte au sujet du trajet SIRA KELEN.',
+                                        );
+                                      },
+                                      icon: const Icon(Icons.chat_rounded, color: Colors.white, size: 16),
+                                      label: const Text(
+                                        'WhatsApp',
+                                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12),
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF25D366),
+                                        padding: const EdgeInsets.symmetric(vertical: 10),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                      ),
+                                    ),
                                   ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF25D366),
-                                    padding: const EdgeInsets.symmetric(vertical: 10),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                  ),
-                                ),
+                                ],
                               ),
                             ],
                           ),

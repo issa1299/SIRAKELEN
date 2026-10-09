@@ -567,6 +567,36 @@ class ApiService {
     }
   }
 
+  // === DISCUSSION INTERNE ===
+  static Future<List<dynamic>> getMessages(String demandeId, String userId) async {
+    final response = await _get(Uri.parse('$baseUrl/messages/$demandeId/$userId'));
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      return jsonDecode(response.body) as List<dynamic>;
+    }
+    return [];
+  }
+
+  static Future<void> envoyerMessage({
+    required String demandeId,
+    required String auteurId,
+    required String contenu,
+  }) async {
+    final response = await _post(
+      Uri.parse('$baseUrl/messages'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'demandeId': demandeId,
+        'auteurId': auteurId,
+        'contenu': contenu,
+      }),
+    );
+    final body = response.body.isNotEmpty
+        ? jsonDecode(response.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    if (response.statusCode == 201) return;
+    throw ApiException(_messageErreur(body) ?? 'Envoi impossible');
+  }
+
   static String? _messageErreur(Map<String, dynamic> body) {
     final message = body['message'];
     if (message is List && message.isNotEmpty) {
