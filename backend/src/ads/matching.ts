@@ -25,13 +25,13 @@ export const MATCHING_CONFIG = {
   /** Fenetre horaire max (minutes). Au-dela = EXCLU. */
   ECART_MAX_MINUTES: 45,
   /** Ecart de cap max entre les deux trajets (degres). Au-dela = EXCLU. */
-  DIRECTION_MAX_DEGRES: 35,
+  DIRECTION_MAX_DEGRES: 45,
   /** Distance laterale max d'un point au trace de reference (km). Au-dela = EXCLU. */
-  CORRIDOR_MAX_KM: 1.2,
+  CORRIDOR_MAX_KM: 1.5,
   /** Part minimale du trace partagee (0..1). En-dessous = EXCLU. */
-  RECOUVREMENT_MIN: 0.15,
+  RECOUVREMENT_MIN: 0.1,
   /** Tolerance de projection au-dela des extremites du segment (en fraction). */
-  TOLERANCE_T: 0.08,
+  TOLERANCE_T: 0.3,
   /** Prefiltre geografique rapide : demi-boite englobante (degres). */
   PREFILTRE_BBOX_DEG: 0.05,
   /** Plafond de candidats evalues par AD (performances). */
