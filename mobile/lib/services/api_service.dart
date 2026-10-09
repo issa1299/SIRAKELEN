@@ -455,6 +455,7 @@ class ApiService {
     String? nom,
     String? quartier,
     String? photoUrl,
+    String? telephone,
   }) async {
     final response = await _patch(
       Uri.parse('$baseUrl/users/$id'),
@@ -464,6 +465,7 @@ class ApiService {
         if (nom != null) 'nom': nom,
         if (quartier != null) 'quartier': quartier,
         if (photoUrl != null) 'photoUrl': photoUrl,
+        if (telephone != null) 'telephone': telephone,
       }),
     );
     final body = jsonDecode(response.body) as Map<String, dynamic>;

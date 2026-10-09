@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -15,6 +15,11 @@ export class UpdateUserDto {
   @IsString()
   @MaxLength(120)
   quartier?: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^[0-9]{8}$/, { message: 'Le numéro doit contenir 8 chiffres' })
+  telephone?: string;
 
   @IsOptional()
   @IsString()

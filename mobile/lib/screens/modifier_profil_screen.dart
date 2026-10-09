@@ -17,6 +17,7 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
   final _prenom = TextEditingController();
   final _nom = TextEditingController();
   final _quartier = TextEditingController();
+  final _telephone = TextEditingController();
   bool _chargement = true;
   bool _enregistrement = false;
   String? _erreur;
@@ -47,6 +48,7 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
     _prenom.dispose();
     _nom.dispose();
     _quartier.dispose();
+    _telephone.dispose();
     super.dispose();
   }
 
@@ -56,6 +58,7 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
       _prenom.text = user['prenom'] as String? ?? '';
       _nom.text = user['nom'] as String? ?? '';
       _quartier.text = user['quartier'] as String? ?? '';
+      _telephone.text = user['telephone'] as String? ?? '';
       _photoUrl = user['photoUrl'] as String?;
       if (!mounted) return;
       setState(() => _chargement = false);
@@ -149,6 +152,7 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
         nom: _nom.text.trim(),
         quartier: _quartier.text.trim(),
         photoUrl: newPhotoUrl,
+        telephone: _telephone.text.replaceAll(' ', ''),
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -293,40 +297,35 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
                           _carteSection(
                             titre: 'COMPTE',
                             enfants: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 14),
-                                decoration: BoxDecoration(
-                                  color: kCream,
-                                  borderRadius: BorderRadius.circular(14),
+                              _label('Numéro de téléphone'),
+                              TextFormField(
+                                controller: _telephone,
+                                keyboardType: TextInputType.phone,
+                                maxLength: 8,
+                                style: const TextStyle(fontSize: 15),
+                                decoration: const InputDecoration(
+                                  hintText: '70 12 34 56',
+                                  prefixText: '+223  ',
+                                  counterText: '',
                                 ),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.phone_outlined,
-                                        size: 20, color: kTextSecondary),
-                                    const SizedBox(width: 12),
-                                    const Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text('Numéro vérifié',
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w600)),
-                                          SizedBox(height: 2),
-                                          Text(
-                                              'Lié à ton compte, non modifiable ici',
-                                              style: TextStyle(
-                                                  fontSize: 11,
-                                                  color: kTextSecondary)),
-                                        ],
-                                      ),
-                                    ),
-                                    const Icon(Icons.verified_rounded,
-                                        size: 18, color: kGreen),
-                                  ],
-                                ),
+                                validator: (v) {
+                                  final chiffres = v?.replaceAll(' ', '') ?? '';
+                                  if (chiffres.length != 8) {
+                                    return 'Le numéro doit contenir 8 chiffres';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.verified_rounded, size: 14, color: kGreen),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Numéro vérifié',
+                                    style: TextStyle(fontSize: 12, color: kTextSecondary),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

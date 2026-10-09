@@ -4,7 +4,6 @@ import 'package:latlong2/latlong.dart';
 import '../main.dart';
 import '../services/api_service.dart';
 import '../services/carte_service.dart';
-import '../services/whatsapp_helper.dart';
 import 'notifications_screen.dart';
 import 'chat_screen.dart';
 import 'publier_screen.dart';
@@ -427,30 +426,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: kOrange.withAlpha(120)),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-              ),
-            ),
-          ],
-          if (acceptee) ...[
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  await WhatsAppHelper.ouvrir(
-                    telephone: '${proprietaire['telephone']}',
-                    message: 'Bonjour ${proprietaire['prenom']}, je te contacte au sujet du trajet SIRA KELEN.',
-                  );
-                },
-                icon: const Icon(Icons.chat_rounded, color: Colors.white, size: 18),
-                label: Text(
-                  'Contacter ${proprietaire['prenom']} via WhatsApp',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF25D366),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
@@ -1196,49 +1171,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                               const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  if (_partenaireDemandeId != null)
-                                    Expanded(
-                                      child: OutlinedButton.icon(
-                                        onPressed: () => _ouvrirChat(
-                                          demandeId: _partenaireDemandeId!,
-                                          partenaireNom: '${_partenaire!['prenom']} ${_partenaire!['nom']}',
-                                          trajetLabel: '${_adActif!['depart']} → ${_adActif!['destination']}',
-                                        ),
-                                        icon: const Icon(Icons.chat_bubble_outline_rounded, size: 16, color: kOrange),
-                                        label: const Text('Discuter', style: TextStyle(color: kOrange, fontWeight: FontWeight.w700, fontSize: 12)),
-                                        style: OutlinedButton.styleFrom(
-                                          side: BorderSide(color: kOrange.withAlpha(120)),
-                                          padding: const EdgeInsets.symmetric(vertical: 10),
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                        ),
-                                      ),
+                              if (_partenaireDemandeId != null)
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: OutlinedButton.icon(
+                                    onPressed: () => _ouvrirChat(
+                                      demandeId: _partenaireDemandeId!,
+                                      partenaireNom: '${_partenaire!['prenom']} ${_partenaire!['nom']}',
+                                      trajetLabel: '${_adActif!['depart']} → ${_adActif!['destination']}',
                                     ),
-                                  if (_partenaireDemandeId != null)
-                                    const SizedBox(width: 8),
-                                  Expanded(
-                                    child: ElevatedButton.icon(
-                                      onPressed: () async {
-                                        await WhatsAppHelper.ouvrir(
-                                          telephone: '${_partenaire!['telephone']}',
-                                          message: 'Bonjour ${_partenaire!['prenom']}, je te contacte au sujet du trajet SIRA KELEN.',
-                                        );
-                                      },
-                                      icon: const Icon(Icons.chat_rounded, color: Colors.white, size: 16),
-                                      label: const Text(
-                                        'WhatsApp',
-                                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12),
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF25D366),
-                                        padding: const EdgeInsets.symmetric(vertical: 10),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                      ),
+                                    icon: const Icon(Icons.chat_bubble_outline_rounded, size: 16, color: Colors.white),
+                                    label: const Text('Discuter avec mon partenaire', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
+                                    style: OutlinedButton.styleFrom(
+                                      side: const BorderSide(color: Colors.white70),
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
                             ],
                           ),
                         ),
@@ -1259,23 +1209,74 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       if (_adActif!['statut'] == 'en_cours_de_finalisation') ...[
-                        const SizedBox(height: 6),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 44,
-                          child: FilledButton.icon(
-                            onPressed: () async {
-                              try {
-                                await ApiService.marquerOrganise(
-                                    _adActif!['id'] as String, widget.userId);
-                                await _chargerMonAd();
-                              } catch (_) {}
-                            },
-                            icon: const Icon(Icons.check_rounded, size: 18),
-                            label: const Text('Marquer comme trajet organisé'),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: kGreen,
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [kGreen, Color(0xFF125A1E)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: kGreen.withAlpha(70),
+                                blurRadius: 16,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Row(
+                                children: [
+                                  Icon(Icons.emoji_events_outlined, color: Colors.white, size: 22),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Trajet effectué ?',
+                                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white),
+                                        ),
+                                        SizedBox(height: 2),
+                                        Text(
+                                          'Confirme pour clôturer et libérer ton planning.',
+                                          style: TextStyle(fontSize: 12, color: Colors.white70, height: 1.4),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 48,
+                                child: FilledButton.icon(
+                                  onPressed: () async {
+                                    try {
+                                      await ApiService.marquerOrganise(
+                                          _adActif!['id'] as String, widget.userId);
+                                      await _chargerMonAd();
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                          content: Text('Trajet organisé. Bon voyage !'),
+                                          backgroundColor: kGreen));
+                                    } catch (_) {}
+                                  },
+                                  icon: const Icon(Icons.check_circle_rounded, size: 20),
+                                  label: const Text('Marquer comme trajet organisé'),
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: kGreen,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -1306,22 +1307,43 @@ class _HomeScreenState extends State<HomeScreen> {
                   _sectionTitle('Trajets compatibles', count: _compatibilites.length),
                   ..._compatibilites.map(
                       (c) => _carteCompatibilite(c as Map<String, dynamic>)),
-                ] else
-                  _emptyState(),
-
-                const SizedBox(height: 10),
-                Center(
-                  child: Text(
-                    _adActif!['role'] == 'conducteur'
-                        ? 'Recherche de passagers compatibles…'
-                        : 'Recherche de conducteurs compatibles…',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: kTextSecondary,
-                      fontStyle: FontStyle.italic,
+                ] else ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: kBorder),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(color: kOrangeLight, shape: BoxShape.circle),
+                          child: const Icon(Icons.search_rounded, color: kOrange, size: 26),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Aucune compatibilité pour le moment',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _adActif!['role'] == 'conducteur'
+                              ? 'Ton trajet est visible. Les passagers compatibles apparaîtront ici.'
+                              : 'Ton trajet est visible. Les conducteurs compatibles apparaîtront ici.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 13, color: kTextSecondary, height: 1.5),
+                        ),
+                      ],
                     ),
                   ),
-                ),
+                ],
+
+                const SizedBox(height: 10),
               ] else ...[
                 _heroPublier(),
                 const SizedBox(height: 16),

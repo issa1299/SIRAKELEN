@@ -114,6 +114,14 @@ export class UsersService {
 
   async update(id: string, dto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
+    if (dto.telephone && dto.telephone !== user.telephone) {
+      const pris = await this.usersRepository.findOne({
+        where: { telephone: dto.telephone },
+      });
+      if (pris) {
+        throw new ConflictException('Ce numéro est déjà utilisé par un autre compte');
+      }
+    }
     Object.assign(user, dto);
     return this.usersRepository.save(user);
   }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../main.dart';
 import '../services/api_service.dart';
-import '../services/whatsapp_helper.dart';
 
 class ProfilAutreScreen extends StatefulWidget {
   final String targetUserId;
@@ -70,13 +69,6 @@ class _ProfilAutreScreenState extends State<ProfilAutreScreen> {
   Future<void> _appeler(String tel) async {
     final uri = Uri(scheme: 'tel', path: tel.replaceAll(' ', ''));
     if (await canLaunchUrl(uri)) await launchUrl(uri);
-  }
-
-  Future<void> _whatsapp(String tel, String prenom) async {
-    await WhatsAppHelper.ouvrir(
-      telephone: tel,
-      message: 'Bonjour $prenom, je te contacte au sujet du trajet SIRA KELEN.',
-    );
   }
 
   Future<void> _envoyerDemande(String adId) async {
@@ -310,8 +302,6 @@ class _ProfilAutreScreenState extends State<ProfilAutreScreen> {
                     valeur: '+223 $telephone',
                     actions: [
                       _boutonAction(Icons.call_rounded, kGreen, () => _appeler(telephone)),
-                      const SizedBox(width: 8),
-                      _boutonAction(Icons.chat_rounded, const Color(0xFF25D366), () => _whatsapp(telephone, prenom)),
                     ],
                   ),
                 if (email.isNotEmpty) ...[
