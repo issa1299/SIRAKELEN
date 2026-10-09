@@ -47,6 +47,18 @@ class _PublierScreenState extends State<PublierScreen> {
 
   static const LatLng _bamakoCenter = LatLng(12.6392, -8.0029);
 
+  /// Destinations par défaut : un tap lance la recherche exacte (Nominatim).
+  static const List<String> _lieuxPopulaires = [
+    'Campus Universitaire',
+    'Centre-ville',
+    'Aéroport Bamako',
+    'Sogoniko',
+    'Kalaban Coro',
+    'ACI 2000',
+    'Djélibougou',
+    'Faladié',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -582,6 +594,54 @@ class _PublierScreenState extends State<PublierScreen> {
                               );
                             },
                           ),
+                  ),
+                // Lieux par défaut : un tap lance la recherche exacte.
+                if (!_rechercheEnCours &&
+                    _rechercheResultats.isEmpty &&
+                    _rechercheController.text.trim().isEmpty)
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [BoxShadow(color: Colors.black.withAlpha(15), blurRadius: 8)],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.star_rounded, color: kOrange, size: 16),
+                            const SizedBox(width: 6),
+                            Text('Lieux populaires',
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: kTextSecondary)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _lieuxPopulaires.map((lieu) {
+                            return GestureDetector(
+                              onTap: () {
+                                _rechercheController.text = lieu;
+                                _rechercher(lieu);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: kOrangeLight,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(lieu,
+                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: kOrange)),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
                   ),
               ],
             ),
