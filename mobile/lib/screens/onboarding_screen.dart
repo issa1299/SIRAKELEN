@@ -16,7 +16,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   int _page = 0;
   Timer? _autoScrollTimer;
-  static const _autoScrollDuration = Duration(seconds: 5);
+  static const _autoScrollDuration = Duration(seconds: 8);
 
   final _slides = const [
     _SlideData(
