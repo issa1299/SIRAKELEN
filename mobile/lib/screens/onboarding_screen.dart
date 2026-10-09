@@ -20,25 +20,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final _slides = const [
     _SlideData(
-      illustration: '1',
-      eyebrow: 'VOYAGEZ MIEUX. DEPENSEZ MOINS.',
-      title: 'Reduisez vos frais de transport au quotidien.',
+      image: 'assets/1.jpeg',
+      eyebrow: 'VOYAGEZ MIEUX. DÉPENSEZ MOINS.',
+      title: 'Réduisez vos frais de transport au quotidien.',
       description:
-          'Partagez les couts de deplacement avec des personnes qui effectuent un trajet similaire au votre.',
+          'Partagez les coûts de déplacement avec des personnes qui effectuent un trajet similaire au vôtre.',
     ),
     _SlideData(
-      illustration: '2',
+      image: 'assets/2.jpeg',
       eyebrow: 'PUBLICATION SIMPLE. MATCHING INTELLIGENT.',
       title: 'Publiez votre trajet, nous trouvons les correspondances.',
       description:
-          'Deposez un avis de deplacement en quelques secondes. Notre systeme identifie automatiquement les utilisateurs dont l\'itineraire est compatible avec le votre.',
+          'Déposez un avis de déplacement en quelques secondes. Notre système identifie automatiquement les utilisateurs dont l\'itinéraire est compatible avec le vôtre.',
     ),
     _SlideData(
-      illustration: '3',
-      eyebrow: 'SECURITE, CONFIANCE ET LIBERTE DE CHOIX.',
-      title: 'Des trajets partages en toute confiance.',
+      image: 'assets/3.jpeg',
+      eyebrow: 'SÉCURITÉ, CONFIANCE ET LIBERTÉ DE CHOIX.',
+      title: 'Des trajets partagés en toute confiance.',
       description:
-          'Chaque utilisateur est verifie par numero de telephone. Vous choisissez librement les personnes avec lesquelles partager votre trajet.',
+          'Chaque utilisateur est vérifié. Vous choisissez librement les personnes avec lesquelles partager votre trajet.',
     ),
   ];
 
@@ -79,13 +79,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  void _suivant() {
-    _autoScrollTimer?.cancel();
-    _controller.animateToPage(_page + 1,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOutCubic);
-  }
-
   void _passer() {
     _autoScrollTimer?.cancel();
     _controller.animateToPage(_slides.length - 1,
@@ -93,18 +86,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeInOutCubic);
   }
 
+  void _suivant() {
+    _autoScrollTimer?.cancel();
+    _controller.animateToPage(_page + 1,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOutCubic);
+  }
+
+  Future<void> _marquerVu() async {
+    final p = await SharedPreferences.getInstance();
+    await p.setBool('onboarding_vu', true);
+  }
+
   void _creerCompte() {
     _autoScrollTimer?.cancel();
-    SharedPreferences.getInstance()
-        .then((p) => p.setBool('onboarding_vu', true));
+    _marquerVu();
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (_) => const RegisterScreen()));
   }
 
   void _seConnecter() {
     _autoScrollTimer?.cancel();
-    SharedPreferences.getInstance()
-        .then((p) => p.setBool('onboarding_vu', true));
+    _marquerVu();
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (_) => const LoginScreen()));
   }
@@ -112,126 +115,88 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                // Barre de progression + compteur
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(28, 12, 28, 0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(3),
-                          child: LinearProgressIndicator(
-                            value: (_page + 1) / _slides.length,
-                            minHeight: 6,
-                            backgroundColor: kOrangeLight,
-                            valueColor: const AlwaysStoppedAnimation<Color>(kOrange),
-                          ),
-                        ),
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          PageView(
+            controller: _controller,
+            onPageChanged: _onPageChanged,
+            physics: const BouncingScrollPhysics(),
+            children: List.generate(_slides.length, (i) {
+              final s = _slides[i];
+              final isLast = i == _slides.length - 1;
+              return _Slide(
+                data: s,
+                page: i,
+                total: _slides.length,
+                isLast: isLast,
+                onSuivant: _suivant,
+                onCreerCompte: _creerCompte,
+                onSeConnecter: _seConnecter,
+              );
+            }),
+          ),
+          // Haut : progression + compteur + Passer
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(3),
+                      child: LinearProgressIndicator(
+                        value: (_page + 1) / _slides.length,
+                        minHeight: 5,
+                        backgroundColor: Colors.white.withAlpha(70),
+                        valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
-                      const SizedBox(width: 12),
-                      Text(
-                        '${_page + 1}/${_slides.length}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: PageView(
-                    controller: _controller,
-                    onPageChanged: _onPageChanged,
-                    physics: const BouncingScrollPhysics(),
-                    children: List.generate(_slides.length, (i) {
-                      final s = _slides[i];
-                      final isLast = i == _slides.length - 1;
-                      return _Slide(
-                        data: s,
-                        page: i,
-                        total: _slides.length,
-                        isLast: isLast,
-                        onSuivant: _suivant,
-                        onCreerCompte: _creerCompte,
-                        onSeConnecter: _seConnecter,
-                      );
-                    }),
-                  ),
-                ),
-              ],
-            ),
-            if (_page < _slides.length - 1)
-              Positioned(
-                top: 12,
-                right: 16,
-                child: GestureDetector(
-                  onTap: _passer,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(
+                  const SizedBox(width: 12),
+                  Text(
+                    '${_page + 1}/${_slides.length}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(20),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('Passer',
-                            style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey[600])),
-                        if (_page == 0) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: kOrangeLight,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text('-40%',
-                                style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    color: kOrange)),
-                          ),
-                        ],
-                      ],
                     ),
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  if (_page < _slides.length - 1)
+                    GestureDetector(
+                      onTap: _passer,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(40),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text('Passer',
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white)),
+                      ),
+                    ),
+                ],
               ),
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
 class _SlideData {
-  final String illustration;
+  final String image;
   final String eyebrow;
   final String title;
   final String description;
 
   const _SlideData({
-    required this.illustration,
+    required this.image,
     required this.eyebrow,
     required this.title,
     required this.description,
@@ -257,168 +222,154 @@ class _Slide extends StatelessWidget {
     required this.onSeConnecter,
   });
 
-  Widget _buildIllustration() {
-    return Container(
-      width: double.infinity,
-      height: 280,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            kOrangeLight,
-            Colors.white,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: 180,
-            height: 180,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: kOrange.withAlpha(20),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Image.asset(
-              'assets/${data.illustration}.jpeg',
-              fit: BoxFit.contain,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            _buildIllustration(),
-            const SizedBox(height: 36),
-            Text(
-              data.eyebrow,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.5,
-                color: kOrange,
-              ),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Image plein écran
+        Image.asset(data.image, fit: BoxFit.cover),
+        // Voile sombre pour lire le texte
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withAlpha(70),
+                Colors.black.withAlpha(30),
+                Colors.black.withAlpha(190),
+              ],
+              stops: const [0.0, 0.45, 1.0],
             ),
-            const SizedBox(height: 16),
-            Text(
-              data.title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w800,
-                height: 1.3,
-                color: kTextPrimary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                data.description,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.grey[600],
-                  height: 1.6,
-                ),
-              ),
-            ),
-            const SizedBox(height: 36),
-            if (!isLast) ...[
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: onSuivant,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: kOrange,
-                    foregroundColor: Colors.white,
-                    elevation: 2,
-                    shadowColor: kOrange.withAlpha(80),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Suivant', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-                      SizedBox(width: 8),
-                      Icon(Icons.arrow_forward_rounded, size: 20),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-            if (isLast) ...[
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: onCreerCompte,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: kOrange,
-                    foregroundColor: Colors.white,
-                    elevation: 2,
-                    shadowColor: kOrange.withAlpha(80),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    'Creer un compte',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: OutlinedButton(
-                  onPressed: onSeConnecter,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: kTextPrimary,
-                    side: BorderSide(color: Colors.grey[300]!),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    'J\'ai deja un compte',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-            const SizedBox(height: 20),
-          ],
+          ),
         ),
-      ),
+        // Contenu bas
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(28, 0, 28, 28),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  data.eyebrow,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.5,
+                    color: Color(0xFFFFB25E),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  data.title,
+                  style: const TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w900,
+                    height: 1.2,
+                    letterSpacing: -0.5,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  data.description,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.white.withAlpha(220),
+                    height: 1.6,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: List.generate(total, (i) {
+                    final active = i == page;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 350),
+                      curve: Curves.easeInOutCubic,
+                      margin: const EdgeInsets.only(right: 6),
+                      width: active ? 32 : 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: active ? Colors.white : Colors.white.withAlpha(90),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: 24),
+                if (!isLast)
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: onSuivant,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kOrange,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Suivant',
+                              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                          SizedBox(width: 8),
+                          Icon(Icons.arrow_forward_rounded, size: 20),
+                        ],
+                      ),
+                    ),
+                  )
+                else ...[
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: onCreerCompte,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kOrange,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: const Text(
+                        'Créer un compte',
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: OutlinedButton(
+                      onPressed: onSeConnecter,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.white, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: const Text(
+                        'J\'ai déjà un compte',
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
