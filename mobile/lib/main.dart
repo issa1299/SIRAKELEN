@@ -79,7 +79,7 @@ class EcranDemarrage extends StatelessWidget {
                     ),
                     child: ClipOval(
                       child: Image.asset(
-                        'assets/logo-officiel.png',
+                        'assets/logo-sk.png',
                         fit: BoxFit.contain,
                       ),
                     ),

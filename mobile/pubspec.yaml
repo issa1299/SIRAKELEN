@@ -70,6 +70,7 @@ flutter:
     - assets/config.json
     - assets/googlelogo.webp
     - assets/logo-officiel.png
+    - assets/logo-sk.png
     - assets/app-icon-512.png
     - assets/1.jpeg
     - assets/2.jpeg
