@@ -520,8 +520,8 @@ class _PublierScreenState extends State<PublierScreen> {
                             ),
                             Text(
                               isDepart
-                                  ? 'Étape 1 sur 2 · Touchez la carte ou cherchez'
-                                  : 'Étape 2 sur 2 · Choisissez l\'arrivée',
+                                  ? 'Étape 1 sur 2 · Bouge la carte sous l\'épingle'
+                                  : 'Étape 2 sur 2 · Bouge la carte sous l\'épingle',
                               style: TextStyle(fontSize: 12, color: kTextSecondary),
                             ),
                           ],
@@ -818,24 +818,21 @@ class _PublierScreenState extends State<PublierScreen> {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        Expanded(
-                          child: SizedBox(
-                            height: 52,
-                            child: OutlinedButton.icon(
-                              onPressed: _utiliserMaPosition,
-                              icon: Icon(Icons.my_location_rounded, color: kOrange, size: 20),
-                              label: Text('Ma position',
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: kOrange)),
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(color: kOrange.withAlpha(120)),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                              ),
+                        SizedBox(
+                          width: 52,
+                          height: 52,
+                          child: OutlinedButton(
+                            onPressed: _utiliserMaPosition,
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: kOrange.withAlpha(120)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                              padding: EdgeInsets.zero,
                             ),
+                            child: Icon(Icons.my_location_rounded, color: kOrange, size: 22),
                           ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
-                          flex: 2,
                           child: SizedBox(
                             height: 52,
                             child: FilledButton(
