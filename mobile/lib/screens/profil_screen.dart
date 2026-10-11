@@ -237,7 +237,10 @@ class _ProfilScreenState extends State<ProfilScreen> {
                       ],
                     ),
                     const SizedBox(height: 4),
-                    Row(
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
@@ -254,13 +257,11 @@ class _ProfilScreenState extends State<ProfilScreen> {
                             ),
                           ),
                         ),
-                        if (depuis.isNotEmpty) ...[
-                          const SizedBox(width: 10),
+                        if (depuis.isNotEmpty)
                           Text(
                             'Membre depuis $depuis',
                             style: TextStyle(fontSize: 12, color: kTextSecondary),
                           ),
-                        ],
                       ],
                     ),
                     const SizedBox(height: 16),
