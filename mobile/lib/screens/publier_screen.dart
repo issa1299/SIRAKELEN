@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import '../services/api_service.dart';
 import '../services/carte_service.dart';
@@ -44,6 +45,7 @@ class _PublierScreenState extends State<PublierScreen> {
   LatLng? _centreTemp;
   bool _nomEnCours = false;
   Timer? _debounceGeo;
+  bool _aideCarte = false;
 
   static const LatLng _bamakoCenter = LatLng(12.6392, -8.0029);
 
@@ -65,6 +67,16 @@ class _PublierScreenState extends State<PublierScreen> {
     final demain = DateTime.now().add(const Duration(days: 1));
     _date = _formatDate(demain);
     _heure.text = '07:30';
+    SharedPreferences.getInstance().then((p) {
+      if (!mounted) return;
+      setState(() => _aideCarte = !(p.getBool('aide_carte_vue') ?? false));
+    });
+  }
+
+  Future<void> _fermerAide() async {
+    setState(() => _aideCarte = false);
+    final p = await SharedPreferences.getInstance();
+    await p.setBool('aide_carte_vue', true);
   }
 
   @override
@@ -429,17 +441,36 @@ class _PublierScreenState extends State<PublierScreen> {
           IgnorePointer(
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 36),
+                padding: const EdgeInsets.only(bottom: 44),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _pin(isDepart ? 'D' : 'A', isDepart ? kGreen : const Color(0xFF2962FF)),
                     Container(
-                      width: 14,
-                      height: 5,
+                      width: 46,
+                      height: 46,
                       decoration: BoxDecoration(
-                        color: Colors.black.withAlpha(50),
-                        borderRadius: BorderRadius.circular(3),
+                        color: isDepart ? kGreen : const Color(0xFF2962FF),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 4),
+                        boxShadow: [BoxShadow(color: Colors.black.withAlpha(70), blurRadius: 8, offset: const Offset(0, 3))],
+                      ),
+                      child: Center(
+                        child: Text(
+                          isDepart ? 'D' : 'A',
+                          style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withAlpha(160),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        isDepart ? 'DÉPART' : 'ARRIVÉE',
+                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1),
                       ),
                     ),
                   ],
@@ -827,6 +858,55 @@ class _PublierScreenState extends State<PublierScreen> {
               ),
             ),
           ),
+          // Aide première utilisation : explique le geste.
+          if (_aideCarte)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withAlpha(120),
+                child: Center(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 32),
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(color: kOrangeLight, shape: BoxShape.circle),
+                          child: const Icon(Icons.pan_tool_outlined, color: kOrange, size: 30),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Place l\'épingle avec ton doigt',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Fais glisser la carte pour mettre l\'épingle verte sur ton point de départ. Le nom du lieu s\'affiche tout seul en bas.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 14, color: kTextSecondary, height: 1.5),
+                        ),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: FilledButton(
+                            onPressed: _fermerAide,
+                            child: const Text('Compris !'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

@@ -1,4 +1,4 @@
-# Feuille de route — Développement de SIRA KÉLÉ
+# Feuille de route — Développement de SIRA KELEN
 
 ## Étape 0 : État des outils (machine de Issaka)
 

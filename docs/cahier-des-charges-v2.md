@@ -1,4 +1,4 @@
-# CAHIER DES CHARGES — SIRA KÉLÉ v2
+# CAHIER DES CHARGES — SIRA KELEN v2
 ## Plateforme de mise en relation pour le partage de trajets urbains au Mali
 
 **Mise à jour : Juillet 2026 — basé sur les résultats de l'enquête terrain (100 répondants)**
