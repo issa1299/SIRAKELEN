@@ -49,16 +49,18 @@ class _PublierScreenState extends State<PublierScreen> {
 
   static const LatLng _bamakoCenter = LatLng(12.6392, -8.0029);
 
-  /// Destinations par défaut : un tap lance la recherche exacte (Nominatim).
-  static const List<String> _lieuxPopulaires = [
-    'Campus Universitaire',
-    'Centre-ville',
-    'Aéroport Bamako',
-    'Sogoniko',
-    'Kalaban Coro',
-    'ACI 2000',
-    'Djélibougou',
-    'Faladié',
+  /// Universités du Mali proposées dans le dialogue de recherche.
+  static const List<String> _universites = [
+    'Université des Sciences Techniques et Technologies de Bamako',
+    'Université des Sciences Sociales et de Gestion de Bamako',
+    'Université des Lettres et Sciences Humaines de Bamako',
+    'Université des Sciences Juridiques et Politiques de Bamako',
+    'École Normale Supérieure de Bamako',
+    'École Nationale d’Ingénieurs Abderhamane Baba Touré',
+    'Institut Polytechnique Rural de Katibougou',
+    'Institut Universitaire de Gestion de Bamako',
+    'Université Kankou Moussa',
+    'Conservatoire des Arts et Métiers Multimédia de Bamako',
   ];
 
   @override
@@ -142,6 +144,180 @@ class _PublierScreenState extends State<PublierScreen> {
         _rechercheEnCours = false;
       });
     }
+  }
+
+  /// Dialogue de recherche : champ + universités du Mali + résultats.
+  Future<void> _ouvrirRecherche() async {
+    final bool isDepart = _etape == 0;
+    _rechercheController.clear();
+    setState(() => _rechercheResultats = []);
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheet) {
+          Future<void> chercher(String q) async {
+            if (q.trim().length < 2) {
+              setSheet(() => _rechercheResultats = []);
+              setState(() => _rechercheResultats = []);
+              return;
+            }
+            setSheet(() => _rechercheEnCours = true);
+            final res = await CarteService.rechercher(q);
+            if (!mounted) return;
+            setSheet(() {
+              _rechercheResultats = res;
+              _rechercheEnCours = false;
+            });
+            setState(() {});
+          }
+
+          final query = _rechercheController.text.trim();
+          return Container(
+            height: MediaQuery.of(ctx).size.height * 0.75,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: SafeArea(
+              top: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Container(width: 40, height: 4,
+                        decoration: BoxDecoration(color: kBorder, borderRadius: BorderRadius.circular(2))),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                    child: Text(
+                      isDepart ? 'Lieu de départ' : 'Destination',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: TextField(
+                      controller: _rechercheController,
+                      autofocus: true,
+                      style: const TextStyle(fontSize: 15),
+                      decoration: InputDecoration(
+                        hintText: 'Écris un quartier, une université…',
+                        hintStyle: TextStyle(color: Colors.grey[400]),
+                        prefixIcon: Icon(Icons.search_rounded, color: kOrange),
+                        suffixIcon: _rechercheController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.close, size: 20),
+                                onPressed: () {
+                                  _rechercheController.clear();
+                                  chercher('');
+                                },
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: kCream,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      ),
+                      onChanged: chercher,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: _rechercheEnCours
+                        ? const Center(
+                            child: SizedBox(width: 26, height: 26,
+                                child: CircularProgressIndicator(strokeWidth: 2.5)))
+                        : _rechercheResultats.isNotEmpty
+                            ? ListView.separated(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                itemCount: _rechercheResultats.length,
+                                separatorBuilder: (_, __) =>
+                                    Divider(height: 1, indent: 16, endIndent: 16, color: Colors.grey.withAlpha(30)),
+                                itemBuilder: (_, i) {
+                                  final r = _rechercheResultats[i];
+                                  return ListTile(
+                                    leading: Icon(Icons.location_on_outlined, color: kOrange, size: 22),
+                                    title: Text(r.nom,
+                                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis),
+                                    subtitle: Text(r.adresseComplete,
+                                        style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis),
+                                    onTap: () {
+                                      Navigator.pop(ctx);
+                                      _selectionnerLieu(r);
+                                    },
+                                  );
+                                },
+                              )
+                            : query.length >= 2
+                                ? Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.search_off_rounded, size: 40, color: Colors.grey[300]),
+                                        const SizedBox(height: 10),
+                                        Text('Aucun lieu trouvé pour « $query »',
+                                            style: TextStyle(fontSize: 13, color: kTextSecondary)),
+                                      ],
+                                    ),
+                                  )
+                                : ListView(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 8),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.school_outlined, color: kOrange, size: 18),
+                                            const SizedBox(width: 8),
+                                            const Text('Universités au Mali',
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w800,
+                                                    color: kTextPrimary)),
+                                          ],
+                                        ),
+                                      ),
+                                      ..._universites.map((u) => ListTile(
+                                            dense: true,
+                                            contentPadding: EdgeInsets.zero,
+                                            leading: Container(
+                                              width: 38,
+                                              height: 38,
+                                              decoration: BoxDecoration(
+                                                  color: kOrangeLight,
+                                                  borderRadius: BorderRadius.circular(10)),
+                                              child: Icon(Icons.school_outlined,
+                                                  color: kOrange, size: 20),
+                                            ),
+                                            title: Text(u,
+                                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis),
+                                            trailing: Icon(Icons.north_west_rounded,
+                                                size: 16, color: Colors.grey[400]),
+                                            onTap: () {
+                                              _rechercheController.text = u;
+                                              chercher(u);
+                                            },
+                                          )),
+                                    ],
+                                  ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   void _selectionnerLieu(LieuResultat lieu) {
@@ -481,7 +657,7 @@ class _PublierScreenState extends State<PublierScreen> {
 
           // Header carte blanche
           Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
+            top: MediaQuery.of(context).padding.top + 68,
             left: 12,
             right: 12,
             child: Container(
@@ -544,137 +720,35 @@ class _PublierScreenState extends State<PublierScreen> {
             ),
           ),
 
-          // Barre de recherche
+          // Barre de recherche (tout en haut) : ouvre le dialogue.
           Positioned(
-            top: MediaQuery.of(context).padding.top + 168,
+            top: MediaQuery.of(context).padding.top + 8,
             left: 12,
             right: 12,
-            child: Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 10, offset: const Offset(0, 3))],
-                  ),
-                  child: TextField(
-                    controller: _rechercheController,
-                    style: const TextStyle(fontSize: 15),
-                    decoration: InputDecoration(
-                      hintText: isDepart ? 'Rechercher un lieu de depart...' : 'Rechercher une destination...',
-                      hintStyle: TextStyle(color: Colors.grey[400]),
-                      prefixIcon: Icon(Icons.search_rounded, color: kOrange),
-                      suffixIcon: _rechercheController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.close, size: 20),
-                              onPressed: () {
-                                _rechercheController.clear();
-                                setState(() => _rechercheResultats = []);
-                              },
-                            )
-                          : null,
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    ),
-                    onChanged: _rechercher,
-                  ),
+            child: GestureDetector(
+              onTap: _ouvrirRecherche,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [BoxShadow(color: Colors.black.withAlpha(25), blurRadius: 10, offset: const Offset(0, 3))],
                 ),
-                if (_rechercheEnCours || _rechercheResultats.isNotEmpty || _rechercheController.text.trim().length >= 2)
-                  Container(
-                    margin: const EdgeInsets.only(top: 4),
-                    constraints: const BoxConstraints(maxHeight: 220),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [BoxShadow(color: Colors.black.withAlpha(15), blurRadius: 8)],
+                child: Row(
+                  children: [
+                    Icon(Icons.search_rounded, color: kOrange, size: 22),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        isDepart ? 'Rechercher un lieu de départ…' : 'Rechercher une destination…',
+                        style: TextStyle(fontSize: 15, color: Colors.grey[500]),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    child: _rechercheEnCours
-                        ? const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Center(child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))),
-                          )
-                        : _rechercheResultats.isEmpty
-                            ? const Padding(
-                                padding: EdgeInsets.all(16),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.search_off_rounded, color: kTextSecondary, size: 20),
-                                    SizedBox(width: 10),
-                                    Expanded(
-                                      child: Text(
-                                        'Aucun lieu trouvé. Touchez la carte pour placer le point.',
-                                        style: TextStyle(fontSize: 13, color: kTextSecondary),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : ListView.separated(
-                            shrinkWrap: true,
-                            padding: EdgeInsets.zero,
-                            itemCount: _rechercheResultats.length,
-                            separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.withAlpha(20)),
-                            itemBuilder: (ctx, i) {
-                              final r = _rechercheResultats[i];
-                              return ListTile(
-                                dense: true,
-                                leading: Icon(Icons.location_on_outlined, color: kOrange, size: 20),
-                                title: Text(r.nom, style: const TextStyle(fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                subtitle: Text(r.adresseComplete, style: TextStyle(fontSize: 11, color: Colors.grey[500]), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                onTap: () => _selectionnerLieu(r),
-                              );
-                            },
-                          ),
-                  ),
-                // Lieux par défaut : un tap lance la recherche exacte.
-                if (!_rechercheEnCours &&
-                    _rechercheResultats.isEmpty &&
-                    _rechercheController.text.trim().isEmpty)
-                  Container(
-                    margin: const EdgeInsets.only(top: 8),
-                    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [BoxShadow(color: Colors.black.withAlpha(15), blurRadius: 8)],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.star_rounded, color: kOrange, size: 16),
-                            const SizedBox(width: 6),
-                            Text('Lieux populaires',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: kTextSecondary)),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: _lieuxPopulaires.map((lieu) {
-                            return GestureDetector(
-                              onTap: () {
-                                _rechercheController.text = lieu;
-                                _rechercher(lieu);
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: kOrangeLight,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(lieu,
-                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: kOrange)),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
+                  ],
+                ),
+              ),
             ),
           ),
 
