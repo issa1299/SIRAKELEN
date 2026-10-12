@@ -46,21 +46,29 @@ class _PublierScreenState extends State<PublierScreen> {
   bool _nomEnCours = false;
   Timer? _debounceGeo;
   bool _aideCarte = false;
+  List<LieuResultat> _unisProches = [];
+  bool _unisEnCours = false;
 
   static const LatLng _bamakoCenter = LatLng(12.6392, -8.0029);
 
-  /// Universités du Mali proposées dans le dialogue de recherche.
-  static const List<String> _universites = [
-    'Université des Sciences Techniques et Technologies de Bamako',
-    'Université des Sciences Sociales et de Gestion de Bamako',
-    'Université des Lettres et Sciences Humaines de Bamako',
-    'Université des Sciences Juridiques et Politiques de Bamako',
-    'École Normale Supérieure de Bamako',
-    'École Nationale d’Ingénieurs Abderhamane Baba Touré',
-    'Institut Polytechnique Rural de Katibougou',
-    'Institut Universitaire de Gestion de Bamako',
-    'Université Kankou Moussa',
-    'Conservatoire des Arts et Métiers Multimédia de Bamako',
+  /// Quartiers par défaut proposés dans le dialogue de recherche.
+  static const List<String> _quartiers = [
+    'Badalabougou',
+    'Kalaban Coro',
+    'Sogoniko',
+    'ACI 2000',
+    'Hippodrome',
+    'Djélibougou',
+    'Faladié',
+    'Korofina',
+    'Niamakoro',
+    'Yirimadio',
+    'Magnambougou',
+    'Baco-Djicoroni',
+    'Sabalibougou',
+    'Hamdallaye',
+    'Médina Coura',
+    'Niaréla',
   ];
 
   @override
@@ -275,9 +283,9 @@ class _PublierScreenState extends State<PublierScreen> {
                                         padding: const EdgeInsets.symmetric(vertical: 8),
                                         child: Row(
                                           children: [
-                                            Icon(Icons.school_outlined, color: kOrange, size: 18),
+                                            Icon(Icons.location_city_outlined, color: kOrange, size: 18),
                                             const SizedBox(width: 8),
-                                            const Text('Universités au Mali',
+                                            const Text('Quartiers de Bamako',
                                                 style: TextStyle(
                                                     fontSize: 13,
                                                     fontWeight: FontWeight.w800,
@@ -285,7 +293,7 @@ class _PublierScreenState extends State<PublierScreen> {
                                           ],
                                         ),
                                       ),
-                                      ..._universites.map((u) => ListTile(
+                                      ..._quartiers.map((u) => ListTile(
                                             dense: true,
                                             contentPadding: EdgeInsets.zero,
                                             leading: Container(
@@ -294,7 +302,7 @@ class _PublierScreenState extends State<PublierScreen> {
                                               decoration: BoxDecoration(
                                                   color: kOrangeLight,
                                                   borderRadius: BorderRadius.circular(10)),
-                                              child: Icon(Icons.school_outlined,
+                                              child: Icon(Icons.location_city_outlined,
                                                   color: kOrange, size: 20),
                                             ),
                                             title: Text(u,
@@ -425,10 +433,30 @@ class _PublierScreenState extends State<PublierScreen> {
       if (mounted) setState(() {
         _itineraire = info;
         _apercu = true;
+        _unisProches = [];
+        _unisEnCours = true;
+      });
+      // Universités réellement proches de la destination (à préciser).
+      final unis = await CarteService.rechercherUniversitesProches(_arriveePoint!);
+      if (mounted) setState(() {
+        _unisProches = unis;
+        _unisEnCours = false;
       });
     } else {
       setState(() => _apercu = true);
     }
+  }
+
+  /// Choisit une université comme arrivée précise.
+  void _choisirUniversite(LieuResultat u) {
+    setState(() {
+      _arriveePoint = u.position;
+      _arriveeNom = u.nom;
+      _centreTemp = u.position;
+      _unisProches = [];
+    });
+    _mapController.move(u.position, 15);
+    _mettreAJourItineraire();
   }
 
   // === PUBLICATION ===
@@ -1009,7 +1037,13 @@ class _PublierScreenState extends State<PublierScreen> {
       backgroundColor: kCream,
       appBar: AppBar(
         title: const Text('Apercu du trajet'),
-        leading: IconButton(icon: const Icon(Icons.arrow_back_rounded), onPressed: () => setState(() => _apercu = false)),
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: () => setState(() {
+                  _apercu = false;
+                  _unisProches = [];
+                  _unisEnCours = false;
+                })),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -1063,7 +1097,86 @@ class _PublierScreenState extends State<PublierScreen> {
             // Resume trajet
             _recapLigne(Icons.circle, kGreen, 'Depart', _departNom),
             _recapLigne(Icons.circle, const Color(0xFF2962FF), 'Destination', _arriveeNom),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+
+            // Universités proches de la destination (préciser l'arrivée).
+            if (_unisEnCours)
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: kBorder),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: kOrange),
+                    ),
+                    const SizedBox(width: 10),
+                    Text('Recherche des universités à proximité…',
+                        style: TextStyle(fontSize: 13, color: kTextSecondary)),
+                  ],
+                ),
+              ),
+            if (!_unisEnCours && _unisProches.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: kBorder),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.school_outlined, color: kOrange, size: 18),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text('Préciser : université d\'arrivée ?',
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text('Touche une université pour en faire la destination exacte.',
+                        style: TextStyle(fontSize: 12, color: kTextSecondary)),
+                    const SizedBox(height: 8),
+                    ..._unisProches.map((u) => GestureDetector(
+                          onTap: () => _choisirUniversite(u),
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: kCream,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.school_outlined, color: kOrange, size: 18),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(u.nom,
+                                      style: const TextStyle(
+                                          fontSize: 13, fontWeight: FontWeight.w600),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis),
+                                ),
+                                Icon(Icons.arrow_forward_rounded, size: 16, color: kOrange),
+                              ],
+                            ),
+                          ),
+                        )),
+                  ],
+                ),
+              ),
+            if (!_unisEnCours && _unisProches.isNotEmpty)
+              const SizedBox(height: 4),
+            const SizedBox(height: 12),
 
             // --- Champs a remplir ---
             _sectionLabel('Heure de depart'),

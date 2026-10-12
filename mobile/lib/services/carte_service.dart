@@ -50,6 +50,28 @@ class CarteService {
     return [];
   }
 
+  // --- Universites pres d'un point (viewbox Nominatim, rayon ~3 km) ---
+  static Future<List<LieuResultat>> rechercherUniversitesProches(
+      LatLng centre) async {
+    const d = 0.03;
+    try {
+      final url = Uri.parse(
+        '$_nominatimUrl/search'
+        '?q=${Uri.encodeComponent('universite')}'
+        '&format=json&limit=8&addressdetails=1&countrycodes=ml'
+        '&viewbox=${centre.longitude - d},${centre.latitude + d},'
+        '${centre.longitude + d},${centre.latitude - d}'
+        '&bounded=1',
+      );
+      final res = await http.get(url, headers: _headers);
+      if (res.statusCode == 200) {
+        final List data = jsonDecode(res.body);
+        return data.map((r) => LieuResultat.fromNominatim(r)).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
   // --- Itineraire OSRM : distance, duree, GEOMETRIE reelle ---
   static Future<ItineraireInfo?> calculerItineraire(
       LatLng depart, LatLng arrivee) async {
