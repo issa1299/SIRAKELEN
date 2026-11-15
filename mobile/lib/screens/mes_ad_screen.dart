@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/api_service.dart';
+import '../widgets/carte_ad.dart';
 
 class MesAdScreen extends StatelessWidget {
   final String userId;
@@ -106,12 +107,12 @@ class MesAdScreen extends StatelessWidget {
             children: [
               if (enCours.isNotEmpty) ...[
                 _sectionTitle('EN COURS'),
-                ...enCours.map((a) => _carte(a, false)),
+                ...enCours.map((a) => CarteAd(ad: a as Map<String, dynamic>, archive: false)),
                 const SizedBox(height: 16),
               ],
               if (archives.isNotEmpty) ...[
                 _sectionTitle('HISTORIQUE'),
-                ...archives.map((a) => _carte(a, true)),
+                ...archives.map((a) => CarteAd(ad: a as Map<String, dynamic>, archive: true)),
               ],
             ],
           );

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,12 +10,30 @@ import { AvisDeplacement, RoleAd, StatutAd } from './avis-deplacement.entity';
 import { Demande, StatutDemande } from '../demandes/demande.entity';
 import { UsersService } from '../users/users.service';
 import { CreateAdDto } from './dto/create-ad.dto';
+import { ListerAdsDto } from './dto/lister-ads.dto';
 import {
   evaluerCompatibilite,
   prefiltrageRapide,
   MATCHING_CONFIG,
   NiveauCompatibilite,
 } from './matching';
+import {
+  AdEntite,
+  AdDeBase,
+  LigneParcourir,
+  CODE_ACCES_REFUSE,
+  MESSAGE_ACCES_REFUSE,
+  MAX_LIGNES_PARCOURIR,
+  adVisible,
+  badgeCompatible,
+  comparerDate,
+  comparerPertinence,
+  construireLigne,
+  dateDuJour,
+  monAdActif,
+  peutParcourir,
+  zoneCorrespond,
+} from './parcourir';
 
 @Injectable()
 export class AdsService {
@@ -235,6 +254,122 @@ export class AdsService {
     return resultats.sort(
       (a, b) => ordre[a.niveau] - ordre[b.niveau] || b.scoreFinal - a.scoreFinal,
     );
+  }
+
+  /**
+   * Parcourir tous les AD actifs — en complement (et non en remplacement) de
+   * l'algorithme de matching. Verification d'acces cote serveur : un AD actif
+   * non expire est obligatoire (sinon 403 AD_ACTIF_REQUIS).
+   */
+  async parcourir(
+    userId: string,
+    q: ListerAdsDto,
+  ): Promise<{
+    items: LigneParcourir[];
+    page: number;
+    limite: number;
+    total: number;
+    totalPages: number;
+  }> {
+    const maintenant = new Date();
+
+    // Utilisateur : ses AD. (findAll pour valider l'existence implicite.)
+    const mesAds = await this.adsRepository.find({
+      where: { proprietaire: { id: userId } },
+      order: { creeLe: 'DESC' },
+    });
+
+    // REGLE D'ACCES CRITIQUE — cote serveur.
+    if (!peutParcourir(mesAds as AdDeBase[], maintenant)) {
+      throw new ForbiddenException({
+        statusCode: 403,
+        code: CODE_ACCES_REFUSE,
+        message: MESSAGE_ACCES_REFUSE,
+      });
+    }
+    const monAd = monAdActif(mesAds as AdDeBase[], maintenant) as AdEntite;
+
+    // Prefiltrage cote base : actifs, a venir, places restantes.
+    const aujourdhui = dateDuJour(maintenant);
+    const qb = this.adsRepository
+      .createQueryBuilder('ad')
+      .leftJoinAndSelect('ad.proprietaire', 'proprietaire')
+      .where('ad.statut = :statut', { statut: StatutAd.ACTIF })
+      .andWhere('ad.dateDeplacement >= :aujourdhui', { aujourdhui })
+      .andWhere('(ad.placesDisponibles IS NULL OR ad.placesDisponibles > 0)');
+
+    // Filtre 1 : date / plage horaire.
+    const dateEff = q.date ?? (q.elargir ? undefined : monAd.dateDeplacement);
+    if (dateEff) {
+      qb.andWhere('ad.dateDeplacement = :date', { date: dateEff });
+    }
+    if (q.heureDebut) {
+      qb.andWhere('ad.heureDepart >= :hdeb', { hdeb: q.heureDebut });
+    }
+    if (q.heureFin) {
+      qb.andWhere('ad.heureDepart <= :hfin', { hfin: q.heureFin });
+    }
+
+    // Filtre 4 : type de transport (insensible a la casse).
+    if (q.transport) {
+      const t = q.transport.replace(/[%_]/g, ' ').trim();
+      if (t) {
+        qb.andWhere('ad.moyenTransport ILIKE :transport', {
+          transport: `%${t}%`,
+        });
+      }
+    }
+
+    const candidats = await qb
+      .orderBy('ad.dateDeplacement', 'ASC')
+      .addOrderBy('ad.heureDepart', 'ASC')
+      .take(MAX_LIGNES_PARCOURIR)
+      .getMany();
+
+    // Filtres JS : zones (insensible aux accents + jetons), jamais le mien.
+    const zoneDep =
+      q.zoneDepart ?? (q.elargir ? undefined : monAd.depart);
+    const zoneArr =
+      q.zoneArrivee ?? (q.elargir ? undefined : monAd.destination);
+
+    const lignes = candidats
+      .filter((ad) => {
+        const a = ad as unknown as AdEntite;
+        if (a.proprietaire?.id === userId) return false;
+        if (zoneDep && !zoneCorrespond(a.depart ?? '', zoneDep)) return false;
+        if (zoneArr && !zoneCorrespond(a.destination ?? '', zoneArr)) return false;
+        return adVisible(a, userId, maintenant);
+      })
+      .map((ad) => {
+        const a = ad as unknown as AdEntite;
+        return construireLigne(monAd, a, {
+          id: a.proprietaire?.id ?? '',
+          prenom: a.proprietaire?.prenom ?? '',
+          nom: a.proprietaire?.nom ?? '',
+          verifie: a.proprietaire?.verifie ?? false,
+          photoUrl: a.proprietaire?.photoUrl ?? null,
+        });
+      });
+
+    // Tri.
+    if (q.tri === 'date') {
+      lignes.sort(comparerDate);
+    } else {
+      lignes.sort(comparerPertinence);
+    }
+
+    const page = q.page ?? 1;
+    const limite = q.limite ?? 20;
+    const total = lignes.length;
+    const items = lignes.slice((page - 1) * limite, page * limite);
+
+    return {
+      items,
+      page,
+      limite,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / limite)),
+    };
   }
 
   /** Trajets publics d'un utilisateur (pour le profil vu par un autre). */

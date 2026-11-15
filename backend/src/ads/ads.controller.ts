@@ -1,6 +1,15 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { AdsService } from './ads.service';
 import { CreateAdDto } from './dto/create-ad.dto';
+import { ListerAdsDto } from './dto/lister-ads.dto';
 import { AvisDeplacement } from './avis-deplacement.entity';
 
 @Controller('ads')
@@ -20,6 +29,15 @@ export class AdsController {
   @Get('compatibilites/:userId')
   compatibilites(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.adsService.compatibilites(userId);
+  }
+
+  /** Parcourir tous les AD actifs (acces conditionne a un AD actif non expire). */
+  @Get('parcourir/:userId')
+  parcourir(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Query() query: ListerAdsDto,
+  ) {
+    return this.adsService.parcourir(userId, query);
   }
 
   /** Trajets publics d'un utilisateur (vue profil d'un autre). */

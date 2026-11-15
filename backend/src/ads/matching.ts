@@ -149,7 +149,10 @@ export function projeterSurTrace(
 }
 
 // ---------------------------------------------------------------------------
-function normaliserLieu(texte: string): string {
+/** Normalisation d'un libelle de zone (minuscules, sans accents ni ponctuation).
+ *  Exportee : reutilisee par l'ecran « Parcourir tous les AD » (filtre de zone).
+ *  Aucun changement de logique. */
+export function normaliserLieu(texte: string): string {
   return texte
     .toLowerCase()
     .normalize('NFD')

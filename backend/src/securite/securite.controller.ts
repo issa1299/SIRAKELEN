@@ -44,6 +44,19 @@ class SignalerDto {
   motif: string;
 }
 
+class SignalerAdDto {
+  @IsUUID()
+  adId: string;
+
+  @IsUUID()
+  auteurId: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Le motif est obligatoire' })
+  @MaxLength(255)
+  motif: string;
+}
+
 @Controller('securite')
 export class SecuriteController {
   constructor(
@@ -77,6 +90,11 @@ export class SecuriteController {
   @Post('signalements')
   signaler(@Body() dto: SignalerDto) {
     return this.signalementsService.signaler(dto);
+  }
+
+  @Post('signalement-ad')
+  signalerAd(@Body() dto: SignalerAdDto) {
+    return this.signalementsService.signalerAd(dto);
   }
 
   @Get('stats/:userId')

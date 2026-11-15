@@ -65,7 +65,7 @@ export class AdminService {
 
   async findAllSignalements() {
     return this.signalementRepo.find({
-      relations: { auteur: true, utilisateurSignale: true },
+      relations: { auteur: true, utilisateurSignale: true, ad: true },
       order: { creeLe: 'DESC' },
     });
   }

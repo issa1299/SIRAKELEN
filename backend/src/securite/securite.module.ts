@@ -5,11 +5,12 @@ import { ContactUrgenceService } from './contact-urgence.service';
 import { SignalementsService } from './signalements.service';
 import { ContactUrgence } from '../contact-urgence/contact-urgence.entity';
 import { Signalement } from '../signalements/signalement.entity';
+import { AvisDeplacement } from '../ads/avis-deplacement.entity';
 import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ContactUrgence, Signalement]),
+    TypeOrmModule.forFeature([ContactUrgence, Signalement, AvisDeplacement]),
     UsersModule,
   ],
   controllers: [SecuriteController],

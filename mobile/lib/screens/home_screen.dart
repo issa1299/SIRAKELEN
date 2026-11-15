@@ -4,10 +4,12 @@ import 'package:latlong2/latlong.dart';
 import '../main.dart';
 import '../services/api_service.dart';
 import '../services/carte_service.dart';
+import '../services/ad_utils.dart';
 import 'notifications_screen.dart';
 import 'chat_screen.dart';
 import 'publier_screen.dart';
 import 'profil_autre_screen.dart';
+import 'parcourir_ads_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String prenom;
@@ -1283,6 +1285,31 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
+                if (aAccesParcourir(_adActif) && _compatibilites.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 46,
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ParcourirAdsScreen(
+                            userId: widget.userId,
+                            departDefaut: _adActif!['depart'] as String?,
+                            destinationDefaut: _adActif!['destination'] as String?,
+                          ),
+                        ),
+                      ),
+                      icon: const Icon(Icons.explore_rounded, size: 18, color: kOrange),
+                      label: const Text('Parcourir tous les AD',
+                          style: TextStyle(color: kOrange, fontWeight: FontWeight.w700)),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: kOrange.withAlpha(120)),
+                      ),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 20),
 
                 // Requests received
@@ -1307,6 +1334,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   _sectionTitle('Trajets compatibles', count: _compatibilites.length),
                   ..._compatibilites.map(
                       (c) => _carteCompatibilite(c as Map<String, dynamic>)),
+                  if (aAccesParcourir(_adActif)) ...[
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ParcourirAdsScreen(
+                              userId: widget.userId,
+                              departDefaut: _adActif!['depart'] as String?,
+                              destinationDefaut: _adActif!['destination'] as String?,
+                            ),
+                          ),
+                        ),
+                        icon: const Icon(Icons.explore_rounded, size: 16, color: kOrange),
+                        label: const Text('Voir tous les AD →',
+                            style: TextStyle(color: kOrange, fontWeight: FontWeight.w700)),
+                      ),
+                    ),
+                  ],
                 ] else ...[
                   const SizedBox(height: 8),
                   Container(
@@ -1341,6 +1389,31 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
+                  if (aAccesParcourir(_adActif)) ...[
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 46,
+                      child: OutlinedButton.icon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ParcourirAdsScreen(
+                              userId: widget.userId,
+                              departDefaut: _adActif!['depart'] as String?,
+                              destinationDefaut: _adActif!['destination'] as String?,
+                            ),
+                          ),
+                        ),
+                        icon: const Icon(Icons.explore_rounded, size: 18, color: kOrange),
+                        label: const Text('Parcourir tous les AD',
+                            style: TextStyle(color: kOrange, fontWeight: FontWeight.w700)),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: kOrange.withAlpha(120)),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
 
                 const SizedBox(height: 10),

@@ -31,6 +31,9 @@ export enum StatutAd {
 
 @Entity('avis_deplacement')
 @Index(['statut', 'dateDeplacement', 'role'])
+@Index(['statut', 'dateDeplacement', 'heureDepart'])
+@Index(['statut', 'depart'])
+@Index(['statut', 'destination'])
 export class AvisDeplacement {
   @PrimaryGeneratedColumn('uuid')
   id: string;

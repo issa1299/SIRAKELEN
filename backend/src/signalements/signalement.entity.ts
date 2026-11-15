@@ -4,8 +4,10 @@ import {
   Column,
   CreateDateColumn,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { User } from '../users/user.entity';
+import { AvisDeplacement } from '../ads/avis-deplacement.entity';
 
 export enum StatutSignalement {
   EN_ATTENTE = 'en_attente',
@@ -22,6 +24,11 @@ export class Signalement {
 
   @ManyToOne(() => User)
   auteur: User;
+
+  /** AD signalé (optionnel — null si le signalement vise un utilisateur). */
+  @ManyToOne(() => AvisDeplacement, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'adId' })
+  ad: AvisDeplacement | null;
 
   @Column({ length: 255 })
   motif: string;

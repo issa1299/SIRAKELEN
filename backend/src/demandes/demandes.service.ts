@@ -4,10 +4,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository, DataSource } from 'typeorm';
+import { In, MoreThanOrEqual, Repository, DataSource } from 'typeorm';
 import { Demande, StatutDemande } from './demande.entity';
 import { AvisDeplacement, StatutAd } from '../ads/avis-deplacement.entity';
 import { UsersService } from '../users/users.service';
+
+/** Limite anti-spam : nombre max de demandes de contact envoyees par jour. */
+const LIMITE_DEMANDES_PAR_JOUR = 20;
 
 @Injectable()
 export class DemandesService {
@@ -42,6 +45,20 @@ export class DemandesService {
     }
 
     const demandeur = await this.usersService.findOne(demandeurId);
+
+    // Limite anti-spam : demandes de contact par jour.
+    const debutJour = new Date();
+    debutJour.setHours(0, 0, 0, 0);
+    const nbDemandesAujourdhui = await this.demandesRepository.count({
+      where: { demandeur: { id: demandeurId }, creeLe: MoreThanOrEqual(debutJour) },
+    });
+    if (nbDemandesAujourdhui >= LIMITE_DEMANDES_PAR_JOUR) {
+      throw new BadRequestException(
+        'Tu as atteint la limite de ' +
+          LIMITE_DEMANDES_PAR_JOUR +
+          ' demandes aujourd’hui. Réessaie demain.',
+      );
+    }
 
     // Pas de double demande.
     const existante = await this.demandesRepository.findOne({

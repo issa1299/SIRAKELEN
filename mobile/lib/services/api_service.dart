@@ -32,7 +32,8 @@ class Session {
 
 class ApiException implements Exception {
   final String message;
-  ApiException(this.message);
+  final String? code;
+  ApiException(this.message, {this.code});
   @override
   String toString() => message;
 }
@@ -73,7 +74,7 @@ class ApiService {
       _avecReessai(() => http.patch(url, headers: headers, body: body));
   /// URL du serveur, chargee depuis assets/config.json au demarrage.
   /// Valeur de secours si le fichier est absent.
-  static const String _baseUrlDefaut = 'http://192.168.1.2:8080';
+  static const String _baseUrlDefaut = 'http://192.168.1.23:8080';
   static String baseUrl = _baseUrlDefaut;
 
   /// A appeler une fois dans main() avant runApp().
@@ -417,6 +418,71 @@ class ApiService {
       return jsonDecode(response.body) as List<dynamic>;
     }
     return [];
+  }
+
+  /// Parcourir tous les AD actifs (acces conditionne a un AD actif non expire).
+  /// Retourne un Map {items, page, limite, total, totalPages}.
+  /// Lance ApiException(code: 'AD_ACTIF_REQUIS') en cas de 403.
+  static Future<Map<String, dynamic>> parcourirAds({
+    required String userId,
+    int page = 1,
+    int limite = 20,
+    String tri = 'pertinence',
+    String? date,
+    String? heureDebut,
+    String? heureFin,
+    String? zoneDepart,
+    String? zoneArrivee,
+    String? transport,
+    bool elargir = false,
+  }) async {
+    final params = <String, String>{
+      'page': '$page',
+      'limite': '$limite',
+      'tri': tri,
+      'elargir': '$elargir',
+      if (date != null && date.isNotEmpty) 'date': date,
+      if (heureDebut != null && heureDebut.isNotEmpty) 'heureDebut': heureDebut,
+      if (heureFin != null && heureFin.isNotEmpty) 'heureFin': heureFin,
+      if (zoneDepart != null && zoneDepart.isNotEmpty) 'zoneDepart': zoneDepart,
+      if (zoneArrivee != null && zoneArrivee.isNotEmpty) 'zoneArrivee': zoneArrivee,
+      if (transport != null && transport.isNotEmpty) 'transport': transport,
+    };
+    final uri = Uri.parse('$baseUrl/ads/parcourir/$userId').replace(queryParameters: params);
+    final response = await _get(uri);
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    }
+    Map<String, dynamic> body = <String, dynamic>{};
+    if (response.body.isNotEmpty) {
+      try {
+        body = jsonDecode(response.body) as Map<String, dynamic>;
+      } catch (_) {}
+    }
+    if (response.statusCode == 403) {
+      throw ApiException(
+        (body['message'] as String?) ?? 'Publie un AD pour parcourir les trajets',
+        code: (body['code'] as String?) ?? 'AD_ACTIF_REQUIS',
+      );
+    }
+    throw ApiException(_messageErreur(body) ?? 'Impossible de charger les trajets');
+  }
+
+  static Future<void> signalerAd({
+    required String adId,
+    required String auteurId,
+    required String motif,
+  }) async {
+    final response = await _post(
+      Uri.parse('$baseUrl/securite/signalement-ad'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'adId': adId, 'auteurId': auteurId, 'motif': motif}),
+    );
+    if (response.statusCode == 201) return;
+    final body = response.body.isNotEmpty
+        ? jsonDecode(response.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+    throw ApiException(_messageErreur(body) ?? 'Signalement impossible');
   }
 
   static Future<void> annulerAd(String adId, String userId) async {
