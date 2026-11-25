@@ -77,7 +77,7 @@ class MesAdScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Aucun AD publié',
+                    'Aucun trajet publié',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,

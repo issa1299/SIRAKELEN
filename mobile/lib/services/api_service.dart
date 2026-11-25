@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show StringFromEnvironment;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,10 +53,10 @@ class ApiService {
         return await appel().timeout(_delaiReveil);
       } on TimeoutException {
         throw ApiException('Serveur en démarrage, réessaie dans quelques secondes…');
-      } on SocketException {
+      } on Exception {
         throw ApiException('Vérifie ta connexion internet puis réessaie.');
       }
-    } on SocketException {
+    } on Exception {
       throw ApiException('Vérifie ta connexion internet puis réessaie.');
     } on ApiException {
       rethrow;
@@ -72,14 +73,19 @@ class ApiService {
   static Future<http.Response> _patch(Uri url,
           {Map<String, String>? headers, Object? body}) =>
       _avecReessai(() => http.patch(url, headers: headers, body: body));
-  /// URL du serveur, chargee depuis assets/config.json au demarrage.
-  /// Valeur de secours si le fichier est absent.
+  /// URL du serveur, chargee via --dart-define=apiBaseUrl=...
+  /// Valeur de secours : assets/config.json, puis localhost.
   static const String _baseUrlDefaut = 'http://192.168.1.23:8080';
   static String baseUrl = _baseUrlDefaut;
 
   /// A appeler une fois dans main() avant runApp().
-  /// Pour changer de serveur : editer assets/config.json, rebuild.
+  /// --dart-define=apiBaseUrl=... prioritaire sur assets/config.json.
   static Future<void> chargerConfig() async {
+    const define = String.fromEnvironment('apiBaseUrl');
+    if (define.isNotEmpty) {
+      baseUrl = define;
+      return;
+    }
     try {
       final brut = await rootBundle.loadString('assets/config.json');
       final conf = jsonDecode(brut) as Map<String, dynamic>;
@@ -461,7 +467,7 @@ class ApiService {
     }
     if (response.statusCode == 403) {
       throw ApiException(
-        (body['message'] as String?) ?? 'Publie un AD pour parcourir les trajets',
+        (body['message'] as String?) ?? 'Publie un trajet pour parcourir les trajets',
         code: (body['code'] as String?) ?? 'AD_ACTIF_REQUIS',
       );
     }
@@ -614,12 +620,17 @@ class ApiService {
   }
 
   // === PHOTO DE PROFIL ===
-  static Future<String> uploadPhoto(String userId, File imageFile) async {
+  static Future<String> uploadPhoto(
+      String userId, List<int> imageBytes, String fileName) async {
     final request = http.MultipartRequest(
       'POST',
       Uri.parse('$baseUrl/upload/photo/$userId'),
     );
-    request.files.add(await http.MultipartFile.fromPath('photo', imageFile.path));
+    request.files.add(http.MultipartFile.fromBytes(
+      'photo',
+      imageBytes,
+      filename: fileName,
+    ));
     try {
       final streamed = await request.send().timeout(_delaiReveil);
       final response = await http.Response.fromStream(streamed);
@@ -630,7 +641,7 @@ class ApiService {
       throw ApiException(_messageErreur(body) ?? 'Erreur d\'upload');
     } on TimeoutException {
       throw ApiException('Serveur en démarrage, réessaie dans quelques secondes…');
-    } on SocketException {
+    } on Exception {
       throw ApiException('Vérifie ta connexion internet puis réessaie.');
     }
   }

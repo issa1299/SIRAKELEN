@@ -1,4 +1,5 @@
-import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../main.dart';
@@ -22,7 +23,8 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
   bool _enregistrement = false;
   String? _erreur;
   String? _photoUrl;
-  File? _photoFile;
+  XFile? _photoFile;
+  Uint8List? _photoBytes;
   final _picker = ImagePicker();
 
   @override
@@ -30,7 +32,7 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
     super.initState();
     _charger();
     // Si Android a tue l'app pendant la prise de photo, recupere le fichier.
-    if (Platform.isAndroid) _recupererPhotoPerdue();
+    if (!kIsWeb) _recupererPhotoPerdue();
   }
 
   Future<void> _recupererPhotoPerdue() async {
@@ -38,7 +40,11 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
       final reponse = await _picker.retrieveLostData();
       if (reponse.file != null) {
         if (!mounted) return;
-        setState(() => _photoFile = File(reponse.file!.path));
+        final bytes = await reponse.file!.readAsBytes();
+        setState(() {
+          _photoFile = reponse.file;
+          _photoBytes = bytes;
+        });
       }
     } catch (_) {}
   }
@@ -124,9 +130,14 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
     if (source == null) return;
     try {
       final picked = await _picker.pickImage(
-          source: source, maxWidth: 512, maxHeight: 512, imageQuality: 80);
+          source: source, maxWidth: 256, maxHeight: 256, imageQuality: 60);
       if (picked == null) return;
-      setState(() => _photoFile = File(picked.path));
+      final bytes = await picked.readAsBytes();
+      if (!mounted) return;
+      setState(() {
+        _photoFile = picked;
+        _photoBytes = bytes;
+      });
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -144,7 +155,8 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
     try {
       String? newPhotoUrl = _photoUrl;
       if (_photoFile != null) {
-        newPhotoUrl = await ApiService.uploadPhoto(widget.userId, _photoFile!);
+        newPhotoUrl = await ApiService.uploadPhoto(
+            widget.userId, await _photoFile!.readAsBytes(), _photoFile!.name);
       }
       await ApiService.updateProfil(
         widget.userId,
@@ -206,8 +218,8 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
                                       ],
                                     ),
                                     child: ClipOval(
-                                      child: _photoFile != null
-                                          ? Image.file(_photoFile!,
+                                      child: _photoBytes != null
+                                          ? Image.memory(_photoBytes!,
                                               width: 108, height: 108, fit: BoxFit.cover)
                                           : (photo != null
                                               ? Image.network(photo,

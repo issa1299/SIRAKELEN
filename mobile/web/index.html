@@ -1,117 +1,183 @@
-<!DOCTYPE html><html><head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
   <base href="$FLUTTER_BASE_HREF">
-
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Partage de trajets au Mali">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <!-- Theme color -->
+  <meta name="theme-color" content="#F77F00">
 
   <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="sirakele">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SIRA KELEN">
+  <link rel="apple-touch-icon" href="logo.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="icon" type="image/png" href="logo.png">
 
-  <title>sirakele</title>
+  <title>SIRA KELEN</title>
   <link rel="manifest" href="manifest.json">
-  
-  
-  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
-  <style id="splash-screen-style">
-    html {
-      height: 100%
-    }
 
-    body {
+  <style>
+    /* Splash screen styles */
+    html, body {
       margin: 0;
-      min-height: 100%;
-      background-color: #FFF8F0;
-          background-size: 100% 100%;
+      padding: 0;
+      height: 100%;
+      background-color: #FDF6EE;
+      overflow: hidden;
     }
 
-    .center {
-      margin: 0;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      -ms-transform: translate(-50%, -50%);
-      transform: translate(-50%, -50%);
+    #splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #FDF6EE;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.3s ease-out;
     }
 
-    .contain {
-      display:block;
-      width:100%; height:100%;
-      object-fit: contain;
+    #splash-screen.fade-out {
+      opacity: 0;
+      pointer-events: none;
     }
 
-    .stretch {
-      display:block;
-      width:100%; height:100%;
+    #splash-screen img.logo {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 24px;
     }
 
-    .cover {
-      display:block;
-      width:100%; height:100%;
-      object-fit: cover;
+    #splash-screen .progress-bar {
+      width: 200px;
+      height: 4px;
+      background-color: #E8E4DD;
+      border-radius: 2px;
+      overflow: hidden;
     }
 
-    .bottom {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      -ms-transform: translate(-50%, 0);
-      transform: translate(-50%, 0);
+    #splash-screen .progress-bar-fill {
+      height: 100%;
+      background-color: #F77F00;
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.3s ease;
+      animation: progress 2s ease-in-out infinite;
     }
 
-    .bottomLeft {
-      position: absolute;
+    @keyframes progress {
+      0% { width: 0%; }
+      50% { width: 70%; }
+      100% { width: 100%; }
+    }
+
+    #splash-screen .app-name {
+      margin-top: 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: #F77F00;
+    }
+
+    /* Update notification */
+    #update-banner {
+      position: fixed;
       bottom: 0;
       left: 0;
-    }
-
-    .bottomRight {
-      position: absolute;
-      bottom: 0;
       right: 0;
+      background-color: #F77F00;
+      color: white;
+      padding: 12px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      z-index: 10000;
+      display: none;
+      cursor: pointer;
     }
 
-    @media (prefers-color-scheme: dark) {
-      body {
-        background-color: #FFF8F0;
-          }
+    #update-banner.visible {
+      display: block;
     }
   </style>
-  <script id="splash-screen-script">
-    function removeSplashFromWeb() {
-      document.getElementById("splash")?.remove();
-      document.getElementById("splash-branding")?.remove();
-      document.body.style.background = "transparent";
-    }
-  </script>
 </head>
 <body>
-  <picture id="splash">
-      <source srcset="splash/img/light-1x.png 1x, splash/img/light-2x.png 2x, splash/img/light-3x.png 3x, splash/img/light-4x.png 4x" media="(prefers-color-scheme: light)">
-      <source srcset="splash/img/dark-1x.png 1x, splash/img/dark-2x.png 2x, splash/img/dark-3x.png 3x, splash/img/dark-4x.png 4x" media="(prefers-color-scheme: dark)">
-      <img class="center" aria-hidden="true" src="splash/img/light-1x.png" alt="">
-  </picture>
-  
-  <script src="flutter_bootstrap.js" async=""></script>
+  <!-- Splash screen -->
+  <div id="splash-screen">
+    <img class="logo" src="logo.png" alt="SIRA KELEN">
+    <div class="app-name">SIRA KELEN</div>
+    <div class="progress-bar">
+      <div class="progress-bar-fill"></div>
+    </div>
+  </div>
 
+  <!-- Update banner -->
+  <div id="update-banner" onclick="window.location.reload()">
+    Nouvelle version disponible : recharger
+  </div>
 
-</body></html>
+  <script src="flutter_bootstrap.js" async></script>
+
+  <script>
+    // Retire le splash UNIQUEMENT quand Flutter a dessine son premier frame.
+    // Pas de timeout : sur reseau mobile lent, Flutter peut prendre > 10s.
+    window.addEventListener('flutter-first-frame', function() {
+      var splash = document.getElementById('splash-screen');
+      if (splash) {
+        splash.classList.add('fade-out');
+        setTimeout(function() {
+          splash.remove();
+        }, 300);
+      }
+    });
+
+    // Fallback tardif (60s) uniquement si Flutter n'a jamais demarre,
+    // avec un message clair au lieu d'un ecran blanc.
+    setTimeout(function() {
+      var splash = document.getElementById('splash-screen');
+      if (splash) {
+        splash.innerHTML =
+          '<div style="max-width:320px;text-align:center;padding:24px;">' +
+          '<div style="font-size:17px;font-weight:700;color:#F77F00;margin-bottom:12px;">Chargement lent détecté</div>' +
+          '<div style="font-size:14px;color:#6B6B6B;line-height:1.5;margin-bottom:20px;">Vérifiez votre connexion puis rechargez la page.</div>' +
+          '<button onclick="location.reload()" style="background:#F77F00;color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:15px;font-weight:700;cursor:pointer;">Réessayer</button>' +
+          '</div>';
+        splash.style.display = 'flex';
+        splash.style.flexDirection = 'column';
+        splash.style.alignItems = 'center';
+        splash.style.justifyContent = 'center';
+      }
+    }, 60000);
+
+    // Service worker update detection
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(function(registration) {
+        registration.addEventListener('updatefound', function() {
+          var newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', function() {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                var banner = document.getElementById('update-banner');
+                if (banner) {
+                  banner.classList.add('visible');
+                }
+              }
+            });
+          }
+        });
+      });
+    }
+  </script>
+</body>
+</html>

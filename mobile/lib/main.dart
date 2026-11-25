@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/welcome_screen.dart';
@@ -7,6 +8,9 @@ import 'screens/onboarding_screen.dart';
 import 'screens/main_scaffold.dart';
 import 'services/auth_service.dart';
 import 'services/api_service.dart';
+
+// Strategie d'URL propre (sans #) sur le web.
+import 'package:flutter_web_plugins/url_strategy.dart' show usePathUrlStrategy;
 
 const Color kOrange = Color(0xFFFF7700);
 const Color kOrangeDark = Color(0xFFE25F00);
@@ -27,6 +31,9 @@ const Color kTextSecondary = Color(0xFF6B6B6B);
 /// l'app démarre et l'OTP est simulé (mode dev).
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb) {
+    usePathUrlStrategy();
+  }
   await ApiService.chargerConfig();
   // Barres systeme aux couleurs de l'app (plus de bande blanche en haut/bas).
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/api_service.dart';
 import '../widgets/mini_trajet_map.dart';
-import 'profil_autre_screen.dart';
+import '../widgets/responsive_wrapper.dart';
+
+// Ecran lourd charge a la demande.
+import 'profil_autre_screen.dart' deferred as profilAutreDeferred;
 
 /// Detail d'un AD parcouru : mini-carte, infos, action de demande, signalement.
 class DetailAdPublicScreen extends StatefulWidget {
@@ -54,7 +57,7 @@ class _DetailAdPublicScreenState extends State<DetailAdPublicScreen> {
         final ctrl = TextEditingController();
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Signaler cet AD'),
+          title: const Text('Signaler ce trajet'),
           content: TextField(
             controller: ctrl,
             maxLines: 3,
@@ -92,8 +95,9 @@ class _DetailAdPublicScreenState extends State<DetailAdPublicScreen> {
     return Scaffold(
       backgroundColor: kCream,
       appBar: AppBar(title: const Text('Détail du trajet')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+      body: ResponsiveWrapper(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -148,15 +152,20 @@ class _DetailAdPublicScreenState extends State<DetailAdPublicScreen> {
                       ),
                     ),
                     TextButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ProfilAutreScreen(
-                            targetUserId: proprietaire['id'] as String,
-                            viewerUserId: widget.userId,
-                          ),
-                        ),
-                      ),
+                      onPressed: () {
+                        profilAutreDeferred.loadLibrary().then((_) {
+                          if (!mounted) return;
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => profilAutreDeferred.ProfilAutreScreen(
+                                targetUserId: proprietaire['id'] as String,
+                                viewerUserId: widget.userId,
+                              ),
+                            ),
+                          );
+                        });
+                      },
                       child: const Text('Profil →'),
                     ),
                   ],
@@ -183,11 +192,12 @@ class _DetailAdPublicScreenState extends State<DetailAdPublicScreen> {
               child: OutlinedButton.icon(
                 onPressed: _signaler,
                 icon: const Icon(Icons.flag_outlined, size: 18, color: kRed),
-                label: const Text('Signaler cet AD', style: TextStyle(color: kRed)),
+                label: const Text('Signaler ce trajet', style: TextStyle(color: kRed)),
                 style: OutlinedButton.styleFrom(side: const BorderSide(color: Color(0xFFF0D9D5))),
               ),
             ),
           ],
+        ),
         ),
       ),
     );

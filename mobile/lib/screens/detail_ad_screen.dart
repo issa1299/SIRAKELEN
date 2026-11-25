@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/api_service.dart';
 import '../services/whatsapp_helper.dart';
+import '../widgets/responsive_wrapper.dart';
 import 'profil_autre_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -79,7 +80,7 @@ class _DetailAdScreenState extends State<DetailAdScreen> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Annuler cet AD ?'),
+        title: const Text('Annuler le trajet ?'),
         content: const Text('Ton trajet ne sera plus visible par les autres utilisateurs.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Non')),
@@ -103,15 +104,15 @@ class _DetailAdScreenState extends State<DetailAdScreen> {
     if (_chargement) {
       return Scaffold(
         backgroundColor: kCream,
-        appBar: AppBar(title: const Text('Détail de mon AD')),
+        appBar: AppBar(title: const Text('Détail de mon trajet')),
         body: const Center(child: CircularProgressIndicator(color: kOrange)),
       );
     }
     if (_ad == null) {
       return Scaffold(
         backgroundColor: kCream,
-        appBar: AppBar(title: const Text('Détail de mon AD')),
-        body: const Center(child: Text('AD introuvable')),
+        appBar: AppBar(title: const Text('Détail de mon trajet')),
+        body: const Center(child: Text('Trajet introuvable')),
       );
     }
 
@@ -120,9 +121,10 @@ class _DetailAdScreenState extends State<DetailAdScreen> {
 
     return Scaffold(
       backgroundColor: kCream,
-      appBar: AppBar(title: const Text('Détail de mon AD')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+      appBar: AppBar(title: const Text('Détail de mon trajet')),
+      body: ResponsiveWrapper(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -337,10 +339,11 @@ class _DetailAdScreenState extends State<DetailAdScreen> {
                   side: const BorderSide(color: kRed),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Annuler cet AD', style: TextStyle(fontWeight: FontWeight.w700)),
+                child: const Text('Annuler le trajet', style: TextStyle(fontWeight: FontWeight.w700)),
               ),
             ),
           ],
+        ),
         ),
       ),
     );

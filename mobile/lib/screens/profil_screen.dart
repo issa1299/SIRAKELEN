@@ -293,7 +293,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
                     // Stats
                     Row(
                       children: [
-                        _stat(_stats['adPublies'].toString(), 'AD publiés'),
+                        _stat(_stats['adPublies'].toString(), 'trajets publiés'),
                         const SizedBox(width: 10),
                         _stat(_stats['trajetsOrganises'].toString(), 'Trajets organisés'),
                       ],

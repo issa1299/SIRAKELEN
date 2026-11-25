@@ -9,4 +9,14 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  /** Endpoint de sante pour la surveillance (Render, Cloudflare, etc.). */
+  @Get('health')
+  health(): { status: string; uptime: number; timestamp: string } {
+    return {
+      status: 'ok',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+    };
+  }
 }

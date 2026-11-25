@@ -337,7 +337,7 @@ class _ProfilAutreScreenState extends State<ProfilAutreScreen> {
         // Stats
         Row(
           children: [
-            _bloc(_stats['adPublies'].toString(), 'AD publiés'),
+            _bloc(_stats['adPublies'].toString(), 'trajets publiés'),
             const SizedBox(width: 10),
             _bloc(_stats['trajetsOrganises'].toString(), 'Trajets organisés'),
             const SizedBox(width: 10),

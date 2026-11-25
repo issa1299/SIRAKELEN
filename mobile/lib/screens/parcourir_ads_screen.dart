@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/api_service.dart';
 import '../widgets/carte_ad.dart';
+import '../widgets/responsive_wrapper.dart';
 import 'detail_ad_public_screen.dart';
 import 'publier_screen.dart';
 
@@ -183,9 +184,9 @@ class _ParcourirAdsScreenState extends State<ParcourirAdsScreen> {
     return Scaffold(
       backgroundColor: kCream,
       appBar: AppBar(
-        title: const Text('Parcourir tous les AD'),
+        title: const Text('Parcourir tous les trajets'),
       ),
-      body: _corps(),
+      body: ResponsiveWrapper(child: _corps()),
     );
   }
 
@@ -304,7 +305,7 @@ class _ParcourirAdsScreenState extends State<ParcourirAdsScreen> {
             child: const Icon(Icons.route_rounded, color: kOrange, size: 30),
           ),
           const SizedBox(height: 16),
-          const Text('Aucun AD pour le moment', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: kTextPrimary)),
+          const Text('Aucun trajet pour le moment', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: kTextPrimary)),
           const SizedBox(height: 8),
           Text(
             _elargir
@@ -370,7 +371,7 @@ class _ParcourirAdsScreenState extends State<ParcourirAdsScreen> {
               child: const Icon(Icons.route_rounded, color: kOrange, size: 32),
             ),
             const SizedBox(height: 16),
-            const Text('Publie un AD pour parcourir les trajets',
+            const Text('Publie un trajet pour parcourir les trajets',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: kTextPrimary)),
             const SizedBox(height: 8),
@@ -391,7 +392,7 @@ class _ParcourirAdsScreenState extends State<ParcourirAdsScreen> {
                   _refresh();
                 },
                 icon: const Icon(Icons.add_rounded),
-                label: const Text('Publier un AD'),
+                label: const Text('Publier un trajet'),
               ),
             ),
           ],

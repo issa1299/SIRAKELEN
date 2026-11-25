@@ -1,4 +1,5 @@
-import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -310,7 +311,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             onTap: _chargement ? null : _signInWithGoogle,
                             enfant: Image.asset('assets/googlelogo.webp', width: 22, height: 22),
                           ),
-                          if (!Platform.isAndroid) ...[
+                          if (!kIsWeb &&
+                              defaultTargetPlatform == TargetPlatform.iOS) ...[
                             const SizedBox(width: 14),
                             _pastilleSocial(
                               onTap: _chargement ? null : _signInWithApple,

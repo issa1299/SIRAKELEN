@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -8,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import '../services/api_service.dart';
 import '../services/carte_service.dart';
+import '../widgets/responsive_wrapper.dart';
 
 class PublierScreen extends StatefulWidget {
   final String userId;
@@ -387,15 +389,65 @@ class _PublierScreenState extends State<PublierScreen> {
   }
 
   Future<void> _utiliserMaPosition() async {
+    // Explication avant la demande d'autorisation (surtout sur web).
+    if (kIsWeb) {
+      final confirme = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Utiliser ma position'),
+          content: const Text(
+            'SIRA KELEN a besoin de ta position pour placer automatiquement '
+            'le départ/arrivée sur la carte. Tu peux aussi saisir le lieu manuellement.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Saisir manuellement'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Autoriser'),
+            ),
+          ],
+        ),
+      );
+      if (confirme != true) return;
+    }
+
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return;
+      if (!serviceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('La localisation est désactivée. Saisis le lieu manuellement.'),
+            backgroundColor: kOrange,
+          ));
+        }
+        return;
+      }
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) return;
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Permission refusée. Saisis le lieu manuellement.'),
+              backgroundColor: kOrange,
+            ));
+          }
+          return;
+        }
       }
-      if (permission == LocationPermission.deniedForever) return;
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Permission bloquée. Saisis le lieu manuellement.'),
+            backgroundColor: kRed,
+          ));
+        }
+        return;
+      }
       final pos = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
       );
@@ -552,9 +604,10 @@ class _PublierScreenState extends State<PublierScreen> {
   Widget _ecranRoleSelection() {
     return Scaffold(
       backgroundColor: kCream,
-      appBar: AppBar(title: const Text('Publier un AD')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+      appBar: AppBar(title: const Text('Publier un trajet')),
+      body: ResponsiveWrapper(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -576,6 +629,7 @@ class _PublierScreenState extends State<PublierScreen> {
               valeur: 'passager',
             ),
           ],
+        ),
         ),
       ),
     );
@@ -1045,8 +1099,9 @@ class _PublierScreenState extends State<PublierScreen> {
                   _unisEnCours = false;
                 })),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+      body: ResponsiveWrapper(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -1338,11 +1393,12 @@ class _PublierScreenState extends State<PublierScreen> {
                 onPressed: _chargement ? null : _publier,
                 child: _chargement
                     ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
-                    : Text(_role == 'conducteur' ? 'Publier mon AD' : 'Rechercher les trajets compatibles'),
+                    : Text(_role == 'conducteur' ? 'Publier mon trajet' : 'Rechercher les trajets compatibles'),
               ),
             ),
             const SizedBox(height: 24),
           ],
+        ),
         ),
       ),
     );
@@ -1387,7 +1443,7 @@ class _PublierScreenState extends State<PublierScreen> {
   Widget _ecranSucces() {
     return Scaffold(
       backgroundColor: kCream,
-      appBar: AppBar(title: const Text('AD publie')),
+      appBar: AppBar(title: const Text('Trajet publié')),
       body: Padding(
         padding: const EdgeInsets.all(28),
         child: Column(
@@ -1401,7 +1457,7 @@ class _PublierScreenState extends State<PublierScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              _role == 'conducteur' ? 'Ton AD conducteur est publie !' : 'Ton AD passager est publie !',
+              _role == 'conducteur' ? 'Ton trajet conducteur est publié !' : 'Ton trajet passager est publié !',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
             ),
