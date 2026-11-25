@@ -1,0 +1,8 @@
+# Déploiement Flutter Web sur Cloudflare Workers/Pages (gratuit)
+# SPA routing géré par Cloudflare via not_found_handling (remplace _redirects).
+name = "sirakelen-app"
+compatibility_date = "2026-11-19"
+
+[assets]
+directory = "./build/web"
+not_found_handling = "single-page-application"

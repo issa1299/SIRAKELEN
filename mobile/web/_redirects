@@ -1,2 +1,3 @@
-# Fallback SPA : toutes les routes renvoient index.html
-/*    /index.html   200
+# SPA routing est géré par wrangler.toml (not_found_handling = "single-page-application").
+# La règle /* /index.html 200 est refusée par Cloudflare Workers (boucle infinie).
+# Ce fichier est volontairement vide.

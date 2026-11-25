@@ -92,8 +92,10 @@ class _LoginScreenState extends State<LoginScreen> {
       _erreur = null;
     });
     try {
+      const googleClientId = String.fromEnvironment('googleClientId');
       final googleUser = await GoogleSignIn(
         scopes: ['email', 'profile'],
+        clientId: kIsWeb && googleClientId.isNotEmpty ? googleClientId : null,
       ).signIn();
       if (googleUser == null) {
         setState(() => _chargement = false);

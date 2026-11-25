@@ -8,6 +8,7 @@ import 'screens/onboarding_screen.dart';
 import 'screens/main_scaffold.dart';
 import 'services/auth_service.dart';
 import 'services/api_service.dart';
+import 'widgets/responsive_wrapper.dart';
 
 // Strategie d'URL propre (sans #) sur le web.
 import 'package:flutter_web_plugins/url_strategy.dart' show usePathUrlStrategy;
@@ -43,11 +44,16 @@ Future<void> main() async {
     systemNavigationBarColor: kCream,
     systemNavigationBarIconBrightness: Brightness.dark,
   ));
-  try {
-    await Firebase.initializeApp();
-    AuthService.firebaseDisponible = true;
-  } catch (_) {
+  // Firebase (Phone Auth) n'est utile que sur mobile : l'OTP web passe par le backend.
+  if (kIsWeb) {
     AuthService.firebaseDisponible = false;
+  } else {
+    try {
+      await Firebase.initializeApp();
+      AuthService.firebaseDisponible = true;
+    } catch (_) {
+      AuthService.firebaseDisponible = false;
+    }
   }
   runApp(const SirakeleApp());
 }
@@ -167,6 +173,10 @@ class SirakeleApp extends StatelessWidget {
     return MaterialApp(
       title: 'SIRA KELEN',
       debugShowCheckedModeBanner: false,
+      // Responsive global : centre le contenu sur tablette/ordinateur,
+      // rendu natif sur téléphone. Appliqué à toutes les routes (Navigator 1.0).
+      builder: (context, child) =>
+          child == null ? const SizedBox.shrink() : ResponsiveWrapper(child: child),
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,

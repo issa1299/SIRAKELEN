@@ -94,20 +94,22 @@ class _ModifierProfilScreenState extends State<ModifierProfilScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            ListTile(
-              leading: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: kOrangeLight,
-                  borderRadius: BorderRadius.circular(12),
+            // La caméra n'est pas disponible sur le web : on propose seulement la galerie.
+            if (!kIsWeb)
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: kOrangeLight,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.photo_camera_rounded, color: kOrange),
                 ),
-                child: const Icon(Icons.photo_camera_rounded, color: kOrange),
+                title: const Text('Prendre une photo',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+                onTap: () => Navigator.pop(ctx, ImageSource.camera),
               ),
-              title: const Text('Prendre une photo',
-                  style: TextStyle(fontWeight: FontWeight.w600)),
-              onTap: () => Navigator.pop(ctx, ImageSource.camera),
-            ),
             ListTile(
               leading: Container(
                 width: 40,

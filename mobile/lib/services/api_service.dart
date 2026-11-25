@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart' show StringFromEnvironment;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -74,8 +73,9 @@ class ApiService {
           {Map<String, String>? headers, Object? body}) =>
       _avecReessai(() => http.patch(url, headers: headers, body: body));
   /// URL du serveur, chargee via --dart-define=apiBaseUrl=...
-  /// Valeur de secours : assets/config.json, puis localhost.
-  static const String _baseUrlDefaut = 'http://192.168.1.23:8080';
+  /// Valeur de secours : assets/config.json, puis URL production HTTPS
+  /// (evite le mixed-content sur le web).
+  static const String _baseUrlDefaut = 'https://sirakele-api.onrender.com';
   static String baseUrl = _baseUrlDefaut;
 
   /// A appeler une fois dans main() avant runApp().
