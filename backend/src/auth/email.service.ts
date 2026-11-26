@@ -1,33 +1,46 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
+import { google } from 'googleapis';
+import { OAuth2Client } from 'google-auth-library';
 
 /**
- * Envoi des codes de vérification par email via GMAIL SMTP uniquement.
+ * Envoi des codes de vérification par email via GMAIL.
  *
- * Un timeout court (8s) est appliqué à chaque envoi : sur Render, le port SMTP
- * peut être lent/bloqué. Sans timeout, l'endpoint REST bloquait indéfiniment et
- * le client affichait « Serveur en démarrage » en boucle.
+ * Stratégie (ordre de préférence) :
+ *  1. Gmail API (HTTPS, port 443) — fonctionne sur Render gratuit.
+ *     Nécessite GMAIL_REFRESH_TOKEN + GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET.
+ *  2. Gmail SMTP (ports 465/587) — fallback local ; souvent bloqué sur Render.
+ *  3. Mode dev — code affiché dans les logs si rien n'est configuré.
  *
- * Le code est de toute façon sauvegardé (hashé) en base AVANT l'envoi : même si
- * Gmail échoue, l'endpoint répond vite et le code reste valable 5 minutes.
+ * Le code est sauvegardé (hashé) en base AVANT l'envoi : même si Gmail échoue,
+ * l'endpoint répond vite et le code reste valable 5 minutes.
  */
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private readonly transporter?: nodemailer.Transporter;
+  private readonly oauth2?: OAuth2Client;
   private readonly from: string;
-  private readonly timeoutMs = 20000;
+  private readonly timeoutMs = 10000;
+  private readonly gmailUser = 'me';
 
   constructor(private readonly config: ConfigService) {
     const user = config.get<string>('SMTP_USER') || '';
     const pass = config.get<string>('SMTP_PASS') || '';
+    const clientId = config.get<string>('GOOGLE_CLIENT_ID') || '';
+    const clientSecret = config.get<string>('GOOGLE_CLIENT_SECRET') || '';
+    const refreshToken = config.get<string>('GMAIL_REFRESH_TOKEN') || '';
 
-    this.from = config.get<string>('SMTP_FROM') || `SIRA KELEN <${user}>`;
+    this.from = config.get<string>('SMTP_FROM') || `SIRA KELEN <${user || this.gmailUser}>`;
 
-    if (user && pass) {
-      // Port 465 (SMTPS/SSL) : fonctionne sur Render, contrairement au 587
-      // (STARTTLS) qui est souvent bloqué par l'hébergeur.
+    // 1) Gmail API (HTTPS) — prioritaire, compatible Render.
+    if (clientId && clientSecret && refreshToken) {
+      this.oauth2 = new google.auth.OAuth2(clientId, clientSecret);
+      this.oauth2.setCredentials({ refresh_token: refreshToken });
+      this.logger.log('Gmail API (HTTPS) configuré avec Refresh Token');
+    } else if (user && pass) {
+      // 2) Fallback SMTP (local / hébergeur autorisant le SMTP sortant).
       this.transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 465,
@@ -37,34 +50,63 @@ export class EmailService {
         greetingTimeout: this.timeoutMs,
         socketTimeout: this.timeoutMs,
       });
-      this.logger.log('Gmail SMTP configuré (smtp.gmail.com:465 SSL, timeout ' + this.timeoutMs + 'ms)');
+      this.logger.log('Gmail SMTP configuré (fallback, timeout ' + this.timeoutMs + 'ms)');
     } else {
-      this.logger.warn('[MODE DEV] SMTP non configuré — codes dans les logs');
+      this.logger.warn('[MODE DEV] Aucun service Gmail configuré — codes dans les logs');
     }
   }
 
   async envoyerVerification(email: string, code: string): Promise<void> {
-    if (!this.transporter) {
-      this.logger.warn(`[MODE DEV] Code pour ${email} : ${code}`);
-      return;
-    }
+    const subject = 'Votre code SIRA KELEN : ' + code;
+    const text = `SIRA KELEN - Votre code de vérification est : ${code}\n\nCode valable 5 minutes. Ne le partagez avec personne.`;
+    const html = this.templateHtml(code);
 
     try {
-      await this.withTimeout(
-        this.transporter.sendMail({
-          from: this.from,
-          to: email,
-          subject: 'Votre code SIRA KELEN : ' + code,
-          text: `SIRA KELEN - Votre code de vérification est : ${code}\n\nCode valable 5 minutes. Ne le partagez avec personne.`,
-          html: this.templateHtml(code),
-        }),
-      );
-      this.logger.log(`Email envoyé à ${email} (Gmail SMTP)`);
+      if (this.oauth2) {
+        await this.withTimeout(this.envoyerViaApi(email, subject, text, html));
+        this.logger.log(`Email envoyé à ${email} (Gmail API)`);
+        return;
+      }
+      if (this.transporter) {
+        await this.withTimeout(
+          this.transporter.sendMail({ from: this.from, to: email, subject, text, html }),
+        );
+        this.logger.log(`Email envoyé à ${email} (Gmail SMTP)`);
+        return;
+      }
+      this.logger.warn(`[MODE DEV] Code pour ${email} : ${code}`);
     } catch (error: any) {
-      // Ne jamais faire échouer l'endpoint : le code est déjà en base.
-      this.logger.error(`Gmail SMTP échoué: ${error?.message || error}`);
+      this.logger.error(`Envoi Gmail échoué: ${error?.message || error}`);
       this.logger.warn(`[FALLBACK] Code pour ${email} : ${code}`);
     }
+  }
+
+  /** Envoi via Gmail API (messages.send, base64url). */
+  private async envoyerViaApi(
+    to: string,
+    subject: string,
+    text: string,
+    html: string,
+  ): Promise<void> {
+    const gmail = google.gmail({ version: 'v1', auth: this.oauth2 });
+    const from = this.from.includes('<')
+      ? this.from
+      : `SIRA KELEN <${this.from}>`;
+    const raw = [
+      `From: ${from}`,
+      `To: ${to}`,
+      `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
+      'MIME-Version: 1.0',
+      'Content-Type: text/html; charset=UTF-8',
+      '',
+      html,
+      '',
+      text,
+    ].join('\r\n');
+    await gmail.users.messages.send({
+      userId: this.gmailUser,
+      requestBody: { raw: Buffer.from(raw).toString('base64url') },
+    });
   }
 
   /** Borne une promesse dans le temps pour ne jamais bloquer la réponse. */
@@ -72,7 +114,7 @@ export class EmailService {
     let timer: NodeJS.Timeout;
     const timeout = new Promise<never>((_, reject) => {
       timer = setTimeout(
-        () => reject(new Error(`Gmail SMTP timeout après ${this.timeoutMs}ms`)),
+        () => reject(new Error(`Gmail timeout après ${this.timeoutMs}ms`)),
         this.timeoutMs,
       );
     });
