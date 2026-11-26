@@ -17,7 +17,7 @@ export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private readonly transporter?: nodemailer.Transporter;
   private readonly from: string;
-  private readonly timeoutMs = 8000;
+  private readonly timeoutMs = 20000;
 
   constructor(private readonly config: ConfigService) {
     const user = config.get<string>('SMTP_USER') || '';
