@@ -10,6 +10,8 @@ import { Signalement } from './signalements/signalement.entity';
 import { ContactUrgence } from './contact-urgence/contact-urgence.entity';
 import { CodeVerification } from './auth/code-verification.entity';
 import { Message } from './messages/message.entity';
+import { AppVersion } from './versions/app-version.entity';
+import { VersionsModule } from './versions/versions.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { AdsModule } from './ads/ads.module';
@@ -32,7 +34,7 @@ import { MessagesModule } from './messages/messages.module';
             type: 'postgres' as const,
             url: databaseUrl,
             ssl: { rejectUnauthorized: false },
-            entities: [User, AvisDeplacement, Demande, Signalement, ContactUrgence, CodeVerification, Message],
+            entities: [User, AvisDeplacement, Demande, Signalement, ContactUrgence, CodeVerification, Message, AppVersion],
             synchronize: true,
           };
         }
@@ -44,11 +46,12 @@ import { MessagesModule } from './messages/messages.module';
           username: config.get<string>('DB_USER'),
           password: config.get<string>('DB_PASSWORD'),
           database: config.get<string>('DB_NAME'),
-          entities: [User, AvisDeplacement, Demande, Signalement, ContactUrgence, CodeVerification, Message],
+          entities: [User, AvisDeplacement, Demande, Signalement, ContactUrgence, CodeVerification, Message, AppVersion],
           synchronize: true,
         };
       },
     }),
+    VersionsModule,
     UsersModule,
     AuthModule,
     AdsModule,

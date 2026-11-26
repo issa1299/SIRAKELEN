@@ -9,6 +9,7 @@ import 'screens/main_scaffold.dart';
 import 'services/auth_service.dart';
 import 'services/api_service.dart';
 import 'widgets/responsive_wrapper.dart';
+import 'widgets/update_checker.dart';
 
 // Strategie d'URL propre (sans #) sur le web.
 import 'package:flutter_web_plugins/url_strategy.dart' show usePathUrlStrategy;
@@ -323,7 +324,7 @@ class SirakeleApp extends StatelessWidget {
           space: 0,
         ),
       ),
-      home: const EcranDemarrage(),
+      home: const UpdateChecker(child: EcranDemarrage()),
     );
   }
 }

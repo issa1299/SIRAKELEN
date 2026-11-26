@@ -238,6 +238,15 @@
 const C = window.SIRAKELEN_CONFIG;
 const app = document.getElementById('app');
 
+// Dernière version active chargée depuis le backend (source de vérité).
+let latestVersion = null;
+function chargerDerniereVersion(){
+  fetch(C.api.url + '/versions/latest?plateforme=android')
+    .then(r => r.ok ? r.json() : null)
+    .then(v => { if(v){ latestVersion = v; const section=document.getElementById('downloadPageContent'); if(section){ section.innerHTML = pageDownloadContent(); } } })
+    .catch(() => {});
+}
+
 function navigate(path){ location.hash = '#' + path; }
 
 function icon(id, cls){ return '<span class="icon '+(cls||'')+'"><svg><use href="#'+id+'"/></svg></span>'; }
@@ -355,18 +364,35 @@ function pageFeatures(){ return `
   </div></section>`;
 }
 
-function pageDownload(){ return `
-  <section><div class="container">
-    <div class="section-head"><span class="section-label">Téléchargement</span><h2>SiraKelen pour Android</h2><p>Version ${C.app.version} (build ${C.app.buildNumber}) — ${C.app.releaseDate}</p></div>
+function pageDownload(){ return `<section><div class="container"><div id="downloadPageContent">${pageDownloadContent()}</div></div></section>`; }
+
+function formatDateFr(iso){
+  if(!iso) return '—';
+  const d=new Date(iso);
+  if(isNaN(d.getTime())) return iso;
+  const mois=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  return d.getDate()+' '+mois[d.getMonth()]+' '+d.getFullYear();
+}
+
+function pageDownloadContent(){
+  const v = latestVersion || {
+    version:C.app.version, buildNumber:C.app.buildNumber,
+    datePublication:null, apkUrl:C.app.apkUrl,
+    tailleOctets:null, notes:'', obligatoire:false
+  };
+  const taille = v.tailleOctets ? '~'+(v.tailleOctets/1048576).toFixed(1)+' Mo' : '~'+C.app.apkSizeMiB+' Mo';
+  const notes = v.notes ? v.notes.split('\n').filter(l=>l.trim()).map(l=>'<li><span class="icon">'+icon('i-check')+'</span><div><span>'+l.trim()+'</span></div></li>').join('') : '';
+  return `
+    <div class="section-head"><span class="section-label">Téléchargement</span><h2>SiraKelen pour Android</h2><p>Version ${v.version} (build ${v.buildNumber}) — ${formatDateFr(v.datePublication) || C.app.releaseDate}</p></div>
     <div class="download-layout">
       <div class="download-box">
         <h3>Informations sur la version</h3>
         <div class="info-row"><span>Nom</span><span>${C.app.name}</span></div>
-        <div class="info-row"><span>Version</span><span>${C.app.version} (${C.app.buildNumber})</span></div>
-        <div class="info-row"><span>Publication</span><span>${C.app.releaseDate}</span></div>
-        <div class="info-row"><span>Taille de l’APK</span><span>~${C.app.apkSizeMiB} Mo</span></div>
+        <div class="info-row"><span>Version</span><span>${v.version} (${v.buildNumber})</span></div>
+        <div class="info-row"><span>Publication</span><span>${formatDateFr(v.datePublication) || C.app.releaseDate}</span></div>
+        <div class="info-row"><span>Taille de l’APK</span><span>${taille}</span></div>
         <div class="info-row"><span>Configuration requise</span><span>${C.app.androidMin}</span></div>
-        <div class="info-row"><span>Type de build</span><span>Release (optimisé)</span></div>
+        <div class="info-row"><span>Type de build</span><span>Release (optimisé)${v.obligatoire?' · obligatoire':''}</span></div>
         <div class="notice">Le fichier téléchargé est l’APK Release généré par le projet Android — jamais un APK de debug.</div>
         <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="downloadApk()">${icon('i-download')} Télécharger l’APK Android</button>
         <p id="downloadStatus" style="font-size:13px;color:var(--muted);margin-top:10px"></p>
@@ -374,12 +400,7 @@ function pageDownload(){ return `
       <div>
         <div class="card">
           <h3 style="font-size:20px;font-weight:800;margin-bottom:16px">Nouveautés de cette version</h3>
-          <ul class="check-list">
-            <li><span class="icon">${icon('i-check')}</span><div><strong>Accueil allégé</strong><span>Trajet en vedette et section « À traiter ».</span></div></li>
-            <li><span class="icon">${icon('i-check')}</span><div><strong>Mes trajets</strong><span>Onglets À venir, Demandes et Passés.</span></div></li>
-            <li><span class="icon">${icon('i-check')}</span><div><strong>Parcourir les trajets</strong><span>Filtres, pagination et détails.</span></div></li>
-            <li><span class="icon">${icon('i-check')}</span><div><strong>Splash personnalisé</strong><span>Logo SiraKelen au démarrage.</span></div></li>
-          </ul>
+          <ul class="check-list">${notes || '<li><span class="icon">'+icon('i-check')+'</span><div><span>Accueil allégé, Mes trajets et Parcourir les trajets.</span></div></li>'}</ul>
         </div>
         <div class="card" style="margin-top:16px">
           <h3 style="font-size:20px;font-weight:800;margin-bottom:16px">Instructions d’installation</h3>
@@ -391,15 +412,16 @@ function pageDownload(){ return `
           </ol>
         </div>
       </div>
-    </div>
-  </div></section>`;
+    </div>`;
 }
 
 function downloadApk(){
-  const url = C.app.apkUrl;
+  const v = latestVersion || C.app;
+  const url = v.apkUrl;
   if(!url){ document.getElementById('downloadStatus').textContent='Lien de téléchargement non configuré.'; return; }
-  document.getElementById('downloadStatus').textContent='Téléchargement en cours… ('+C.app.apkFileName+')';
-  const a=document.createElement('a'); a.href=url; a.download=C.app.apkFileName; document.body.appendChild(a); a.click(); a.remove();
+  const name = 'sirakelen-v'+v.version+'-release.apk';
+  document.getElementById('downloadStatus').textContent='Téléchargement en cours… ('+name+')';
+  const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
 }
 
 function pageWeb(){ return `
@@ -480,6 +502,7 @@ if(C.social.github){ document.getElementById('footerGithub').href=C.social.githu
 else { document.getElementById('footerGithub').style.display='none'; }
 window.addEventListener('hashchange',render);
 render();
+chargerDerniereVersion();
 </script>
 </body>
 </html>

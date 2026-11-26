@@ -4,6 +4,7 @@ import '../services/api_service.dart';
 import 'modifier_profil_screen.dart';
 import 'contact_urgence_screen.dart';
 import 'mes_ad_screen.dart';
+import 'a_propos_screen.dart';
 import 'login_screen.dart';
 
 class ProfilScreen extends StatefulWidget {
@@ -366,6 +367,12 @@ class _ProfilScreenState extends State<ProfilScreen> {
                               MaterialPageRoute(builder: (_) => ContactUrgenceScreen(userId: widget.userId)),
                             );
                             _charger();
+                          }),
+                          _menu(Icons.info_outline_rounded, 'À propos de SiraKelen', () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const AProposScreen()),
+                            );
                           }),
                           _menu(Icons.logout_rounded, 'Déconnexion', () async {
                             await Session.effacer();
