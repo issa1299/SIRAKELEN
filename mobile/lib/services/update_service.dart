@@ -58,6 +58,9 @@ class AppVersionInfo {
 
 class UpdateService {
   /// Version installée (sync avec pubspec.yaml : 1.0.0+1).
+  ///
+  /// À mettre à jour en même temps que pubspec.yaml lors d'uneRelease :
+  /// `version: 1.0.1+2` → versionInstallee = '1.0.1', buildInstalle = 2.
   static const String versionInstallee = '1.0.0';
   static const int buildInstalle = 1;
 
@@ -70,6 +73,8 @@ class UpdateService {
       final response = await http.get(uri).timeout(const Duration(seconds: 15));
       if (response.statusCode == 200 && response.body.isNotEmpty) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
+        // Une réponse "null" (aucune version active) n'est pas une mise à jour.
+        if (data.isEmpty) return null;
         return AppVersionInfo.fromJson(data);
       }
     } catch (_) {}
@@ -77,8 +82,33 @@ class UpdateService {
   }
 
   /// Y a-t-il une mise à jour disponible ?
+  ///
+  /// On compare le buildNumber ET la version lisible : publier "1.0.1" avec
+  /// le même build que l'app installée doit tout de même proposer la mise à jour.
   static bool miseAJourDisponible(AppVersionInfo? distante) {
     if (distante == null) return false;
-    return distante.buildNumber > buildInstalle;
+    if (distante.buildNumber > buildInstalle) return true;
+    if (distante.buildNumber < buildInstalle) return false;
+    return _estSuperieure(distante.version, versionInstallee);
   }
+
+  /// Compare des versions du type "1.0.1", "1.2", "2.0.0+3".
+  static bool _estSuperieure(String distante, String installee) {
+    final a = _parties(distante);
+    final b = _parties(installee);
+    final n = a.length > b.length ? a.length : b.length;
+    for (var i = 0; i < n; i++) {
+      final x = i < a.length ? a[i] : 0;
+      final y = i < b.length ? b[i] : 0;
+      if (x > y) return true;
+      if (x < y) return false;
+    }
+    return false;
+  }
+
+  static List<int> _parties(String v) => v
+      .split(RegExp(r'[^0-9]+'))
+      .where((s) => s.isNotEmpty)
+      .map((s) => int.tryParse(s) ?? 0)
+      .toList();
 }
