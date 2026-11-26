@@ -6,271 +6,298 @@
 <title>SiraKelen — Administration centralisée</title>
 <style>
 :root{
-  --orange:#F77F00;--orange-dark:#E26500;--ink:#141414;--ink2:#1E1E1E;
-  --cream:#FDF6EE;--white:#fff;--text:#1A1A1A;--muted:#717171;
-  --border:#E9E4DC;--green:#177A35;--green-bg:#E3F3E8;
-  --red:#C62828;--red-bg:#FDECEA;--warn:#B35A00;--warn-bg:#FFF0DC;
-  --blue:#1B5FA8;--blue-bg:#E8F0FA;--shadow:0 6px 22px rgba(20,20,20,.06);
+  --orange:#F47700;--ink:#151515;--cream:#FAF7F2;--white:#fff;--text:#1B1B1B;
+  --muted:#737373;--border:#E7E2DA;--soft:#F4F1EC;--green:#1B7A35;--green-bg:#E8F3EB;
+  --red:#C0392B;--red-bg:#FBECEA;--blue:#1B5FA8;--blue-bg:#EAF1F9;
+  --amber:#9A6200;--amber-bg:#FFF2DC;--shadow:0 4px 18px rgba(20,20,20,.045);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
 body{font-family:'Segoe UI',Roboto,Arial,sans-serif;background:var(--cream);color:var(--text);font-size:14px;line-height:1.5}
 button,input,select,textarea{font-family:inherit;font-size:inherit}
 a{color:inherit;text-decoration:none}
+.ico{width:17px;height:17px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ico.sm{width:14px;height:14px}.ico.lg{width:21px;height:21px}
 
 /* ---------- Layout ---------- */
 .app{display:flex;min-height:100vh}
-.sidebar{width:248px;background:var(--ink);color:#fff;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:40;transition:transform .25s}
-.sidebar .brand{padding:22px 20px;border-bottom:1px solid #2c2c2c;display:flex;align-items:center;gap:11px}
-.sidebar .brand .logo{width:36px;height:36px;border-radius:10px;background:var(--orange);display:grid;place-items:center;font-weight:900;font-size:18px;color:#fff;flex:none}
-.sidebar .brand b{display:block;font-size:15px;letter-spacing:.3px}
-.sidebar .brand small{display:block;color:#9b9b9b;font-size:11px}
-.nav{flex:1;overflow-y:auto;padding:14px 12px}
-.nav .group{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#7d7d7d;padding:14px 10px 6px;font-weight:700}
-.nav button{display:flex;align-items:center;gap:11px;width:100%;border:0;background:transparent;color:#c8c8c8;padding:10px 12px;border-radius:9px;cursor:pointer;text-align:left;font-weight:600;font-size:13px;transition:.15s}
+.sidebar{width:242px;background:var(--ink);color:#fff;position:fixed;inset:0 auto 0 0;z-index:40;display:flex;flex-direction:column;transition:transform .22s}
+.sidebar .brand{padding:20px 18px;border-bottom:1px solid #2b2b2b;display:flex;align-items:center;gap:10px}
+.sidebar .brand .logo{width:34px;height:34px;border-radius:9px;background:var(--orange);display:grid;place-items:center;font-weight:900;color:#fff;font-size:14px}
+.sidebar .brand b{display:block;font-size:15px}.sidebar .brand small{display:block;color:#9c9c9c;font-size:11px}
+.nav{flex:1;overflow-y:auto;padding:12px}
+.nav .group{font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:#7b7b7b;padding:13px 10px 5px;font-weight:700}
+.nav button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;color:#c9c9c9;padding:9px 11px;border-radius:8px;cursor:pointer;text-align:left;font-weight:600;font-size:13px;transition:.15s}
 .nav button:hover{background:#242424;color:#fff}
-.nav button.active{background:var(--orange);color:#fff}
-.nav button .ic{width:19px;text-align:center;font-size:15px;opacity:.95}
-.nav button .badge{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:800}
-.sidebar .foot{padding:14px 18px;border-top:1px solid #2c2c2c;font-size:11px;color:#8c8c8c}
-
-.main{flex:1;margin-left:248px;min-width:0;display:flex;flex-direction:column}
-.topbar{height:66px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 24px;position:sticky;top:0;z-index:30}
-.menu-btn{display:none;background:none;border:0;font-size:22px;cursor:pointer;color:var(--ink)}
-.search{flex:1;max-width:420px;position:relative}
-.search input{width:100%;padding:9px 14px 9px 36px;border:1px solid var(--border);border-radius:9px;background:var(--cream);outline:none}
+.nav button.active{background:#2a2a2a;color:#fff}
+.nav button.active .ico{color:var(--orange)}
+.nav button .badge{margin-left:auto;background:#3a3a3a;color:#fff;border-radius:9px;padding:1px 6px;font-size:10px;font-weight:800}
+.sidebar .foot{padding:13px 18px;border-top:1px solid #2b2b2b;color:#8c8c8c;font-size:11px}
+.main{flex:1;margin-left:242px;min-width:0;display:flex;flex-direction:column}
+.topbar{height:62px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 22px;position:sticky;top:0;z-index:30}
+.menu-btn{display:none;background:none;border:0;cursor:pointer;color:var(--ink)}
+.search{flex:1;max-width:400px;position:relative}
+.search input{width:100%;padding:9px 12px 9px 36px;border:1px solid var(--border);border-radius:8px;background:var(--cream);outline:none}
 .search input:focus{border-color:var(--orange);background:#fff}
-.search .si{position:absolute;left:12px;top:8px;color:var(--muted);font-size:15px}
-.top-actions{margin-left:auto;display:flex;align-items:center;gap:10px}
-.icon-btn{position:relative;width:38px;height:38px;border:1px solid var(--border);background:#fff;border-radius:9px;cursor:pointer;display:grid;place-items:center;font-size:17px;color:var(--ink)}
-.icon-btn .dot{position:absolute;top:3px;right:3px;min-width:16px;height:16px;border-radius:9px;background:var(--red);color:#fff;font-size:9px;font-weight:800;display:grid;place-items:center;padding:0 3px}
-.profile{display:flex;align-items:center;gap:9px;padding:5px 9px 5px 5px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer}
-.profile .avatar{width:30px;height:30px;border-radius:50%;background:var(--orange);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
-.profile .pn{font-size:12px;font-weight:700;line-height:1.1}
-.profile .pr{font-size:10px;color:var(--orange);font-weight:700;text-transform:uppercase}
-.dropdown{position:absolute;top:58px;right:24px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:7px;min-width:210px;z-index:50;display:none}
+.search .si{position:absolute;left:11px;top:9px;color:var(--muted);display:grid}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:9px}
+.icon-btn{position:relative;width:36px;height:36px;border:1px solid var(--border);background:#fff;border-radius:8px;cursor:pointer;display:grid;place-items:center;color:var(--ink)}
+.icon-btn .dot{position:absolute;top:2px;right:2px;min-width:15px;height:15px;border-radius:8px;background:var(--red);color:#fff;font-size:9px;font-weight:800;display:grid;place-items:center;padding:0 3px}
+.profile{display:flex;align-items:center;gap:8px;padding:4px 9px 4px 4px;border:1px solid var(--border);border-radius:9px;background:#fff;cursor:pointer}
+.profile .avatar{width:28px;height:28px;border-radius:50%;background:var(--soft);color:var(--ink);display:grid;place-items:center;font-weight:800;font-size:11px}
+.profile .pn{font-size:12px;font-weight:700;line-height:1.1}.profile .pr{font-size:10px;color:var(--muted)}
+.dropdown{position:absolute;top:55px;right:22px;background:#fff;border:1px solid var(--border);border-radius:11px;box-shadow:0 12px 32px rgba(0,0,0,.12);padding:6px;min-width:210px;z-index:50;display:none}
 .dropdown.show{display:block}
-.dropdown button,.dropdown a{display:block;width:100%;border:0;background:none;text-align:left;padding:9px 11px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text)}
-.dropdown button:hover,.dropdown a:hover{background:var(--cream)}
-.notif-panel{position:absolute;top:58px;right:80px;width:330px;max-width:calc(100vw - 40px);background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);z-index:50;display:none;overflow:hidden}
+.dropdown button,.dropdown a{display:flex;align-items:center;gap:9px;width:100%;border:0;background:none;text-align:left;padding:9px 10px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text)}
+.dropdown button:hover,.dropdown a:hover{background:var(--soft)}
+.notif-panel{position:absolute;top:55px;right:78px;width:320px;max-width:calc(100vw - 34px);background:#fff;border:1px solid var(--border);border-radius:11px;box-shadow:0 12px 32px rgba(0,0,0,.12);z-index:50;display:none;overflow:hidden}
 .notif-panel.show{display:block}
-.notif-panel h4{padding:13px 16px;border-bottom:1px solid var(--border);font-size:13px}
-.notif-panel .item{padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;cursor:pointer}
-.notif-panel .item:hover{background:var(--cream)}
+.notif-panel h4{padding:12px 15px;border-bottom:1px solid var(--border);font-size:13px}
+.notif-panel .item{padding:11px 15px;border-bottom:1px solid var(--border);font-size:12px;cursor:pointer}
+.notif-panel .item:hover{background:var(--soft)}
 .notif-panel .item small{display:block;color:var(--muted);margin-top:3px}
-.content{padding:24px;flex:1}
-.view{display:none;animation:fade .2s}
-.view.active{display:block}
-@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.content{padding:22px;flex:1}
+.view{display:none;animation:fade .18s}.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
 
 /* ---------- Common ---------- */
-.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
-.page-head h1{font-size:23px;font-weight:800;letter-spacing:-.3px}
-.page-head p{color:var(--muted);font-size:13px;margin-top:3px}
-.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;box-shadow:var(--shadow);margin-bottom:18px}
-.card h2{font-size:16px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.page-head h1{font-size:22px;font-weight:800;letter-spacing:-.3px}.page-head p{color:var(--muted);font-size:13px;margin-top:2px}
+.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:var(--shadow);margin-bottom:16px}
+.card h2{font-size:15px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .card h2 .sub{font-size:11px;color:var(--muted);font-weight:600;margin-left:auto}
-.grid{display:grid;gap:14px}
-.stats{grid-template-columns:repeat(auto-fit,minmax(178px,1fr))}
-.stat{background:#fff;border:1px solid var(--border);border-radius:13px;padding:16px;box-shadow:var(--shadow);position:relative;overflow:hidden}
-.stat:before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--orange)}
-.stat.g:before{background:var(--green)}.stat.b:before{background:var(--blue)}.stat.r:before{background:var(--red)}
+.grid{display:grid;gap:14px}.stats{grid-template-columns:repeat(auto-fit,minmax(172px,1fr))}
+.stat{background:#fff;border:1px solid var(--border);border-radius:11px;padding:15px}
+.stat .si{width:30px;height:30px;border-radius:8px;background:var(--soft);color:var(--ink);display:grid;place-items:center;margin-bottom:10px}
 .stat .lbl{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-.stat .val{font-size:27px;font-weight:850;margin:6px 0 2px;letter-spacing:-.5px}
-.stat .hint{font-size:11px;color:var(--muted)}
-.row{display:flex;gap:12px;flex-wrap:wrap}
-.row>div{flex:1;min-width:150px}
+.stat .val{font-size:25px;font-weight:850;margin:3px 0;letter-spacing:-.5px}.stat .hint{font-size:11px;color:var(--muted)}
+.row{display:flex;gap:12px;flex-wrap:wrap}.row>div{flex:1;min-width:150px}
 label{display:block;font-size:12px;font-weight:700;margin:0 0 5px;color:#3d3d3d}
 input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:#fff;outline:none;color:var(--text)}
-input:focus,select:focus,textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(247,127,0,.1)}
-textarea{min-height:92px;resize:vertical}
-.btn{padding:9px 14px;border:0;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.15s;white-space:nowrap}
+input:focus,select:focus,textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(244,119,0,.09)}
+textarea{min-height:88px;resize:vertical}
+.btn{padding:9px 13px;border:1px solid transparent;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.15s;white-space:nowrap}
 .btn:disabled{opacity:.45;cursor:not-allowed}
-.btn-p{background:var(--orange);color:#fff}.btn-p:hover{background:var(--orange-dark)}
-.btn-d{background:var(--red-bg);color:var(--red)}.btn-d:hover{background:#fbdad6}
-.btn-g{background:#fff;color:#444;border:1px solid var(--border)}.btn-g:hover{background:var(--cream)}
-.btn-s{background:#E8F0FA;color:var(--blue)}.btn-s:hover{background:#d9e8f8}
-.btn-k{background:var(--green-bg);color:var(--green)}
-.actions{display:flex;gap:7px;flex-wrap:wrap}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
-.toolbar input,.toolbar select{width:auto;min-width:150px}
-.toolbar .search-mini{flex:1;min-width:180px}
-.pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:800;text-transform:capitalize;white-space:nowrap}
-.pill.ok{background:var(--green-bg);color:var(--green)}
-.pill.off{background:#F1F1EE;color:var(--muted)}
-.pill.warn{background:var(--warn-bg);color:var(--warn)}
-.pill.err{background:var(--red-bg);color:var(--red)}
-.pill.info{background:var(--blue-bg);color:var(--blue)}
-.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:11px}
+.btn-p{background:var(--orange);color:#fff}.btn-p:hover{background:#dd6a00}
+.btn-d{background:#fff;color:var(--red);border-color:var(--border)}.btn-d:hover{background:var(--red-bg)}
+.btn-g{background:#fff;color:#444;border-color:var(--border)}.btn-g:hover{background:var(--soft)}
+.btn-s{background:#fff;color:var(--blue);border-color:var(--border)}.btn-s:hover{background:var(--blue-bg)}
+.btn-k{background:#fff;color:var(--green);border-color:var(--border)}.btn-k:hover{background:var(--green-bg)}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:13px}
+.toolbar input,.toolbar select{width:auto;min-width:150px}.toolbar .search-mini{flex:1;min-width:180px}
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
 table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px}
-th{background:#FAF7F2;text-align:left;padding:10px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:800;white-space:nowrap;border-bottom:1px solid var(--border)}
+th{background:#F8F5F0;text-align:left;padding:10px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:800;border-bottom:1px solid var(--border);white-space:nowrap}
 td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
-tr:last-child td{border-bottom:0}
-tbody tr:hover{background:#FFFCF8}
-.empty{padding:34px;text-align:center;color:var(--muted);font-size:13px}
-.small{font-size:11px;color:var(--muted)}
-.strong{font-weight:700}
-.notice{background:#FFF8EA;border-left:4px solid var(--orange);padding:12px 15px;border-radius:8px;font-size:12px;color:#7A5A20;margin-bottom:14px}
-.notice.blue{background:var(--blue-bg);border-color:var(--blue);color:#214B7A}
-.notice.red{background:var(--red-bg);border-color:var(--red);color:#8E2626}
-.progress{height:8px;background:#EFECE7;border-radius:6px;overflow:hidden;margin-top:6px}
+tr:last-child td{border-bottom:0}tbody tr:hover{background:#FDFBF8}
+.empty{padding:30px;text-align:center;color:var(--muted);font-size:13px}
+.small{font-size:11px;color:var(--muted)}.strong{font-weight:700}
+.pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:800;text-transform:capitalize;white-space:nowrap}
+.pill.ok{background:var(--green-bg);color:var(--green)}.pill.off{background:var(--soft);color:var(--muted)}
+.pill.warn{background:var(--amber-bg);color:var(--amber)}.pill.err{background:var(--red-bg);color:var(--red)}
+.pill.info{background:var(--blue-bg);color:var(--blue)}
+.notice{display:flex;gap:9px;background:#fff;border:1px solid var(--border);padding:11px 14px;border-radius:9px;font-size:12px;color:#5d5344;margin-bottom:13px}
+.notice .ico{color:var(--orange);margin-top:1px}
+.notice.blue .ico{color:var(--blue)}.notice.red .ico{color:var(--red)}
+.progress{height:7px;background:var(--soft);border-radius:6px;overflow:hidden;margin-top:6px}
 .progress i{display:block;height:100%;background:var(--orange);border-radius:6px}
-.chart{width:100%;height:180px;overflow:visible}
-.legend{display:flex;gap:16px;font-size:11px;color:var(--muted);margin-top:6px}
-.legend span:before{content:'';display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--orange);margin-right:6px;vertical-align:-1px}
+.chart{width:100%;height:170px}.legend{display:flex;gap:16px;font-size:11px;color:var(--muted);margin-top:5px}
+.legend span:before{content:'';display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--orange);margin-right:6px}
 .legend span:nth-child(2):before{background:var(--blue)}
-.feed{display:flex;flex-direction:column;gap:10px}
-.feed .it{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px}
-.feed .it:last-child{border:0}
-.feed .it .dotc{width:8px;height:8px;border-radius:50%;background:var(--orange);margin-top:6px;flex:none}
+.feed{display:flex;flex-direction:column}.feed .it{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px}
+.feed .it:last-child{border:0}.feed .it .si{width:27px;height:27px;border-radius:7px;background:var(--soft);display:grid;place-items:center;flex:none}
 .feed .it small{display:block;color:var(--muted)}
 
-/* ---------- Modals ---------- */
-.overlay{position:fixed;inset:0;background:rgba(15,15,15,.55);z-index:100;display:none;align-items:center;justify-content:center;padding:18px}
+/* ---------- Mobile : fiches en modal ---------- */
+.m-list{display:none}
+.m-item{width:100%;text-align:left;background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:9px;cursor:pointer;display:flex;align-items:center;gap:10px}
+.m-item:active{background:var(--soft)}
+.m-item .mb{flex:1;min-width:0}
+.m-item .mt{font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.m-item .ms{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.m-item .chev{color:var(--muted);display:grid}
+
+/* ---------- Modales ---------- */
+.overlay{position:fixed;inset:0;background:rgba(15,15,15,.5);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
 .overlay.show{display:flex}
-.modal{background:#fff;border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.25)}
-.modal .mh{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.modal .mh h3{font-size:16px;font-weight:800}
-.modal .mb{padding:20px 22px}
-.modal .mf{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:9px}
-.modal .close{background:none;border:0;font-size:21px;cursor:pointer;color:var(--muted)}
-#toast{position:fixed;bottom:22px;right:22px;z-index:200;display:flex;flex-direction:column;gap:9px}
-.toast{padding:12px 17px;border-radius:10px;color:#fff;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.18);animation:fade .2s;max-width:340px}
+.modal{background:#fff;border-radius:13px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.22)}
+.modal .mh{padding:15px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal .mh h3{font-size:15px;font-weight:800}.modal .mb{padding:18px}
+.modal .mf{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.modal .close{background:none;border:0;cursor:pointer;color:var(--muted);display:grid}
+.fiche{display:grid;grid-template-columns:auto 1fr;gap:9px 14px;font-size:13px}
+.fiche dt{color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.fiche dd{word-break:break-word}
+#toast{position:fixed;bottom:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px}
+.toast{padding:11px 15px;border-radius:9px;color:#fff;font-size:12px;font-weight:600;box-shadow:0 8px 22px rgba(0,0,0,.16);animation:fade .2s;max-width:320px;display:flex;gap:8px;align-items:center}
 .toast.ok{background:#1B7A35}.toast.err{background:#B3261E}
 
 /* ---------- Login ---------- */
-#loginView{min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 20% 0%,#FFF0DC,#FDF6EE 55%)}
-.login-box{background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:0 18px 50px rgba(20,20,20,.09);width:100%;max-width:400px;padding:30px}
-.login-box .lg{width:48px;height:48px;border-radius:13px;background:var(--orange);color:#fff;display:grid;place-items:center;font-weight:900;font-size:23px;margin-bottom:16px}
-.login-box h1{font-size:21px;font-weight:850}
-.login-box p{color:var(--muted);font-size:13px;margin:5px 0 22px}
-.login-box label{margin-top:13px}
-.login-box .btn{width:100%;justify-content:center;margin-top:20px;padding:11px}
-.login-foot{margin-top:18px;text-align:center;font-size:11px;color:var(--muted)}
+#loginView{min-height:100vh;display:grid;place-items:center;padding:18px;background:radial-gradient(circle at 22% 0%,#FFF0DC,#FAF7F2 58%)}
+.login-box{background:#fff;border:1px solid var(--border);border-radius:15px;box-shadow:0 16px 44px rgba(20,20,20,.08);width:100%;max-width:390px;padding:28px}
+.login-box .lg{width:44px;height:44px;border-radius:11px;background:var(--orange);color:#fff;display:grid;place-items:center;font-weight:900;margin-bottom:15px}
+.login-box h1{font-size:20px;font-weight:850}.login-box p{color:var(--muted);font-size:13px;margin:4px 0 20px}
+.login-box label{margin-top:12px}.login-box .btn{width:100%;justify-content:center;margin-top:18px;padding:11px}
+.login-foot{margin-top:16px;text-align:center;font-size:11px;color:var(--muted)}
 
 @media(max-width:900px){
-  .sidebar{transform:translateX(-100%)}
-  .sidebar.open{transform:none}
-  .main{margin-left:0}
-  .menu-btn{display:block}
-  .notif-panel{right:20px}
-  .content{padding:16px}
-  .topbar{padding:0 14px}
+  .sidebar{transform:translateX(-100%)}.sidebar.open{transform:none}
+  .main{margin-left:0}.menu-btn{display:grid}.notif-panel{right:18px}
+  .content{padding:16px}.topbar{padding:0 13px}
   .profile .pn,.profile .pr{display:none}
+}
+@media(max-width:760px){
+  .table-wrap{display:none}
+  .m-list{display:block}
+  .grid[style]{grid-template-columns:1fr!important}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stat .val{font-size:21px}
 }
 </style>
 </head>
 <body>
 
-<!-- ============ LOGIN ============ -->
+<!-- Sprite d'icônes SVG réelles -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="ic-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></symbol>
+  <symbol id="ic-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="ic-route" viewBox="0 0 24 24"><path d="m8 3-4 4 4 4"/><path d="M4 7h16a2 2 0 0 1 2 2v2"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4a2 2 0 0 1-2-2v-2"/></symbol>
+  <symbol id="ic-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></symbol>
+  <symbol id="ic-bell" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+  <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+  <symbol id="ic-layout" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></symbol>
+  <symbol id="ic-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 0 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 0 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 0 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+  <symbol id="ic-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></symbol>
+  <symbol id="ic-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.7-4 3-9 3s-9-1.3-9-3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/></symbol>
+  <symbol id="ic-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/><polyline points="12 7 12 12 16 14"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.7" y2="16.7"/></symbol>
+  <symbol id="ic-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="ic-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></symbol>
+  <symbol id="ic-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="ic-external" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.5 15a9 9 0 1 1-2.1-9.4L23 10"/></symbol>
+  <symbol id="ic-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="ic-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></symbol>
+  <symbol id="ic-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="ic-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+  <symbol id="ic-menu" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="ic-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></symbol>
+  <symbol id="ic-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></symbol>
+  <symbol id="ic-play" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></symbol>
+  <symbol id="ic-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+  <symbol id="ic-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
+  <symbol id="ic-send" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+  <symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></symbol>
+  <symbol id="ic-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+</svg>
+
+<!-- LOGIN -->
 <div id="loginView">
   <div class="login-box">
-    <div class="lg">SK</div>
+    <div class="lg"><svg class="ico lg"><use href="#ic-shield"/></svg></div>
     <h1>Administration SiraKelen</h1>
     <p>Connectez-vous avec un compte administrateur autorisé.</p>
-    <label>Email</label>
-    <input id="loginEmail" type="email" value="admin@sirakele.com" autocomplete="username">
-    <label>Mot de passe</label>
-    <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
+    <label>Email</label><input id="loginEmail" type="email" value="admin@sirakele.com" autocomplete="username">
+    <label>Mot de passe</label><input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
     <button class="btn btn-p" id="loginBtn" onclick="connecter()">Se connecter</button>
-    <div class="login-foot">Espace sécurisé — les actions sont journalisées.<br>
-      <a href="../index.html" style="color:var(--orange);font-weight:700">← Site officiel</a>
-    </div>
+    <div class="login-foot">Espace sécurisé — toutes les actions sont journalisées.<br>
+      <a href="../index.html" style="color:var(--orange);font-weight:700">← Site officiel</a></div>
   </div>
 </div>
 
-<!-- ============ APP ============ -->
+<!-- APP -->
 <div class="app" id="appView" style="display:none">
   <aside class="sidebar" id="sidebar">
     <div class="brand"><div class="logo">SK</div><div><b>SiraKelen</b><small>Administration centrale</small></div></div>
     <nav class="nav" id="nav"></nav>
-    <div class="foot">v1.0 · Panneau unifié<br>Toutes les données sont réelles</div>
+    <div class="foot">Une seule base de données<br>Toutes les statistiques sont réelles</div>
   </aside>
-
   <div class="main">
     <header class="topbar">
-      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
-      <div class="search"><span class="si">⌕</span><input id="globalSearch" placeholder="Rechercher dans la page…" oninput="filtrerTable(this.value)"></div>
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')"><svg class="ico lg"><use href="#ic-menu"/></svg></button>
+      <div class="search"><span class="si"><svg class="ico"><use href="#ic-search"/></svg></span><input id="globalSearch" placeholder="Rechercher dans la page…" oninput="filtrerTable(this.value)"></div>
       <div class="top-actions">
-        <button class="icon-btn" title="Notifications" onclick="toggleNotifs()">🔔<span class="dot" id="notifDot" style="display:none">0</span></button>
+        <button class="icon-btn" title="Notifications" onclick="toggleNotifs()"><svg class="ico"><use href="#ic-bell"/></svg><span class="dot" id="notifDot" style="display:none">0</span></button>
         <div class="profile" onclick="toggleProfile(event)"><div class="avatar" id="avatar">A</div><div><div class="pn" id="prenomTop">Admin</div><div class="pr" id="roleTop">admin</div></div></div>
       </div>
     </header>
 
     <div class="notif-panel" id="notifPanel"><h4>Notifications administratives</h4><div id="notifList"></div></div>
     <div class="dropdown" id="profileMenu">
-      <button onclick="ouvrirProfil()">✎ Mon profil</button>
-      <button onclick="ouvrirMotDePasse()">🔒 Changer le mot de passe</button>
-      <a href="../index.html" target="_blank">↗ Site officiel</a>
-      <a href="https://sirakelen.pages.dev/login" target="_blank">↗ Ancien admin Flutter</a>
-      <button onclick="deconnexion()" style="color:var(--red)">⏻ Déconnexion</button>
+      <button onclick="ouvrirProfil()"><svg class="ico sm"><use href="#ic-user"/></svg> Mon profil</button>
+      <button onclick="ouvrirMotDePasse()"><svg class="ico sm"><use href="#ic-lock"/></svg> Changer le mot de passe</button>
+      <a href="../index.html" target="_blank"><svg class="ico sm"><use href="#ic-external"/></svg> Site officiel</a>
+      <a href="https://sirakelen.pages.dev/login" target="_blank"><svg class="ico sm"><use href="#ic-external"/></svg> Ancien admin Flutter</a>
+      <button onclick="deconnexion()" style="color:var(--red)"><svg class="ico sm"><use href="#ic-logout"/></svg> Déconnexion</button>
     </div>
 
     <main class="content">
-      <!-- TABLEAU DE BORD -->
+      <!-- DASHBOARD -->
       <section class="view active" id="v-dashboard">
-        <div class="page-head"><div><h1>Tableau de bord</h1><p>Vue d'ensemble de la plateforme — données réelles</p></div>
-          <button class="btn btn-g" onclick="chargerDashboard()">↻ Actualiser</button></div>
+        <div class="page-head"><div><h1>Tableau de bord</h1><p>Vue d'ensemble — données réelles</p></div>
+          <button class="btn btn-g" onclick="chargerDashboard()"><svg class="ico sm"><use href="#ic-refresh"/></svg> Actualiser</button></div>
         <div class="grid stats" id="statCards"></div>
         <div class="grid" style="grid-template-columns:1.4fr 1fr">
-          <div class="card"><h2>Activité réelle <span class="sub">30 derniers jours</span></h2>
-            <div class="chart-wrap"><svg class="chart" id="chartSvg" viewBox="0 0 600 180" preserveAspectRatio="none"></svg></div>
-            <div class="legend"><span>Visites du site</span><span>Téléchargements APK</span></div>
-          </div>
-          <div class="card"><h2>Indicateurs</h2><div id="progressList"></div></div>
+          <div class="card"><h2><svg class="ico"><use href="#ic-history"/></svg> Activité réelle <span class="sub">30 derniers jours</span></h2>
+            <svg class="chart" id="chartSvg" viewBox="0 0 600 170" preserveAspectRatio="none"></svg>
+            <div class="legend"><span>Visites du site</span><span>Téléchargements APK</span></div></div>
+          <div class="card"><h2><svg class="ico"><use href="#ic-grid"/></svg> Indicateurs</h2><div id="progressList"></div></div>
         </div>
-        <div class="card"><h2>Activité récente</h2><div class="feed" id="recentFeed"></div></div>
+        <div class="card"><h2><svg class="ico"><use href="#ic-clock"/></svg> Activité récente</h2><div class="feed" id="recentFeed"></div></div>
       </section>
 
-      <!-- UTILISATEURS -->
+      <!-- USERS -->
       <section class="view" id="v-users">
         <div class="page-head"><div><h1>Utilisateurs</h1><p>Consulter, modifier et modérer les comptes</p></div></div>
         <div class="card">
-          <div class="toolbar">
-            <input class="search-mini" id="uQ" placeholder="Nom, téléphone ou email…" oninput="chargerUsers()">
+          <div class="toolbar"><input class="search-mini" id="uQ" placeholder="Nom, téléphone ou email…" oninput="chargerUsers()">
             <select id="uStatut" onchange="chargerUsers()"><option value="">Tous statuts</option><option value="actif">Actifs</option><option value="suspendu">Suspendus</option><option value="banni">Bannis</option></select>
-            <select id="uAdmin" onchange="chargerUsers()"><option value="">Tous types</option><option value="true">Administrateurs</option><option value="false">Utilisateurs</option></select>
-          </div>
+            <select id="uAdmin" onchange="chargerUsers()"><option value="">Tous types</option><option value="true">Administrateurs</option><option value="false">Utilisateurs</option></select></div>
           <div class="table-wrap"><table><thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Statut</th><th>Rôle</th><th>Inscrit</th><th>Actions</th></tr></thead><tbody id="usersBody"></tbody></table></div>
+          <div class="m-list" id="m-users"></div>
         </div>
       </section>
 
-      <!-- ANNONCES / TRAJETS -->
+      <!-- ADS -->
       <section class="view" id="v-ads">
         <div class="page-head"><div><h1>Annonces &amp; trajets</h1><p>Avis de Déplacement publiés par les utilisateurs</p></div></div>
         <div class="card">
-          <div class="toolbar">
-            <input class="search-mini" id="aQ" placeholder="Départ ou destination…" oninput="chargerAds()">
-            <select id="aStatut" onchange="chargerAds()"><option value="">Tous statuts</option><option value="actif">Actifs</option><option value="en_cours_de_finalisation">En cours</option><option value="trajet_organise">Organisés</option><option value="annule">Annulés</option></select>
-          </div>
+          <div class="toolbar"><input class="search-mini" id="aQ" placeholder="Départ ou destination…" oninput="chargerAds()">
+            <select id="aStatut" onchange="chargerAds()"><option value="">Tous statuts</option><option value="actif">Actifs</option><option value="en_cours_de_finalisation">En cours</option><option value="trajet_organise">Organisés</option><option value="annule">Annulés</option></select></div>
           <div class="table-wrap"><table><thead><tr><th>Trajet</th><th>Date</th><th>Rôle</th><th>Statut</th><th>Propriétaire</th><th>Actions</th></tr></thead><tbody id="adsBody"></tbody></table></div>
+          <div class="m-list" id="m-ads"></div>
         </div>
       </section>
 
       <!-- SIGNALEMENTS -->
       <section class="view" id="v-signaux">
         <div class="page-head"><div><h1>Signalements</h1><p>Traitement avec historique conservé dans le journal</p></div></div>
-        <div class="card">
-          <div class="toolbar"><select id="sStatut" onchange="chargerSignaux()"><option value="">Tous</option><option value="en_attente">En attente</option><option value="traite">Traités</option></select></div>
+        <div class="card"><div class="toolbar"><select id="sStatut" onchange="chargerSignaux()"><option value="">Tous</option><option value="en_attente">En attente</option><option value="traite">Traités</option></select></div>
           <div class="table-wrap"><table><thead><tr><th>Motif</th><th>Auteur</th><th>Utilisateur signalé</th><th>Annonce</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="signauxBody"></tbody></table></div>
+          <div class="m-list" id="m-signaux"></div>
         </div>
       </section>
 
       <!-- NOTIFICATIONS -->
       <section class="view" id="v-notifs">
-        <div class="page-head"><div><h1>Notifications</h1><p>Envoyer à tous, à un groupe ou à un utilisateur — programmation et historique</p></div></div>
-        <div class="notice" id="fcmNotice">Vérification de la configuration FCM…</div>
+        <div class="page-head"><div><h1>Notifications</h1><p>Envoyer à tous, à un groupe ou à un utilisateur</p></div></div>
+        <div class="notice" id="fcmNotice"><svg class="ico"><use href="#ic-info"/></svg><span>Vérification FCM…</span></div>
         <div class="grid" style="grid-template-columns:1fr 1.3fr">
-          <div class="card"><h2>Nouvelle notification</h2>
+          <div class="card"><h2><svg class="ico"><use href="#ic-send"/></svg> Nouvelle notification</h2>
             <label>Titre</label><input id="nTitre" maxlength="120" placeholder="Ex : Nouvelle version disponible">
             <label style="margin-top:12px">Message</label><textarea id="nCorps" placeholder="Votre message…"></textarea>
             <div class="row" style="margin-top:12px"><div><label>Cible</label><select id="nCible" onchange="majCible()"><option value="tous">Tous les utilisateurs</option><option value="groupe">Groupe</option><option value="individuel">Utilisateur précis</option></select></div></div>
-            <div class="row" style="margin-top:12px"><div><label id="nValLabel" style="display:none">Valeur cible</label><input id="nVal" style="display:none" placeholder="Groupe ou identifiant utilisateur"></div></div>
+            <div class="row" style="margin-top:12px"><div><label id="nValLabel" style="display:none">Valeur cible</label><input id="nVal" style="display:none"></div></div>
             <label style="margin-top:12px">Programmer (optionnel)</label><input id="nDate" type="datetime-local">
-            <div class="actions" style="margin-top:16px"><button class="btn btn-p" onclick="envoyerNotification()">Envoyer / programmer</button></div>
+            <div class="actions" style="margin-top:15px"><button class="btn btn-p" onclick="envoyerNotification()"><svg class="ico sm"><use href="#ic-send"/></svg> Envoyer / programmer</button></div>
           </div>
-          <div class="card"><h2>Historique des envois</h2>
+          <div class="card"><h2><svg class="ico"><use href="#ic-history"/></svg> Historique des envois</h2>
             <div class="table-wrap"><table><thead><tr><th>Titre</th><th>Cible</th><th>Date</th><th>Résultat</th><th></th></tr></thead><tbody id="notifsBody"></tbody></table></div>
+            <div class="m-list" id="m-notifs"></div>
           </div>
         </div>
       </section>
@@ -278,48 +305,50 @@ tbody tr:hover{background:#FFFCF8}
       <!-- VERSIONS -->
       <section class="view" id="v-versions">
         <div class="page-head"><div><h1>Mises à jour</h1><p>Android et Web — une seule source de vérité</p></div></div>
-        <div class="notice blue">Une version enregistrée n'est <b>jamais</b> considérée comme déployée. Pour le Web, le déploiement réel est vérifié séparément (voir ci-dessous).</div>
+        <div class="notice"><svg class="ico"><use href="#ic-info"/></svg><span>Une version enregistrée n'est <b>jamais</b> considérée comme déployée. Pour le Web, le déploiement réel se vérifie séparément.</span></div>
         <div class="grid" style="grid-template-columns:1fr 1.3fr">
-          <div class="card"><h2>Nouvelle version Android</h2>
+          <div class="card"><h2><svg class="ico"><use href="#ic-upload"/></svg> Nouvelle version Android</h2>
             <div class="row"><div><label>Version</label><input id="vVersion" placeholder="1.0.1"></div><div><label>Build</label><input id="vBuild" type="number" value="2"></div></div>
             <label style="margin-top:12px">URL de l'APK Release</label><input id="vApk" placeholder="https://github.com/…/sirakelen-v1.0.1-release.apk">
-            <label style="margin-top:12px">Taille (octets)</label><input id="vTaille" type="number" placeholder="57640386">
+            <label style="margin-top:12px">Taille (octets)</label><input id="vTaille" type="number">
             <label style="margin-top:12px">Nouveautés (1 par ligne)</label><textarea id="vNotes"></textarea>
             <label style="margin-top:12px"><input type="checkbox" id="vOblig" style="width:auto;margin-right:7px">Mise à jour obligatoire</label>
-            <div class="actions" style="margin-top:14px"><button class="btn btn-p" onclick="creerVersion()">Créer le brouillon</button></div>
+            <div class="actions" style="margin-top:14px"><button class="btn btn-p" onclick="creerVersion()"><svg class="ico sm"><use href="#ic-plus"/></svg> Créer le brouillon</button></div>
           </div>
-          <div class="card"><h2>Historique des versions</h2>
+          <div class="card"><h2><svg class="ico"><use href="#ic-history"/></svg> Historique des versions</h2>
             <div class="table-wrap"><table><thead><tr><th>Version</th><th>Plateforme</th><th>Statut</th><th>Publication</th><th>Actions</th></tr></thead><tbody id="versionsBody"></tbody></table></div>
-            <h2 style="margin-top:20px">Version Web déployée</h2><div id="webVersion" class="small">Chargement…</div>
+            <div class="m-list" id="m-versions"></div>
+            <h2 style="margin-top:18px"><svg class="ico"><use href="#ic-layout"/></svg> Version Web déployée</h2><div id="webVersion" class="small">Chargement…</div>
           </div>
         </div>
       </section>
 
-      <!-- SITE OFFICIEL -->
+      <!-- SITE -->
       <section class="view" id="v-site">
         <div class="page-head"><div><h1>Site officiel</h1><p>Textes, images, actualités, FAQ et liens — sans modifier les fichiers du frontend</p></div></div>
-        <div class="card"><h2>Contenus éditables</h2>
-          <div class="toolbar"><button class="btn btn-g" onclick="afficherOngletSite('contenu')">Textes &amp; liens</button><button class="btn btn-g" onclick="afficherOngletSite('news')">Actualités</button><button class="btn btn-g" onclick="afficherOngletSite('faq')">FAQ</button></div>
-          <div id="siteContenu"></div>
-        </div>
+        <div class="card"><div class="toolbar"><button class="btn btn-g" onclick="afficherOngletSite('contenu')">Textes &amp; liens</button><button class="btn btn-g" onclick="afficherOngletSite('news')">Actualités</button><button class="btn btn-g" onclick="afficherOngletSite('faq')">FAQ</button></div>
+          <div id="siteContenu"></div></div>
       </section>
 
-      <!-- ADMINISTRATEURS -->
+      <!-- ADMINS -->
       <section class="view" id="v-admins">
         <div class="page-head"><div><h1>Administrateurs</h1><p>Rôles et permissions — réservé aux super administrateurs</p></div></div>
-        <div class="card"><h2>Promouvoir un utilisateur</h2>
+        <div class="card"><h2><svg class="ico"><use href="#ic-shield"/></svg> Promouvoir un utilisateur</h2>
           <div class="row"><div><label>Identifiant utilisateur</label><input id="admId" placeholder="UUID de l'utilisateur"></div><div><label>Rôle</label><select id="admRole"><option value="super_admin">Super administrateur</option><option value="admin">Administrateur</option><option value="moderateur">Modérateur</option><option value="support">Support</option><option value="editeur">Éditeur</option></select></div></div>
-          <div class="actions" style="margin-top:14px"><button class="btn btn-p" onclick="promouvoir()">Promouvoir</button></div>
+          <div class="actions" style="margin-top:14px"><button class="btn btn-p" onclick="promouvoir()"><svg class="ico sm"><use href="#ic-check"/></svg> Promouvoir</button></div>
         </div>
-        <div class="card"><h2>Administrateurs actuels</h2><div class="table-wrap"><table><thead><tr><th>Nom</th><th>Email</th><th>Rôle</th><th>Actions</th></tr></thead><tbody id="adminsBody"></tbody></table></div></div>
+        <div class="card"><h2><svg class="ico"><use href="#ic-users"/></svg> Administrateurs actuels</h2>
+          <div class="table-wrap"><table><thead><tr><th>Nom</th><th>Email</th><th>Rôle</th><th>Actions</th></tr></thead><tbody id="adminsBody"></tbody></table></div>
+          <div class="m-list" id="m-admins"></div>
+        </div>
       </section>
 
-      <!-- PARAMÈTRES -->
+      <!-- PARAMETRES -->
       <section class="view" id="v-parametres">
-        <div class="page-head"><div><h1>Paramètres généraux</h1><p>Nom, logo, contacts, liens, modération, sécurité et notifications</p></div></div>
-        <div class="card"><h2>Configuration</h2><div id="paramsBody"></div>
+        <div class="page-head"><div><h1>Paramètres généraux</h1><p>Nom, contacts, liens, modération, sécurité et notifications</p></div></div>
+        <div class="card"><h2><svg class="ico"><use href="#ic-settings"/></svg> Configuration</h2><div id="paramsBody"></div>
           <div class="row" style="margin-top:14px"><div><label>Nouvelle clé</label><input id="pKey" placeholder="ex: securite.2fa"></div><div><label>Valeur</label><input id="pVal" placeholder="valeur"></div></div>
-          <div class="actions" style="margin-top:12px"><button class="btn btn-p" onclick="ajouterParametre()">Ajouter / modifier</button></div>
+          <div class="actions" style="margin-top:12px"><button class="btn btn-p" onclick="ajouterParametre()"><svg class="ico sm"><use href="#ic-plus"/></svg> Ajouter / modifier</button></div>
         </div>
       </section>
 
@@ -327,25 +356,24 @@ tbody tr:hover{background:#FFFCF8}
       <section class="view" id="v-sauvegardes">
         <div class="page-head"><div><h1>Sauvegardes</h1><p>État et lancement manuel — fichiers jamais exposés publiquement</p></div></div>
         <div class="card"><div id="backupState">Chargement…</div>
-          <div class="actions" style="margin-top:14px"><button class="btn btn-p" onclick="lancerSauvegarde()">Lancer une sauvegarde</button></div>
+          <div class="actions" style="margin-top:14px"><button class="btn btn-p" onclick="lancerSauvegarde()"><svg class="ico sm"><use href="#ic-db"/></svg> Lancer une sauvegarde</button></div>
         </div>
       </section>
 
       <!-- JOURNAL -->
       <section class="view" id="v-journal">
         <div class="page-head"><div><h1>Journal d'activité</h1><p>Administrateur, action, date/heure et objet concerné</p></div></div>
-        <div class="card"><div class="table-wrap"><table><thead><tr><th>Date</th><th>Administrateur</th><th>Action</th><th>Objet</th><th>Détail</th></tr></thead><tbody id="logsBody"></tbody></table></div></div>
+        <div class="card"><div class="table-wrap"><table><thead><tr><th>Date</th><th>Administrateur</th><th>Action</th><th>Objet</th><th>Détail</th></tr></thead><tbody id="logsBody"></tbody></table></div>
+          <div class="m-list" id="m-journal"></div></div>
       </section>
     </main>
   </div>
 </div>
 
-<!-- MODALES -->
 <div class="overlay" id="overlay" onclick="if(event.target===this)fermerModal()">
   <div class="modal">
-    <div class="mh"><h3 id="modalTitle">—</h3><button class="close" onclick="fermerModal()">×</button></div>
-    <div class="mb" id="modalBody"></div>
-    <div class="mf" id="modalFoot"></div>
+    <div class="mh"><h3 id="modalTitle">—</h3><button class="close" onclick="fermerModal()"><svg class="ico"><use href="#ic-x"/></svg></button></div>
+    <div class="mb" id="modalBody"></div><div class="mf" id="modalFoot"></div>
   </div>
 </div>
 <div id="toast"></div>
@@ -353,33 +381,33 @@ tbody tr:hover{background:#FFFCF8}
 <script>
 /* ============================================================
    SiraKelen — Administration centralisée
-   Une seule API, un seul backend, une seule base de données.
    ============================================================ */
 const API='https://sirakelen-api-proxy.diassanaissiaka68.workers.dev';
 let TOKEN=localStorage.getItem('sk_admin_token')||null;
-let MOI=null, PERMS=new Set(), cache={}, section='dashboard';
+let MOI=null, PERMS=new Set(), fiches={}, section='dashboard';
 
 const NAV=[
   {g:'Général'},
-  {id:'dashboard',label:'Tableau de bord',ic:'▦'},
+  {id:'dashboard',label:'Tableau de bord',ic:'grid'},
   {g:'Gestion'},
-  {id:'users',label:'Utilisateurs',ic:'♙',perm:'users:lire'},
-  {id:'ads',label:'Annonces & trajets',ic:'⇄',perm:'ads:lire'},
-  {id:'signaux',label:'Signalements',ic:'⚑',perm:'signalements:lire'},
-  {id:'notifs',label:'Notifications',ic:'✉',perm:'notifications:lire'},
+  {id:'users',label:'Utilisateurs',ic:'users',perm:'users:lire'},
+  {id:'ads',label:'Annonces & trajets',ic:'route',perm:'ads:lire'},
+  {id:'signaux',label:'Signalements',ic:'flag',perm:'signalements:lire'},
+  {id:'notifs',label:'Notifications',ic:'bell',perm:'notifications:lire'},
   {g:'Plateforme'},
-  {id:'versions',label:'Mises à jour',ic:'↥',perm:'versions:lire'},
-  {id:'site',label:'Site officiel',ic:'▤',perm:'contenu:lire'},
-  {id:'parametres',label:'Paramètres',ic:'⚙',perm:'parametres:modifier'},
+  {id:'versions',label:'Mises à jour',ic:'upload',perm:'versions:lire'},
+  {id:'site',label:'Site officiel',ic:'layout',perm:'contenu:lire'},
+  {id:'parametres',label:'Paramètres',ic:'settings',perm:'parametres:modifier'},
   {g:'Administration'},
-  {id:'admins',label:'Administrateurs',ic:'♛',perm:'admins:gerer'},
-  {id:'sauvegardes',label:'Sauvegardes',ic:'⛁',perm:'sauvegardes'},
-  {id:'journal',label:'Journal d\'activité',ic:'☷',perm:'journal:lire'},
+  {id:'admins',label:'Administrateurs',ic:'shield',perm:'admins:gerer'},
+  {id:'sauvegardes',label:'Sauvegardes',ic:'db',perm:'sauvegardes'},
+  {id:'journal',label:'Journal d\'activité',ic:'history',perm:'journal:lire'},
 ];
 
 /* ---------- utilitaires ---------- */
+function ico(n,c){return '<svg class="ico '+(c||'')+'"><use href="#ic-'+n+'"/></svg>';}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function toast(t,ok=true){const d=document.createElement('div');d.className='toast '+(ok?'ok':'err');d.textContent=t;document.getElementById('toast').appendChild(d);setTimeout(()=>d.remove(),3800);}
+function toast(t,ok=true){const d=document.createElement('div');d.className='toast '+(ok?'ok':'err');d.innerHTML=ico(ok?'check':'alert','sm')+'<span>'+esc(t)+'</span>';document.getElementById('toast').appendChild(d);setTimeout(()=>d.remove(),3800);}
 function dateFR(d){if(!d)return'—';try{return new Date(d).toLocaleDateString('fr-FR')+' '+new Date(d).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}catch{return'—';}}
 function peut(p){return PERMS.size===0||PERMS.has(p);}
 
@@ -389,28 +417,49 @@ async function api(path,opts={}){
   if(opts.body&&!headers['Content-Type'])headers['Content-Type']='application/json';
   const r=await fetch(API+path,Object.assign({},opts,{headers}));
   if(r.status===401){TOKEN=null;localStorage.removeItem('sk_admin_token');afficherLogin();throw new Error('Session expirée — reconnectez-vous');}
-  const txt=await r.text();
-  const data=txt?JSON.parse(txt):null;
+  const txt=await r.text();const data=txt?JSON.parse(txt):null;
   if(!r.ok)throw new Error((data&&data.message)||('Erreur HTTP '+r.status));
   return data;
 }
 
+/* Tableau desktop + fiches mobiles (ouvertes en modal) */
+function rendreListe(sec,tbodyId,mobileId,lignes,cartes){
+  document.getElementById(tbodyId).innerHTML=lignes;
+  fiches[sec]=cartes||[];
+  const m=document.getElementById(mobileId);
+  if(m)m.innerHTML=(cartes||[]).map((c,i)=>
+    '<button class="m-item" data-fiche="'+i+'" onclick="ouvrirFiche(\''+sec+'\','+i+')">'+
+    '<div class="mb"><div class="mt">'+c.titre+'</div><div class="ms">'+c.sousTitre+'</div></div>'+
+    (c.badge?'<span class="pill '+c.badge.cl+'">'+c.badge.texte+'</span>':'')+
+    '<span class="chev">'+ico('chevron','sm')+'</span></button>').join('')||'<div class="empty">Aucun élément.</div>';
+}
+function ouvrirFiche(sec,i){
+  const c=(fiches[sec]||[])[i];if(!c)return;
+  const champs=(c.champs||[]).map(f=>'<dt>'+esc(f[0])+'</dt><dd>'+f[1]+'</dd>').join('');
+  const foot='<button class="btn btn-g" onclick="fermerModal()">Fermer</button>'+
+    (c.actions||[]).map(a=>'<button class="btn '+a.cl+'" onclick="fermerModal();'+a.js+'">'+ico(a.ic,'sm')+' '+esc(a.label)+'</button>').join('');
+  ouvrirModal(c.titre,'<dl class="fiche">'+champs+'</dl>',foot);
+}
+function filtrerTable(q){
+  const t=document.querySelector('#v-'+section+' tbody'),m=document.querySelector('#v-'+section+' .m-list');
+  const terme=q.toLowerCase().trim();
+  if(t)[...t.rows].forEach(r=>r.style.display=!terme||r.textContent.toLowerCase().includes(terme)?'':'none');
+  if(m)[...m.children].forEach(el=>el.style.display=!terme||el.textContent.toLowerCase().includes(terme)?'':'none');
+}
+
 function confirmer(titre,message,danger=false){
   return new Promise(res=>{
-    document.getElementById('modalTitle').textContent=titre;
-    document.getElementById('modalBody').innerHTML='<p style="font-size:13px;color:#444">'+esc(message)+'</p>';
-    document.getElementById('modalFoot').innerHTML=
-      '<button class="btn btn-g" id="cfNo">Annuler</button><button class="btn '+(danger?'btn-d':'btn-p')+'" id="cfYes">Confirmer</button>';
-    document.getElementById('overlay').classList.add('show');
+    ouvrirModal(titre,'<p style="font-size:13px;color:#444">'+esc(message)+'</p>',
+      '<button class="btn btn-g" id="cfNo">Annuler</button><button class="btn '+(danger?'btn-d':'btn-p')+'" id="cfYes">Confirmer</button>');
     document.getElementById('cfNo').onclick=()=>{fermerModal();res(false);};
     document.getElementById('cfYes').onclick=()=>{fermerModal();res(true);};
   });
 }
 function fermerModal(){document.getElementById('overlay').classList.remove('show');}
-function ouvrirModal(titre,html,footHtml){
+function ouvrirModal(titre,html,foot){
   document.getElementById('modalTitle').textContent=titre;
   document.getElementById('modalBody').innerHTML=html;
-  document.getElementById('modalFoot').innerHTML=footHtml||'<button class="btn btn-g" onclick="fermerModal()">Fermer</button>';
+  document.getElementById('modalFoot').innerHTML=foot||'<button class="btn btn-g" onclick="fermerModal()">Fermer</button>';
   document.getElementById('overlay').classList.add('show');
 }
 
@@ -426,11 +475,9 @@ async function connecter(){
     TOKEN=d.token;localStorage.setItem('sk_admin_token',TOKEN);
     MOI=await api('/admin/moi');PERMS=new Set(MOI.permissions||[]);
     document.getElementById('loginView').style.display='none';document.getElementById('appView').style.display='flex';
-    document.getElementById('prenomTop').textContent=MOI.prenom||'Admin';
-    document.getElementById('roleTop').textContent=MOI.role;
+    document.getElementById('prenomTop').textContent=MOI.prenom||'Admin';document.getElementById('roleTop').textContent=MOI.role;
     document.getElementById('avatar').textContent=(MOI.prenom||'A')[0].toUpperCase();
-    construireNav();chargerDashboard();chargerNotificationsHeader();
-    toast('Bienvenue '+(MOI.prenom||''));
+    construireNav();chargerDashboard();chargerNotificationsHeader();toast('Bienvenue '+(MOI.prenom||''));
   }catch(e){toast(e.message,false);}
   finally{btn.disabled=false;btn.textContent='Se connecter';}
 }
@@ -441,14 +488,15 @@ function construireNav(){
   NAV.forEach(n=>{
     if(n.g){const g=document.createElement('div');g.className='group';g.textContent=n.g;nav.appendChild(g);return;}
     if(n.perm&&!peut(n.perm))return;
-    const b=document.createElement('button');b.id='nav-'+n.id;b.innerHTML='<span class="ic">'+n.ic+'</span>'+esc(n.label)+(n.id==='signaux'?'<span class="badge" id="badgeSignaux" style="display:none">0</span>':'');
+    const b=document.createElement('button');b.id='nav-'+n.id;
+    b.innerHTML=ico(n.ic)+'<span>'+esc(n.label)+'</span>'+(n.id==='signaux'?'<span class="badge" id="badgeSignaux" style="display:none">0</span>':'');
     b.onclick=()=>aller(n.id);nav.appendChild(b);
   });
 }
 function aller(id){
   section=id;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const v=document.getElementById('v-'+id);if(v)v.classList.add('active');
+  document.getElementById('v-'+id)?.classList.add('active');
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.id==='nav-'+id));
   document.getElementById('globalSearch').value='';
   document.getElementById('sidebar').classList.remove('open');
@@ -456,18 +504,12 @@ function aller(id){
     versions:chargerVersions,site:()=>afficherOngletSite(siteTab),admins:chargerAdmins,
     parametres:chargerParametres,sauvegardes:chargerSauvegardes,journal:chargerJournal})[id]?.();
 }
-function filtrerTable(q){
-  const t=document.querySelector('#v-'+section+' tbody');if(!t)return;
-  const terme=q.toLowerCase().trim();
-  [...t.rows].forEach(r=>r.style.display=!terme||r.textContent.toLowerCase().includes(terme)?'':'none');
-}
 
-/* ---------- header notifications ---------- */
+/* ---------- header ---------- */
 async function chargerNotificationsHeader(){
   try{
-    const att=await api('/admin/signalements?statut=en_attente');
-    const n=att.length;const dot=document.getElementById('notifDot');
-    dot.style.display=n?'grid':'none';dot.textContent=n>9?'9+':n;
+    const att=await api('/admin/signalements?statut=en_attente');const n=att.length;
+    const dot=document.getElementById('notifDot');dot.style.display=n?'grid':'none';dot.textContent=n>9?'9+':n;
     const badge=document.getElementById('badgeSignaux');if(badge){badge.style.display=n?'inline-block':'none';badge.textContent=n;}
     document.getElementById('notifList').innerHTML=n?att.slice(0,5).map(s=>'<div class="item" onclick="aller(\'signaux\');document.getElementById(\'notifPanel\').classList.remove(\'show\')"><b>'+esc(s.motif)+'</b><small>'+esc(s.auteur?.prenom||'Utilisateur')+' · '+dateFR(s.creeLe)+'</small></div>').join(''):'<div class="item small">Aucune notification en attente.</div>';
   }catch(e){}
@@ -476,23 +518,20 @@ function toggleNotifs(){document.getElementById('notifPanel').classList.toggle('
 function toggleProfile(e){e.stopPropagation();document.getElementById('profileMenu').classList.toggle('show');document.getElementById('notifPanel').classList.remove('show');}
 document.addEventListener('click',()=>{document.getElementById('profileMenu')?.classList.remove('show');document.getElementById('notifPanel')?.classList.remove('show');});
 
-/* ---------- profil ---------- */
 async function ouvrirProfil(){
   const u=await api('/admin/users/'+MOI.id).catch(()=>null);
-  const html='<label>Prénom</label><input id="pfPrenom" value="'+esc(u?.prenom||MOI.prenom)+'"><label style="margin-top:12px">Nom</label><input id="pfNom" value="'+esc(u?.nom||'')+'">';
-  ouvrirModal('Mon profil',html,'<button class="btn btn-g" onclick="fermerModal()">Annuler</button><button class="btn btn-p" onclick="sauverProfil()">Enregistrer</button>');
+  ouvrirModal('Mon profil','<label>Prénom</label><input id="pfPrenom" value="'+esc(u?.prenom||MOI.prenom)+'"><label style="margin-top:12px">Nom</label><input id="pfNom" value="'+esc(u?.nom||'')+'">',
+    '<button class="btn btn-g" onclick="fermerModal()">Annuler</button><button class="btn btn-p" onclick="sauverProfil()">Enregistrer</button>');
 }
 async function sauverProfil(){
-  try{await api('/admin/profil',{method:'PATCH',body:JSON.stringify({prenom:document.getElementById('pfPrenom').value,nom:document.getElementById('pfNom').value})});
-    fermerModal();toast('Profil mis à jour');chargerDashboard();}catch(e){toast(e.message,false);}
+  try{await api('/admin/profil',{method:'PATCH',body:JSON.stringify({prenom:document.getElementById('pfPrenom').value,nom:document.getElementById('pfNom').value})});fermerModal();toast('Profil mis à jour');chargerDashboard();}catch(e){toast(e.message,false);}
 }
 function ouvrirMotDePasse(){
   ouvrirModal('Changer le mot de passe','<label>Ancien mot de passe</label><input id="mpOld" type="password"><label style="margin-top:12px">Nouveau (8 caractères min.)</label><input id="mpNew" type="password">',
     '<button class="btn btn-g" onclick="fermerModal()">Annuler</button><button class="btn btn-p" onclick="sauverMotDePasse()">Modifier</button>');
 }
 async function sauverMotDePasse(){
-  try{await api('/admin/mot-de-passe',{method:'POST',body:JSON.stringify({ancien:document.getElementById('mpOld').value,nouveau:document.getElementById('mpNew').value})});
-    fermerModal();toast('Mot de passe sécurisé (scrypt)');}catch(e){toast(e.message,false);}
+  try{await api('/admin/mot-de-passe',{method:'POST',body:JSON.stringify({ancien:document.getElementById('mpOld').value,nouveau:document.getElementById('mpNew').value})});fermerModal();toast('Mot de passe sécurisé');}catch(e){toast(e.message,false);}
 }
 
 /* ---------- dashboard ---------- */
@@ -504,91 +543,90 @@ async function chargerDashboard(){
       api('/admin/evenements/serie?type=telechargement_apk&jours=30').catch(()=>[]),
       api('/admin/activite').catch(()=>({})),
     ]);
-    cache.stats=s;
     const cartes=[
-      ['Utilisateurs',s.totalUsers,'actifs : '+s.usersActifs,''],
-      ['Actifs',s.usersActifs,'compte actif','g'],
-      ['Nouveaux (30j)',s.nouveauxInscrits30j,'inscriptions',''],
-      ['Annonces',s.totalAnnonces,'dont '+s.annoncesActives+' actives','b'],
-      ['Trajets organisés',s.totalTrajets,'finalisés','b'],
-      ['Signalements',s.totalSignalements,'en attente : '+s.signalementsEnAttente,s.signalementsEnAttente?'r':''],
-      ['Demandes',s.totalDemandes,'acceptées : '+s.demandesAcceptees,''],
-      ['Notifications',s.notificationsEnvoyees,'campagnes envoyées','b'],
-      ['Téléchargements APK',s.telechargementsApk,'réels',''],
-      ['Visites du site',s.visitesSite,'réelles',''],
-      ['Messages',s.totalMessages,'échangés',''],
-      ['Taux de matching',s.matchingRate+'%','demandes acceptées','g'],
+      ['users','Utilisateurs',s.totalUsers,'actifs : '+s.usersActifs],
+      ['check','Actifs',s.usersActifs,'compte actif'],
+      ['plus','Nouveaux (30j)',s.nouveauxInscrits30j,'inscriptions'],
+      ['route','Annonces',s.totalAnnonces,'dont '+s.annoncesActives+' actives'],
+      ['check','Trajets organisés',s.totalTrajets,'finalisés'],
+      ['flag','Signalements',s.totalSignalements,'en attente : '+s.signalementsEnAttente],
+      ['file','Demandes',s.totalDemandes,'acceptées : '+s.demandesAcceptees],
+      ['bell','Notifications',s.notificationsEnvoyees,'campagnes envoyées'],
+      ['download','Téléchargements APK',s.telechargementsApk,'réels'],
+      ['eye','Visites du site',s.visitesSite,'réelles'],
+      ['file','Messages',s.totalMessages,'échangés'],
+      ['grid','Taux de matching',s.matchingRate+'%','demandes acceptées'],
     ];
-    document.getElementById('statCards').innerHTML=cartes.map(c=>'<div class="stat '+c[3]+'"><div class="lbl">'+esc(c[0])+'</div><div class="val">'+esc(c[1])+'</div><div class="hint">'+esc(c[2])+'</div></div>').join('');
-    const pct=s.totalDemandes?Math.round(s.demandesAcceptees/s.totalDemandes*100):0;
-    const pctAct=s.totalUsers?Math.round(s.usersActifs/s.totalUsers*100):0;
+    document.getElementById('statCards').innerHTML=cartes.map(c=>'<div class="stat"><div class="si">'+ico(c[0])+'</div><div class="lbl">'+esc(c[1])+'</div><div class="val">'+esc(c[2])+'</div><div class="hint">'+esc(c[3])+'</div></div>').join('');
     document.getElementById('progressList').innerHTML=
-      barre('Comptes actifs',pctAct)+barre('Demandes acceptées',pct)+
+      barre('Comptes actifs',s.totalUsers?Math.round(s.usersActifs/s.totalUsers*100):0)+
+      barre('Demandes acceptées',s.totalDemandes?Math.round(s.demandesAcceptees/s.totalDemandes*100):0)+
       barre('Annonces actives',s.totalAnnonces?Math.round(s.annoncesActives/s.totalAnnonces*100):0)+
       barre('Signalements traités',s.totalSignalements?Math.round((s.totalSignalements-s.signalementsEnAttente)/s.totalSignalements*100):0);
     dessinerGraphique(visit,apk);
     const feed=[];
-    (act.utilisateurs||[]).slice(0,4).forEach(u=>feed.push(['Nouvel utilisateur',esc(u.prenom||'')+' '+esc(u.nom||''),u.creeLe]));
-    (act.annonces||[]).slice(0,4).forEach(a=>feed.push(['Nouvelle annonce',esc(a.depart||'')+' → '+esc(a.destination||''),a.creeLe]));
-    (act.logs||[]).slice(0,6).forEach(l=>feed.push([esc(l.action),esc(l.adminPrenom||'Admin'),l.creeLe]));
-    document.getElementById('recentFeed').innerHTML=feed.length?feed.slice(0,9).map(f=>'<div class="it"><div class="dotc"></div><div><b>'+f[0]+'</b><small>'+f[1]+' · '+dateFR(f[2])+'</small></div></div>').join(''):'<div class="small">Aucune activité récente.</div>';
+    (act.utilisateurs||[]).slice(0,4).forEach(u=>feed.push(['users','Nouvel utilisateur',esc(u.prenom||'')+' '+esc(u.nom||''),u.creeLe]));
+    (act.annonces||[]).slice(0,4).forEach(a=>feed.push(['route','Nouvelle annonce',esc(a.depart||'')+' → '+esc(a.destination||''),a.creeLe]));
+    (act.logs||[]).slice(0,6).forEach(l=>feed.push(['history',esc(l.action),esc(l.adminPrenom||'Admin'),l.creeLe]));
+    document.getElementById('recentFeed').innerHTML=feed.length?feed.slice(0,9).map(f=>'<div class="it"><div class="si">'+ico(f[0],'sm')+'</div><div><b>'+f[1]+'</b><small>'+f[2]+' · '+dateFR(f[3])+'</small></div></div>').join(''):'<div class="small">Aucune activité récente.</div>';
     chargerNotificationsHeader();
   }catch(e){toast('Chargement tableau de bord : '+e.message,false);}
 }
 function barre(label,v){return '<div style="margin-bottom:13px"><div class="small strong">'+esc(label)+' — '+v+'%</div><div class="progress"><i style="width:'+Math.min(v,100)+'%"></i></div></div>';}
 function dessinerGraphique(v,a){
-  const svg=document.getElementById('chartSvg');
-  const jours=30, dates=[];const base=new Date();base.setHours(0,0,0,0);
-  for(let i=jours-1;i>=0;i--){const d=new Date(base.getTime()-i*86400000);dates.push(d.toISOString().slice(0,10));}
+  const svg=document.getElementById('chartSvg'),jours=30,dates=[],base=new Date();base.setHours(0,0,0,0);
+  for(let i=jours-1;i>=0;i--)dates.push(new Date(base.getTime()-i*86400000).toISOString().slice(0,10));
   const vm={},am={};(v||[]).forEach(x=>vm[x.jour]=Number(x.total));(a||[]).forEach(x=>am[x.jour]=Number(x.total));
-  const max=Math.max(1,...dates.map(d=>Math.max(vm[d]||0,am[d]||0)));
-  const W=600,H=180,pad=18,step=(W-pad*2)/jours,bw=Math.max(2,step*0.32);
-  let out='<line x1="0" y1="'+H+'" x2="'+W+'" y2="'+H+'" stroke="#E5E0D8"/>';
-  out+='<line x1="0" y1="'+(H/2)+'" x2="'+W+'" y2="'+(H/2)+'" stroke="#F0ECE5"/>';
-  dates.forEach((d,i)=>{
-    const x=pad+i*step;
-    const hv=(vm[d]||0)/max*(H-24),ha=(am[d]||0)/max*(H-24);
-    out+='<rect x="'+(x+1)+'" y="'+(H-hv)+'" width="'+bw+'" height="'+hv+'" rx="2" fill="#F77F00"><title>'+d+' visites : '+(vm[d]||0)+'</title></rect>';
-    out+='<rect x="'+(x+1+bw)+'" y="'+(H-ha)+'" width="'+bw+'" height="'+ha+'" rx="2" fill="#1B5FA8"><title>'+d+' downloads : '+(am[d]||0)+'</title></rect>';
-  });
-  out+='<text x="2" y="12" font-size="10" fill="#888">'+max+'</text><text x="'+ (W-60) +'" y="'+(H-4)+'" font-size="10" fill="#888">30 j</text>';
+  const max=Math.max(1,...dates.map(d=>Math.max(vm[d]||0,am[d]||0))),W=600,H=170,pad=18,step=(W-pad*2)/jours,bw=Math.max(2,step*.32);
+  let out='<line x1="0" y1="'+H+'" x2="'+W+'" y2="'+H+'" stroke="#EDE9E2"/><line x1="0" y1="'+(H/2)+'" x2="'+W+'" y2="'+(H/2)+'" stroke="#F4F1EC"/>';
+  dates.forEach((d,i)=>{const x=pad+i*step,hv=(vm[d]||0)/max*(H-22),ha=(am[d]||0)/max*(H-22);
+    out+='<rect x="'+(x+1)+'" y="'+(H-hv)+'" width="'+bw+'" height="'+hv+'" rx="2" fill="#F47700"><title>'+d+' visites : '+(vm[d]||0)+'</title></rect>';
+    out+='<rect x="'+(x+1+bw)+'" y="'+(H-ha)+'" width="'+bw+'" height="'+ha+'" rx="2" fill="#1B5FA8"><title>'+d+' downloads : '+(am[d]||0)+'</title></rect>';});
+  out+='<text x="2" y="12" font-size="10" fill="#888">'+max+'</text>';
   svg.innerHTML=out;
 }
 
 /* ---------- utilisateurs ---------- */
 async function chargerUsers(){
   try{
-    const q=document.getElementById('uQ').value,st=document.getElementById('uStatut').value,ad=document.getElementById('uAdmin').value;
-    const p=new URLSearchParams();if(q)p.set('q',q);if(st)p.set('statut',st);if(ad)p.set('admin',ad);
-    const users=await api('/admin/users'+(p.toString()?'?'+p:''));cache.users=users;
-    document.getElementById('usersBody').innerHTML=users.length?users.map(u=>{
-      const pill=u.statut==='actif'?'ok':(u.statut==='suspendu'?'warn':'err');
+    const p=new URLSearchParams(),q=document.getElementById('uQ').value,st=document.getElementById('uStatut').value,ad=document.getElementById('uAdmin').value;
+    if(q)p.set('q',q);if(st)p.set('statut',st);if(ad)p.set('admin',ad);
+    const users=await api('/admin/users'+(p.toString()?'?'+p:''));
+    const cartes=users.map(u=>{
+      const act=[];
+      if(peut('users:modifier'))act.push({label:'Modifier',ic:'edit',cl:'btn-g',js:"modifierUser('"+u.id+"')"});
+      if(peut('users:suspendre'))act.push(u.statut==='actif'
+        ?{label:'Suspendre',ic:'pause',cl:'btn-d',js:"suspendre('"+u.id+"')"}
+        :{label:'Réactiver',ic:'play',cl:'btn-k',js:"reactiver('"+u.id+"')"});
+      act.push({label:'Signalements',ic:'flag',cl:'btn-g',js:"voirSignauxUser('"+u.id+"')"});
+      if(peut('users:supprimer')&&!u.admin)act.push({label:'Supprimer',ic:'trash',cl:'btn-d',js:"supprimerUser('"+u.id+"')"});
+      return {titre:esc(u.prenom||'')+' '+esc(u.nom||''),sousTitre:esc(u.email||u.telephone||'—'),
+        badge:{texte:esc(u.statut||'actif'),cl:u.statut==='actif'?'ok':u.statut==='suspendu'?'warn':'err'},
+        champs:[['Email',esc(u.email||'—')],['Téléphone',esc(u.telephone||'—')],['Statut',esc(u.statut||'actif')],['Rôle',u.admin?esc(u.adminRole||'admin'):'Utilisateur'],['Quartier',esc(u.quartier||'—')],['Inscrit le',dateFR(u.creeLe)]],actions:act};
+    });
+    const lignes=users.map(u=>{
+      const pill=u.statut==='actif'?'ok':u.statut==='suspendu'?'warn':'err';
       return '<tr><td class="strong">'+esc(u.prenom||'')+' '+esc(u.nom||'')+'</td><td>'+esc(u.email||'—')+'</td><td>'+esc(u.telephone||'—')+'</td>'+
-        '<td><span class="pill '+pill+'">'+esc(u.statut||'actif')+'</span></td><td>'+(u.admin?'<span class="pill info">'+esc(u.adminRole||'admin')+'</span>':'—')+'</td><td class="small">'+dateFR(u.creeLe)+'</td><td><div class="actions">'+
-        (peut('users:modifier')?'<button class="btn btn-g" onclick="modifierUser(\''+u.id+'\')">Modifier</button>':'')+
-        (u.statut==='actif'?
-          (peut('users:suspendre')?'<button class="btn btn-d" onclick="suspendre(\''+u.id+'\')">Suspendre</button>':''):
-          (peut('users:suspendre')?'<button class="btn btn-k" onclick="reactiver(\''+u.id+'\')">Réactiver</button>':''))+
-        '<button class="btn btn-g" onclick="voirSignauxUser(\''+u.id+'\')">Signalements</button>'+
-        (peut('users:supprimer')&&!u.admin?'<button class="btn btn-d" onclick="supprimerUser(\''+u.id+'\')">Supprimer</button>':'')+
-        '</div></td></tr>';
-    }).join(''):'<tr><td colspan="7" class="empty">Aucun utilisateur.</td></tr>';
+      '<td><span class="pill '+pill+'">'+esc(u.statut||'actif')+'</span></td><td>'+(u.admin?'<span class="pill info">'+esc(u.adminRole||'admin')+'</span>':'—')+'</td><td class="small">'+dateFR(u.creeLe)+'</td><td><div class="actions">'+
+      (peut('users:modifier')?'<button class="btn btn-g" onclick="modifierUser(\''+u.id+'\')">'+ico('edit','sm')+'</button>':'')+
+      (peut('users:suspendre')?(u.statut==='actif'?'<button class="btn btn-d" onclick="suspendre(\''+u.id+'\')">'+ico('pause','sm')+'</button>':'<button class="btn btn-k" onclick="reactiver(\''+u.id+'\')">'+ico('play','sm')+'</button>'):'')+
+      '<button class="btn btn-g" onclick="voirSignauxUser(\''+u.id+'\')">'+ico('flag','sm')+'</button>'+
+      (peut('users:supprimer')&&!u.admin?'<button class="btn btn-d" onclick="supprimerUser(\''+u.id+'\')">'+ico('trash','sm')+'</button>':'')+'</div></td></tr>';
+    }).join('')||'<tr><td colspan="7" class="empty">Aucun utilisateur.</td></tr>';
+    rendreListe('users','usersBody','m-users',lignes,cartes);
   }catch(e){toast(e.message,false);}
 }
 async function modifierUser(id){
   const u=await api('/admin/users/'+id);
-  ouvrirModal('Modifier l\'utilisateur',
-    '<div class="row"><div><label>Prénom</label><input id="muP" value="'+esc(u.prenom||'')+'"></div><div><label>Nom</label><input id="muN" value="'+esc(u.nom||'')+'"></div></div>'+
-    '<label style="margin-top:12px">Quartier</label><input id="muQ" value="'+esc(u.quartier||'')+'"><label style="margin-top:12px">Téléphone</label><input id="muT" value="'+esc(u.telephone||'')+'">',
+  ouvrirModal('Modifier l\'utilisateur','<div class="row"><div><label>Prénom</label><input id="muP" value="'+esc(u.prenom||'')+'"></div><div><label>Nom</label><input id="muN" value="'+esc(u.nom||'')+'"></div></div><label style="margin-top:12px">Quartier</label><input id="muQ" value="'+esc(u.quartier||'')+'"><label style="margin-top:12px">Téléphone</label><input id="muT" value="'+esc(u.telephone||'')+'">',
     '<button class="btn btn-g" onclick="fermerModal()">Annuler</button><button class="btn btn-p" onclick="sauverUser(\''+id+'\')">Enregistrer</button>');
 }
 async function sauverUser(id){
-  try{await api('/admin/users/'+id,{method:'PATCH',body:JSON.stringify({prenom:document.getElementById('muP').value,nom:document.getElementById('muN').value,quartier:document.getElementById('muQ').value,telephone:document.getElementById('muT').value})});
-    fermerModal();toast('Utilisateur mis à jour');chargerUsers();}catch(e){toast(e.message,false);}
+  try{await api('/admin/users/'+id,{method:'PATCH',body:JSON.stringify({prenom:document.getElementById('muP').value,nom:document.getElementById('muN').value,quartier:document.getElementById('muQ').value,telephone:document.getElementById('muT').value})});fermerModal();toast('Utilisateur mis à jour');chargerUsers();}catch(e){toast(e.message,false);}
 }
 async function suspendre(id){
-  if(!await confirmer('Suspendre le compte','Le compte sera suspendu. L\'utilisateur ne pourra plus publier. Confirmer ?',true))return;
-  const motif=prompt('Motif de la suspension (facultatif) :')||'';
+  if(!await confirmer('Suspendre le compte','Le compte sera suspendu. Confirmer ?',true))return;
+  const motif=prompt('Motif (facultatif) :')||'';
   try{await api('/admin/users/'+id+'/suspendre',{method:'POST',body:JSON.stringify({statut:'suspendu',motif})});toast('Compte suspendu');chargerUsers();}catch(e){toast(e.message,false);}
 }
 async function reactiver(id){
@@ -596,7 +634,7 @@ async function reactiver(id){
   try{await api('/admin/users/'+id+'/reactiver',{method:'POST',body:JSON.stringify({})});toast('Compte réactivé');chargerUsers();}catch(e){toast(e.message,false);}
 }
 async function supprimerUser(id){
-  if(!await confirmer('Supprimer le compte','Suppression définitive. Refusée si le compte est lié à des annonces, demandes ou signalements. Confirmer ?',true))return;
+  if(!await confirmer('Supprimer le compte','Suppression définitive. Refusée si le compte est lié à des annonces, demandes ou signalements.',true))return;
   try{await api('/admin/users/'+id,{method:'DELETE'});toast('Compte supprimé');chargerUsers();}catch(e){toast(e.message,false);}
 }
 async function voirSignauxUser(id){
@@ -607,51 +645,61 @@ async function voirSignauxUser(id){
 /* ---------- annonces ---------- */
 async function chargerAds(){
   try{
-    const q=document.getElementById('aQ').value,s=document.getElementById('aStatut').value;
-    const p=new URLSearchParams();if(q)p.set('q',q);if(s)p.set('statut',s);
-    const ads=await api('/admin/ads'+(p.toString()?'?'+p:''));cache.ads=ads;
-    document.getElementById('adsBody').innerHTML=ads.length?ads.map(a=>
-      '<tr><td class="strong">'+esc(a.depart||'')+' → '+esc(a.destination||'')+'</td><td>'+esc(a.dateDeplacement||'')+' '+esc(a.heureDepart||'')+'</td><td>'+esc(a.role||'')+'</td>'+
+    const p=new URLSearchParams(),q=document.getElementById('aQ').value,s=document.getElementById('aStatut').value;
+    if(q)p.set('q',q);if(s)p.set('statut',s);
+    const ads=await api('/admin/ads'+(p.toString()?'?'+p:''));
+    const cartes=ads.map(a=>{
+      const act=[];
+      if(peut('ads:modifier'))act.push({label:'Modifier',ic:'edit',cl:'btn-g',js:"modifierAd('"+a.id+"')"},
+        {label:a.statut==='actif'?'Suspendre':'Activer',ic:a.statut==='actif'?'pause':'play',cl:a.statut==='actif'?'btn-d':'btn-k',js:"statutAd('"+a.id+"','"+(a.statut==='actif'?'annule':'actif')+"')"});
+      if(peut('ads:supprimer'))act.push({label:'Supprimer',ic:'trash',cl:'btn-d',js:"supprimerAd('"+a.id+"')"});
+      return {titre:esc(a.depart||'')+' → '+esc(a.destination||''),sousTitre:(a.dateDeplacement||'')+' '+(a.heureDepart||''),
+        badge:{texte:esc(a.statut||''),cl:a.statut==='actif'?'ok':a.statut==='annule'?'err':'warn'},
+        champs:[['Départ',esc(a.depart||'—')],['Destination',esc(a.destination||'—')],['Date',esc(a.dateDeplacement||'—')],['Heure',esc(a.heureDepart||'—')],['Rôle',esc(a.role||'—')],['Statut',esc(a.statut||'—')],['Propriétaire',esc(a.proprietaire?.prenom||'—')]],actions:act};
+    });
+    const lignes=ads.map(a=>'<tr><td class="strong">'+esc(a.depart||'')+' → '+esc(a.destination||'')+'</td><td>'+esc(a.dateDeplacement||'')+' '+esc(a.heureDepart||'')+'</td><td>'+esc(a.role||'')+'</td>'+
       '<td><span class="pill '+(a.statut==='actif'?'ok':a.statut==='annule'?'err':'warn')+'">'+esc(a.statut||'')+'</span></td><td>'+esc(a.proprietaire?.prenom||'—')+'</td><td><div class="actions">'+
-      (peut('ads:modifier')?'<button class="btn btn-g" onclick="modifierAd(\''+a.id+'\')">Modifier</button><button class="btn '+(a.statut==='actif'?'btn-d':'btn-k')+'" onclick="statutAd(\''+a.id+'\',\''+(a.statut==='actif'?'annule':'actif')+'\')">'+(a.statut==='actif'?'Suspendre':'Activer')+'</button>':'')+
-      (peut('ads:supprimer')?'<button class="btn btn-d" onclick="supprimerAd(\''+a.id+'\')">Supprimer</button>':'')+'</div></td></tr>').join(''):'<tr><td colspan="6" class="empty">Aucune annonce.</td></tr>';
+      (peut('ads:modifier')?'<button class="btn btn-g" onclick="modifierAd(\''+a.id+'\')">'+ico('edit','sm')+'</button><button class="btn '+(a.statut==='actif'?'btn-d':'btn-k')+'" onclick="statutAd(\''+a.id+'\',\''+(a.statut==='actif'?'annule':'actif')+'\')">'+ico(a.statut==='actif'?'pause':'play','sm')+'</button>':'')+
+      (peut('ads:supprimer')?'<button class="btn btn-d" onclick="supprimerAd(\''+a.id+'\')">'+ico('trash','sm')+'</button>':'')+'</div></td></tr>').join('')||'<tr><td colspan="6" class="empty">Aucune annonce.</td></tr>';
+    rendreListe('ads','adsBody','m-ads',lignes,cartes);
   }catch(e){toast(e.message,false);}
 }
 async function modifierAd(id){
   const a=(await api('/admin/ads')).find(x=>x.id===id)||{};
-  ouvrirModal('Modifier l\'annonce','<div class="row"><div><label>Départ</label><input id="adD" value="'+esc(a.depart||'')+'"></div><div><label>Destination</label><input id="adA" value="'+esc(a.destination||'')+'"></div></div>'+
-    '<div class="row" style="margin-top:12px"><div><label>Date</label><input id="adDate" type="date" value="'+esc(a.dateDeplacement||'')+'"></div><div><label>Heure</label><input id="adH" type="time" value="'+esc(a.heureDepart||'')+'"></div></div>',
+  ouvrirModal('Modifier l\'annonce','<div class="row"><div><label>Départ</label><input id="adD" value="'+esc(a.depart||'')+'"></div><div><label>Destination</label><input id="adA" value="'+esc(a.destination||'')+'"></div></div><div class="row" style="margin-top:12px"><div><label>Date</label><input id="adDate" type="date" value="'+esc(a.dateDeplacement||'')+'"></div><div><label>Heure</label><input id="adH" type="time" value="'+esc(a.heureDepart||'')+'"></div></div>',
     '<button class="btn btn-g" onclick="fermerModal()">Annuler</button><button class="btn btn-p" onclick="sauverAd(\''+id+'\')">Enregistrer</button>');
 }
 async function sauverAd(id){
-  try{await api('/admin/ads/'+id,{method:'PATCH',body:JSON.stringify({depart:document.getElementById('adD').value,destination:document.getElementById('adA').value,dateDeplacement:document.getElementById('adDate').value,heureDepart:document.getElementById('adH').value})});
-    fermerModal();toast('Annonce modifiée');chargerAds();}catch(e){toast(e.message,false);}
+  try{await api('/admin/ads/'+id,{method:'PATCH',body:JSON.stringify({depart:document.getElementById('adD').value,destination:document.getElementById('adA').value,dateDeplacement:document.getElementById('adDate').value,heureDepart:document.getElementById('adH').value})});fermerModal();toast('Annonce modifiée');chargerAds();}catch(e){toast(e.message,false);}
 }
 async function statutAd(id,statut){
   if(!await confirmer(statut==='actif'?'Activer l\'annonce':'Suspendre l\'annonce','Confirmer ce changement de statut ?',statut!=='actif'))return;
   try{await api('/admin/ads/'+id+'/statut',{method:'PATCH',body:JSON.stringify({statut})});toast('Statut mis à jour');chargerAds();}catch(e){toast(e.message,false);}
 }
 async function supprimerAd(id){
-  if(!await confirmer('Supprimer l\'annonce','Cette annonce sera supprimée définitivement. Confirmer ?',true))return;
+  if(!await confirmer('Supprimer l\'annonce','Cette annonce sera supprimée définitivement.',true))return;
   try{await api('/admin/ads/'+id,{method:'DELETE'});toast('Annonce supprimée');chargerAds();}catch(e){toast(e.message,false);}
 }
 
 /* ---------- signalements ---------- */
 async function chargerSignaux(){
   try{
-    const s=document.getElementById('sStatut').value;
-    const l=await api('/admin/signalements'+(s?'?statut='+s:''));
-    document.getElementById('signauxBody').innerHTML=l.length?l.map(x=>
-      '<tr><td class="strong">'+esc(x.motif)+'</td><td>'+esc(x.auteur?.prenom||'—')+'</td><td>'+esc(x.utilisateurSignale?.prenom||'—')+'</td>'+
-      '<td>'+(x.ad?esc(x.ad.depart||'')+' → '+esc(x.ad.destination||''):'—')+'</td><td class="small">'+dateFR(x.creeLe)+'</td>'+
-      '<td><span class="pill '+(x.statut==='en_attente'?'warn':'ok')+'">'+esc(x.statut)+'</span></td><td><div class="actions">'+
-      (x.statut==='en_attente'&&peut('signalements:traiter')?'<button class="btn btn-k" onclick="traiter(\''+x.id+'\',\'traite\')">Traiter</button><button class="btn btn-d" onclick="traiter(\''+x.id+'\',\'rejete\')">Rejeter</button>':'—')+
-      '</div></td></tr>').join(''):'<tr><td colspan="7" class="empty">Aucun signalement.</td></tr>';
-    chargerNotificationsHeader();
+    const s=document.getElementById('sStatut').value,l=await api('/admin/signalements'+(s?'?statut='+s:''));
+    const cartes=l.map(x=>{
+      const act=x.statut==='en_attente'&&peut('signalements:traiter')?[
+        {label:'Traiter',ic:'check',cl:'btn-k',js:"traiter('"+x.id+"','traite')"},
+        {label:'Rejeter',ic:'x',cl:'btn-d',js:"traiter('"+x.id+"','rejete')"}]:[];
+      return {titre:esc(x.motif),sousTitre:esc(x.auteur?.prenom||'Utilisateur')+' · '+dateFR(x.creeLe),
+        badge:{texte:esc(x.statut),cl:x.statut==='en_attente'?'warn':'ok'},
+        champs:[['Motif',esc(x.motif)],['Auteur',esc(x.auteur?.prenom||'—')],['Utilisateur signalé',esc(x.utilisateurSignale?.prenom||'—')],['Annonce',x.ad?esc(x.ad.depart)+' → '+esc(x.ad.destination):'—'],['Date',dateFR(x.creeLe)],['Statut',esc(x.statut)]],actions:act};
+    });
+    const lignes=l.map(x=>'<tr><td class="strong">'+esc(x.motif)+'</td><td>'+esc(x.auteur?.prenom||'—')+'</td><td>'+esc(x.utilisateurSignale?.prenom||'—')+'</td><td>'+(x.ad?esc(x.ad.depart||'')+' → '+esc(x.ad.destination||''):'—')+'</td><td class="small">'+dateFR(x.creeLe)+'</td><td><span class="pill '+(x.statut==='en_attente'?'warn':'ok')+'">'+esc(x.statut)+'</span></td><td><div class="actions">'+
+      (x.statut==='en_attente'&&peut('signalements:traiter')?'<button class="btn btn-k" onclick="traiter(\''+x.id+'\',\'traite\')">'+ico('check','sm')+'</button><button class="btn btn-d" onclick="traiter(\''+x.id+'\',\'rejete\')">'+ico('x','sm')+'</button>':'—')+'</div></td></tr>').join('')||'<tr><td colspan="7" class="empty">Aucun signalement.</td></tr>';
+    rendreListe('signaux','signauxBody','m-signaux',lignes,cartes);chargerNotificationsHeader();
   }catch(e){toast(e.message,false);}
 }
 async function traiter(id,decision){
-  if(!await confirmer(decision==='traite'?'Traiter le signalement':'Rejeter le signalement','La décision sera journalisée avec votre identité. Confirmer ?',decision==='rejete'))return;
+  if(!await confirmer(decision==='traite'?'Traiter le signalement':'Rejeter le signalement','La décision sera journalisée. Confirmer ?',decision==='rejete'))return;
   const detail=prompt('Note de traitement (facultative) :')||'';
   try{await api('/admin/signalements/'+id+'/traiter',{method:'POST',body:JSON.stringify({decision,detail})});toast('Signalement traité');chargerSignaux();}catch(e){toast(e.message,false);}
 }
@@ -667,23 +715,24 @@ async function chargerNotifs(){
   majCible();
   try{
     const f=await api('/admin/notifications/fcm-statut');
-    document.getElementById('fcmNotice').innerHTML=f.configure?'✅ Firebase Cloud Messaging configuré : les push seront réellement envoyés aux tokens enregistrés.':'⚠️ FCM non configuré sur le backend : les campagnes sont enregistrées et tracées, aucun push n\'est émis. Définissez FCM_SERVICE_ACCOUNT_JSON sur Render.';
+    document.getElementById('fcmNotice').innerHTML=ico(f.configure?'check':'alert')+'<span>'+(f.configure?'Firebase Cloud Messaging configuré : les push sont réellement envoyés aux tokens enregistrés.':'FCM non configuré : les campagnes sont enregistrées et tracées, aucun push n\'est émis. Définissez FCM_SERVICE_ACCOUNT_JSON sur Render.')+'</span>';
     const l=await api('/admin/notifications');
-    document.getElementById('notifsBody').innerHTML=l.length?l.map(n=>'<tr><td class="strong">'+esc(n.titre)+'<div class="small">'+esc((n.corps||'').slice(0,60))+'</div></td>'+
-      '<td>'+esc(n.cible)+(n.cibleValeur?'/'+esc(n.cibleValeur):'')+'</td><td class="small">'+dateFR(n.dateEnvoi||n.creeLe)+'</td>'+
-      '<td><span class="pill '+(n.statut==='envoyee'?'ok':n.statut==='programmee'?'info':'warn')+'">'+esc(n.statut)+'</span><div class="small">'+esc(n.resultat||'')+'</div></td>'+
-      '<td>'+(n.statut!=='envoyee'&&peut('notifications:envoyer')?'<button class="btn btn-s" onclick="forcerEnvoi(\''+n.id+'\')">Envoyer</button>':'')+'</td></tr>').join(''):'<tr><td colspan="5" class="empty">Aucune notification.</td></tr>';
+    const cartes=l.map(n=>({titre:esc(n.titre),sousTitre:esc(n.cible)+(n.cibleValeur?'/'+esc(n.cibleValeur):'')+' · '+dateFR(n.dateEnvoi||n.creeLe),
+      badge:{texte:esc(n.statut),cl:n.statut==='envoyee'?'ok':n.statut==='programmee'?'info':'warn'},
+      champs:[['Titre',esc(n.titre)],['Message',esc(n.corps)],['Cible',esc(n.cible)+(n.cibleValeur?'/'+esc(n.cibleValeur):'')],['Date',dateFR(n.dateEnvoi||n.creeLe)],['Destinataires',n.destinataires],['Envoyés',n.envoyes],['Échecs',n.echecs],['Résultat',esc(n.resultat||'—')]],
+      actions:n.statut!=='envoyee'&&peut('notifications:envoyer')?[{label:'Envoyer',ic:'send',cl:'btn-s',js:"forcerEnvoi('"+n.id+"')"}]:[]}));
+    const lignes=l.map(n=>'<tr><td class="strong">'+esc(n.titre)+'<div class="small">'+esc((n.corps||'').slice(0,55))+'</div></td><td>'+esc(n.cible)+(n.cibleValeur?'/'+esc(n.cibleValeur):'')+'</td><td class="small">'+dateFR(n.dateEnvoi||n.creeLe)+'</td>'+
+      '<td><span class="pill '+(n.statut==='envoyee'?'ok':n.statut==='programmee'?'info':'warn')+'">'+esc(n.statut)+'</span><div class="small">'+esc(n.resultat||'')+'</div></td><td>'+(n.statut!=='envoyee'&&peut('notifications:envoyer')?'<button class="btn btn-s" onclick="forcerEnvoi(\''+n.id+'\')">'+ico('send','sm')+'</button>':'')+'</td></tr>').join('')||'<tr><td colspan="5" class="empty">Aucune notification.</td></tr>';
+    rendreListe('notifs','notifsBody','m-notifs',lignes,cartes);
   }catch(e){toast(e.message,false);}
 }
 async function envoyerNotification(){
   const c=document.getElementById('nCible').value;
-  const dto={titre:document.getElementById('nTitre').value,corps:document.getElementById('nCorps').value,cible:c,
-    cibleValeur:c==='tous'?undefined:document.getElementById('nVal').value,dateProgramme:document.getElementById('nDate').value||undefined};
+  const dto={titre:document.getElementById('nTitre').value,corps:document.getElementById('nCorps').value,cible:c,cibleValeur:c==='tous'?undefined:document.getElementById('nVal').value,dateProgramme:document.getElementById('nDate').value||undefined};
   if(!dto.titre||!dto.corps){toast('Titre et message requis',false);return;}
-  if(!await confirmer(c==='tous'?'Envoyer à tous':'Envoyer la notification','La campagne sera enregistrée et journalisée. Confirmer ?'))return;
-  try{await api('/admin/notifications',{method:'POST',body:JSON.stringify(dto)});toast('Notification enregistrée');nettoyerFormNotif();chargerNotifs();}catch(e){toast(e.message,false);}
+  if(!await confirmer('Envoyer la notification','La campagne sera enregistrée et journalisée. Confirmer ?'))return;
+  try{await api('/admin/notifications',{method:'POST',body:JSON.stringify(dto)});toast('Notification enregistrée');['nTitre','nCorps','nVal','nDate'].forEach(i=>document.getElementById(i).value='');chargerNotifs();}catch(e){toast(e.message,false);}
 }
-function nettoyerFormNotif(){['nTitre','nCorps','nVal','nDate'].forEach(i=>document.getElementById(i).value='');}
 async function forcerEnvoi(id){
   if(!await confirmer('Envoyer maintenant','La notification sera envoyée immédiatement. Confirmer ?'))return;
   try{await api('/admin/notifications/'+id+'/envoyer',{method:'POST',body:JSON.stringify({})});toast('Envoi traité');chargerNotifs();}catch(e){toast(e.message,false);}
@@ -693,21 +742,21 @@ async function forcerEnvoi(id){
 async function chargerVersions(){
   try{
     const l=await api('/versions/all');
-    document.getElementById('versionsBody').innerHTML=l.length?l.map(v=>{
-      const date=v.datePublication?dateFR(v.datePublication):'—';
-      return '<tr><td class="strong">'+esc(v.version)+' <span class="small">(build '+esc(v.buildNumber)+')</span><div class="small">'+esc((v.notes||'').split('\n').slice(0,2).join(' · '))+'</div></td>'+
-        '<td>'+esc(v.plateforme)+'</td><td>'+(v.actif?'<span class="pill ok">Active</span>':'<span class="pill off">Brouillon</span>')+(v.obligatoire?' <span class="pill warn">Obligatoire</span>':'')+'</td>'+
-        '<td class="small">'+date+'</td><td><div class="actions">'+
-        (peut('versions:publier')?(v.actif?'<button class="btn btn-g" onclick="versionAction(\''+v.id+'\',\'desactiver\')">Désactiver</button>':'<button class="btn btn-p" onclick="versionAction(\''+v.id+'\',\'publier\')">Publier</button>'):'')+'</div></td></tr>';
-    }).join(''):'<tr><td colspan="5" class="empty">Aucune version.</td></tr>';
+    const cartes=l.map(v=>({titre:esc(v.version)+' <span class="small">(build '+esc(v.buildNumber)+')</span>',sousTitre:esc(v.plateforme)+' · '+dateFR(v.datePublication),
+      badge:{texte:v.actif?'Active':'Brouillon',cl:v.actif?'ok':'off'},
+      champs:[['Version',esc(v.version)],['Build',esc(v.buildNumber)],['Plateforme',esc(v.plateforme)],['Publication',dateFR(v.datePublication)],['Obligatoire',v.obligatoire?'Oui':'Non'],['Notes',esc(v.notes||'—')]],
+      actions:peut('versions:publier')?[v.actif?{label:'Désactiver',ic:'pause',cl:'btn-d',js:"versionAction('"+v.id+"','desactiver')"}:{label:'Publier',ic:'check',cl:'btn-p',js:"versionAction('"+v.id+"','publier')"}]:[]}));
+    const lignes=l.map(v=>'<tr><td class="strong">'+esc(v.version)+' <span class="small">(build '+esc(v.buildNumber)+')</span><div class="small">'+esc((v.notes||'').split('\n').slice(0,2).join(' · '))+'</div></td><td>'+esc(v.plateforme)+'</td>'+
+      '<td>'+(v.actif?'<span class="pill ok">Active</span>':'<span class="pill off">Brouillon</span>')+(v.obligatoire?' <span class="pill warn">Obligatoire</span>':'')+'</td><td class="small">'+dateFR(v.datePublication)+'</td><td>'+
+      (peut('versions:publier')?(v.actif?'<button class="btn btn-g" onclick="versionAction(\''+v.id+'\',\'desactiver\')">Désactiver</button>':'<button class="btn btn-p" onclick="versionAction(\''+v.id+'\',\'publier\')">Publier</button>'):'')+'</td></tr>').join('')||'<tr><td colspan="5" class="empty">Aucune version.</td></tr>';
+    rendreListe('versions','versionsBody','m-versions',lignes,cartes);
     const web=await api('/versions/latest?plateforme=web');
     document.getElementById('webVersion').innerHTML=web?'<b>'+esc(web.version)+'</b> — publication : '+dateFR(web.datePublication)+'<br>'+esc(web.notes||'')+'<br><span class="small">Statut de déploiement réel à vérifier sur l\'URL publique de l\'application Web.</span>':'Aucune version Web active enregistrée.';
   }catch(e){toast(e.message,false);}
 }
 async function creerVersion(){
-  const dto={version:document.getElementById('vVersion').value.trim(),buildNumber:parseInt(document.getElementById('vBuild').value),
-    plateforme:'android',apkUrl:document.getElementById('vApk').value.trim()||undefined,
-    tailleOctets:parseInt(document.getElementById('vTaille').value)||undefined,
+  const dto={version:document.getElementById('vVersion').value.trim(),buildNumber:parseInt(document.getElementById('vBuild').value),plateforme:'android',
+    apkUrl:document.getElementById('vApk').value.trim()||undefined,tailleOctets:parseInt(document.getElementById('vTaille').value)||undefined,
     notes:document.getElementById('vNotes').value.trim(),obligatoire:document.getElementById('vOblig').checked};
   if(!dto.version||!dto.buildNumber){toast('Version et build requis',false);return;}
   try{await api('/versions',{method:'POST',body:JSON.stringify(dto)});toast('Brouillon créé — vérifiez l\'APK avant publication');['vVersion','vApk','vTaille','vNotes'].forEach(i=>document.getElementById(i).value='');chargerVersions();}catch(e){toast(e.message,false);}
@@ -719,18 +768,17 @@ async function versionAction(id,action){
 
 /* ---------- site ---------- */
 let siteTab='contenu';
-function afficherOngletSite(tab){siteTab=tab;
-  if(tab==='contenu')chargerContenu();else if(tab==='news')chargerNews();else chargerFaq();
-}
+function afficherOngletSite(tab){siteTab=tab;if(tab==='contenu')chargerContenu();else if(tab==='news')chargerNews();else chargerFaq();}
 async function chargerContenu(){
   try{
     const l=await api('/admin/site/contenu');
     document.getElementById('siteContenu').innerHTML='<div class="table-wrap"><table><thead><tr><th>Clé</th><th>Valeur</th><th>Groupe</th><th></th></tr></thead><tbody>'+
-      (l.length?l.map(c=>'<tr><td class="strong">'+esc(c.cle)+'</td><td>'+esc((c.valeur||'').slice(0,90))+'</td><td>'+esc(c.groupe)+'</td><td><button class="btn btn-g" onclick="editContenu(\''+esc(c.cle)+'\')">Modifier</button></td></tr>').join(''):'<tr><td colspan="4" class="empty">Aucun contenu éditable pour le moment.</td></tr>')+'</tbody></table></div>';
+      (l.length?l.map(c=>'<tr><td class="strong">'+esc(c.cle)+'</td><td>'+esc((c.valeur||'').slice(0,85))+'</td><td>'+esc(c.groupe)+'</td><td><button class="btn btn-g" onclick="editContenu(\''+esc(c.cle)+'\')">'+ico('edit','sm')+'</button></td></tr>').join(''):'<tr><td colspan="4" class="empty">Aucun contenu éditable pour le moment.</td></tr>')+'</tbody></table></div>'+
+      '<div class="m-list" id="m-contenu">'+l.map(c=>'<button class="m-item" onclick="editContenu(\''+esc(c.cle)+'\')"><div class="mb"><div class="mt">'+esc(c.cle)+'</div><div class="ms">'+esc((c.valeur||'').slice(0,60))+'</div></div><span class="chev">'+ico('chevron','sm')+'</span></button>').join('')+'</div>';
   }catch(e){toast(e.message,false);}
 }
 async function editContenu(cle){
-  const l=await api('/admin/site/contenu');const c=l.find(x=>x.cle===cle)||{};
+  const c=(await api('/admin/site/contenu')).find(x=>x.cle===cle)||{};
   ouvrirModal('Modifier « '+cle+' »','<label>Valeur</label><textarea id="cVal" style="min-height:150px">'+esc(c.valeur||'')+'</textarea>',
     '<button class="btn btn-g" onclick="fermerModal()">Annuler</button><button class="btn btn-p" onclick="sauverContenu(\''+esc(cle)+'\')">Enregistrer</button>');
 }
@@ -740,15 +788,19 @@ async function sauverContenu(cle){
 async function chargerNews(){
   try{
     const l=await api('/admin/site/news');
-    document.getElementById('siteContenu').innerHTML='<div class="actions" style="margin-bottom:12px"><button class="btn btn-p" onclick="editNews()">+ Nouvelle actualité</button></div>'+
+    const cartes=l.map(n=>({titre:esc(n.titre),sousTitre:dateFR(n.datePublication),badge:{texte:n.actif?'Publiée':'Masquée',cl:n.actif?'ok':'off'},
+      champs:[['Titre',esc(n.titre)],['Contenu',esc((n.contenu||'').slice(0,300))],['Publication',dateFR(n.datePublication)],['Image',esc(n.imageUrl||'—')]],
+      actions:[{label:'Modifier',ic:'edit',cl:'btn-g',js:"editNews('"+n.id+"')"},{label:'Supprimer',ic:'trash',cl:'btn-d',js:"delNews('"+n.id+"')"}]}));
+    document.getElementById('siteContenu').innerHTML='<div class="actions" style="margin-bottom:12px"><button class="btn btn-p" onclick="editNews()">'+ico('plus','sm')+' Nouvelle actualité</button></div>'+
       '<div class="table-wrap"><table><thead><tr><th>Titre</th><th>Publication</th><th>Statut</th><th>Actions</th></tr></thead><tbody>'+
-      (l.length?l.map(n=>'<tr><td class="strong">'+esc(n.titre)+'</td><td class="small">'+dateFR(n.datePublication)+'</td><td><span class="pill '+(n.actif?'ok':'off')+'">'+(n.actif?'Publiée':'Masquée')+'</span></td><td><div class="actions"><button class="btn btn-g" onclick="editNews(\''+n.id+'\')">Modifier</button><button class="btn btn-d" onclick="delNews(\''+n.id+'\')">Supprimer</button></div></td></tr>').join(''):'<tr><td colspan="4" class="empty">Aucune actualité.</td></tr>')+'</tbody></table></div>';
+      (l.map(n=>'<tr><td class="strong">'+esc(n.titre)+'</td><td class="small">'+dateFR(n.datePublication)+'</td><td><span class="pill '+(n.actif?'ok':'off')+'">'+(n.actif?'Publiée':'Masquée')+'</span></td><td><div class="actions"><button class="btn btn-g" onclick="editNews(\''+n.id+'\')">'+ico('edit','sm')+'</button><button class="btn btn-d" onclick="delNews(\''+n.id+'\')">'+ico('trash','sm')+'</button></div></td></tr>').join('')||'<tr><td colspan="4" class="empty">Aucune actualité.</td></tr>')+'</tbody></table></div>'+
+      '<div class="m-list" id="m-news">'+cartes.map((c,i)=>'<button class="m-item" onclick="ouvrirFiche(\'site\','+i+')"><div class="mb"><div class="mt">'+c.titre+'</div><div class="ms">'+c.sousTitre+'</div></div><span class="chev">'+ico('chevron','sm')+'</span></button>').join('')+'</div>';
+    fiches.site=cartes;
   }catch(e){toast(e.message,false);}
 }
 async function editNews(id){
   const n=id?(await api('/admin/site/news')).find(x=>x.id===id)||{}:{};
-  ouvrirModal(id?'Modifier l\'actualité':'Nouvelle actualité',
-    '<label>Titre</label><input id="nwT" value="'+esc(n.titre||'')+'"><label style="margin-top:12px">Contenu</label><textarea id="nwC">'+esc(n.contenu||'')+'</textarea><label style="margin-top:12px">Image (URL)</label><input id="nwI" value="'+esc(n.imageUrl||'')+'">',
+  ouvrirModal(id?'Modifier l\'actualité':'Nouvelle actualité','<label>Titre</label><input id="nwT" value="'+esc(n.titre||'')+'"><label style="margin-top:12px">Contenu</label><textarea id="nwC">'+esc(n.contenu||'')+'</textarea><label style="margin-top:12px">Image (URL)</label><input id="nwI" value="'+esc(n.imageUrl||'')+'">',
     '<button class="btn btn-g" onclick="fermerModal()">Annuler</button><button class="btn btn-p" onclick="sauverNews(\''+(id||'')+'\')">Enregistrer</button>');
 }
 async function sauverNews(id){
@@ -759,15 +811,19 @@ async function delNews(id){if(!await confirmer('Supprimer l\'actualité','Confir
 async function chargerFaq(){
   try{
     const l=await api('/admin/site/faq');
-    document.getElementById('siteContenu').innerHTML='<div class="actions" style="margin-bottom:12px"><button class="btn btn-p" onclick="editFaq()">+ Nouvelle question</button></div>'+
+    const cartes=l.map(f=>({titre:esc(f.question),sousTitre:'Ordre '+f.ordre,badge:{texte:f.actif?'Visible':'Masquée',cl:f.actif?'ok':'off'},
+      champs:[['Question',esc(f.question)],['Réponse',esc(f.reponse)],['Ordre',f.ordre]],
+      actions:[{label:'Modifier',ic:'edit',cl:'btn-g',js:"editFaq('"+f.id+"')"},{label:'Supprimer',ic:'trash',cl:'btn-d',js:"delFaq('"+f.id+"')"}]}));
+    document.getElementById('siteContenu').innerHTML='<div class="actions" style="margin-bottom:12px"><button class="btn btn-p" onclick="editFaq()">'+ico('plus','sm')+' Nouvelle question</button></div>'+
       '<div class="table-wrap"><table><thead><tr><th>Question</th><th>Ordre</th><th>Statut</th><th>Actions</th></tr></thead><tbody>'+
-      (l.length?l.map(f=>'<tr><td class="strong">'+esc(f.question)+'</td><td>'+esc(f.ordre)+'</td><td><span class="pill '+(f.actif?'ok':'off')+'">'+(f.actif?'Visible':'Masquée')+'</span></td><td><div class="actions"><button class="btn btn-g" onclick="editFaq(\''+f.id+'\')">Modifier</button><button class="btn btn-d" onclick="delFaq(\''+f.id+'\')">Supprimer</button></div></td></tr>').join(''):'<tr><td colspan="4" class="empty">Aucune question.</td></tr>')+'</tbody></table></div>';
+      (l.map(f=>'<tr><td class="strong">'+esc(f.question)+'</td><td>'+esc(f.ordre)+'</td><td><span class="pill '+(f.actif?'ok':'off')+'">'+(f.actif?'Visible':'Masquée')+'</span></td><td><div class="actions"><button class="btn btn-g" onclick="editFaq(\''+f.id+'\')">'+ico('edit','sm')+'</button><button class="btn btn-d" onclick="delFaq(\''+f.id+'\')">'+ico('trash','sm')+'</button></div></td></tr>').join('')||'<tr><td colspan="4" class="empty">Aucune question.</td></tr>')+'</tbody></table></div>'+
+      '<div class="m-list" id="m-faq">'+cartes.map((c,i)=>'<button class="m-item" onclick="ouvrirFiche(\'site\','+i+')"><div class="mb"><div class="mt">'+c.titre+'</div><div class="ms">'+c.sousTitre+'</div></div><span class="chev">'+ico('chevron','sm')+'</span></button>').join('')+'</div>';
+    fiches.site=cartes;
   }catch(e){toast(e.message,false);}
 }
 async function editFaq(id){
   const f=id?(await api('/admin/site/faq')).find(x=>x.id===id)||{}:{};
-  ouvrirModal(id?'Modifier la question':'Nouvelle question',
-    '<label>Question</label><input id="fqQ" value="'+esc(f.question||'')+'"><label style="margin-top:12px">Réponse</label><textarea id="fqR">'+esc(f.reponse||'')+'</textarea><label style="margin-top:12px">Ordre</label><input id="fqO" type="number" value="'+(f.ordre||0)+'">',
+  ouvrirModal(id?'Modifier la question':'Nouvelle question','<label>Question</label><input id="fqQ" value="'+esc(f.question||'')+'"><label style="margin-top:12px">Réponse</label><textarea id="fqR">'+esc(f.reponse||'')+'</textarea><label style="margin-top:12px">Ordre</label><input id="fqO" type="number" value="'+(f.ordre||0)+'">',
     '<button class="btn btn-g" onclick="fermerModal()">Annuler</button><button class="btn btn-p" onclick="sauverFaq(\''+(id||'')+'\')">Enregistrer</button>');
 }
 async function sauverFaq(id){
@@ -780,15 +836,18 @@ async function delFaq(id){if(!await confirmer('Supprimer la question','Confirmer
 async function chargerAdmins(){
   try{
     const l=await api('/admin/admins');
-    document.getElementById('adminsBody').innerHTML=l.length?l.map(a=>'<tr><td class="strong">'+esc(a.prenom||'')+' '+esc(a.nom||'')+'</td><td>'+esc(a.email||'')+'</td><td><span class="pill info">'+esc(a.adminRole||'admin')+'</span></td>'+
-      '<td>'+(a.id===MOI.id?'<span class="small">Vous</span>':'<button class="btn btn-d" onclick="revoquer(\''+a.id+'\')">Révoquer</button>')+'</td></tr>').join(''):'<tr><td colspan="4" class="empty">Aucun administrateur.</td></tr>';
+    const cartes=l.map(a=>({titre:esc(a.prenom||'')+' '+esc(a.nom||''),sousTitre:esc(a.email||''),badge:{texte:esc(a.adminRole||'admin'),cl:'info'},
+      champs:[['Nom',esc(a.prenom||'')+' '+esc(a.nom||'')],['Email',esc(a.email||'—')],['Rôle',esc(a.adminRole||'admin')]],
+      actions:a.id===MOI.id?[]:[{label:'Révoquer',ic:'x',cl:'btn-d',js:"revoquer('"+a.id+"')"}]}));
+    const lignes=l.map(a=>'<tr><td class="strong">'+esc(a.prenom||'')+' '+esc(a.nom||'')+'</td><td>'+esc(a.email||'')+'</td><td><span class="pill info">'+esc(a.adminRole||'admin')+'</span></td><td>'+(a.id===MOI.id?'<span class="small">Vous</span>':'<button class="btn btn-d" onclick="revoquer(\''+a.id+'\')">Révoquer</button>')+'</td></tr>').join('')||'<tr><td colspan="4" class="empty">Aucun administrateur.</td></tr>';
+    rendreListe('admins','adminsBody','m-admins',lignes,cartes);
   }catch(e){toast(e.message,false);}
 }
 async function promouvoir(){
   if(!await confirmer('Promouvoir un administrateur','Ce compte recevra les permissions du rôle choisi. Confirmer ?'))return;
   try{await api('/admin/admins/'+document.getElementById('admId').value.trim()+'/promouvoir',{method:'POST',body:JSON.stringify({role:document.getElementById('admRole').value})});toast('Administrateur promu');chargerAdmins();}catch(e){toast(e.message,false);}
 }
-async function revoquer(id){if(!await confirmer('Révoquer l\'accès admin','Ce compte perdra tous ses droits administratifs. Confirmer ?',true))return;try{await api('/admin/admins/'+id+'/revoquer',{method:'POST',body:JSON.stringify({})});toast('Accès révoqué');chargerAdmins();}catch(e){toast(e.message,false);}}
+async function revoquer(id){if(!await confirmer('Révoquer l\'accès admin','Ce compte perdra tous ses droits administratifs.',true))return;try{await api('/admin/admins/'+id+'/revoquer',{method:'POST',body:JSON.stringify({})});toast('Accès révoqué');chargerAdmins();}catch(e){toast(e.message,false);}}
 
 /* ---------- paramètres ---------- */
 async function chargerParametres(){
@@ -807,16 +866,13 @@ async function ajouterParametre(){
 async function chargerSauvegardes(){
   try{
     const e=await api('/admin/sauvegardes');
-    document.getElementById('backupState').innerHTML=
-      '<div class="grid stats" style="margin-bottom:14px"><div class="stat"><div class="lbl">Base configurée</div><div class="val" style="font-size:19px">'+(e.baseConfiguree?'Oui':'Non')+'</div></div>'+
-      '<div class="stat '+(e.pgDumpDisponible?'g':'r')+'"><div class="lbl">pg_dump</div><div class="val" style="font-size:19px">'+(e.pgDumpDisponible?'Disponible':'Indisponible')+'</div></div>'+
-      '<div class="stat b"><div class="lbl">Sauvegardes</div><div class="val">'+e.sauvegardes.length+'</div></div></div>'+
-      '<div class="notice red">'+esc(e.avertissement)+'</div>'+
+    document.getElementById('backupState').innerHTML='<div class="grid stats" style="margin-bottom:14px"><div class="stat"><div class="si">'+ico('db')+'</div><div class="lbl">Base configurée</div><div class="val" style="font-size:19px">'+(e.baseConfiguree?'Oui':'Non')+'</div></div><div class="stat"><div class="si">'+ico('check')+'</div><div class="lbl">pg_dump</div><div class="val" style="font-size:19px">'+(e.pgDumpDisponible?'Disponible':'Indisponible')+'</div></div><div class="stat"><div class="si">'+ico('db')+'</div><div class="lbl">Sauvegardes</div><div class="val">'+e.sauvegardes.length+'</div></div></div>'+
+      '<div class="notice">'+ico('alert')+'<span>'+esc(e.avertissement)+'</span></div>'+
       (e.sauvegardes.length?'<div class="table-wrap"><table><thead><tr><th>Fichier</th><th>Taille</th><th>Date</th></tr></thead><tbody>'+e.sauvegardes.map(s=>'<tr><td>'+esc(s.nom)+'</td><td>'+Math.round(s.tailleOctets/1024)+' Ko</td><td>'+dateFR(s.date)+'</td></tr>').join('')+'</tbody></table></div>':'');
   }catch(e){toast(e.message,false);}
 }
 async function lancerSauvegarde(){
-  if(!await confirmer('Lancer une sauvegarde','pg_dump sera exécuté sur le serveur. Le fichier ne sera pas exposé publiquement. Confirmer ?'))return;
+  if(!await confirmer('Lancer une sauvegarde','pg_dump sera exécuté sur le serveur. Le fichier ne sera pas exposé publiquement.',true))return;
   try{const r=await api('/admin/sauvegardes',{method:'POST',body:JSON.stringify({})});toast('Sauvegarde créée : '+r.nom);chargerSauvegardes();}catch(e){toast(e.message,false);}
 }
 
@@ -824,7 +880,10 @@ async function lancerSauvegarde(){
 async function chargerJournal(){
   try{
     const l=await api('/admin/logs?limite=200');
-    document.getElementById('logsBody').innerHTML=l.length?l.map(x=>'<tr><td class="small">'+dateFR(x.creeLe)+'</td><td class="strong">'+esc(x.adminPrenom||x.adminId)+'</td><td><span class="pill info">'+esc(x.action)+'</span></td><td>'+esc(x.objetType||'—')+(x.objetId?' <span class="small">'+esc(x.objetId.slice(0,8))+'</span>':'')+'</td><td class="small">'+esc((x.detail||'').slice(0,90))+'</td></tr>').join(''):'<tr><td colspan="5" class="empty">Aucune action journalisée.</td></tr>';
+    const cartes=l.map(x=>({titre:esc(x.action),sousTitre:esc(x.adminPrenom||'Admin')+' · '+dateFR(x.creeLe),badge:{texte:esc(x.objetType||'—'),cl:'info'},
+      champs:[['Date',dateFR(x.creeLe)],['Administrateur',esc(x.adminPrenom||x.adminId)],['Action',esc(x.action)],['Objet',esc(x.objetType||'—')+' '+(x.objetId?esc(x.objetId.slice(0,8)):'')],['Détail',esc((x.detail||'').slice(0,200))]],actions:[]}));
+    const lignes=l.map(x=>'<tr><td class="small">'+dateFR(x.creeLe)+'</td><td class="strong">'+esc(x.adminPrenom||x.adminId)+'</td><td><span class="pill info">'+esc(x.action)+'</span></td><td>'+esc(x.objetType||'—')+(x.objetId?' <span class="small">'+esc(x.objetId.slice(0,8))+'</span>':'')+'</td><td class="small">'+esc((x.detail||'').slice(0,85))+'</td></tr>').join('')||'<tr><td colspan="5" class="empty">Aucune action journalisée.</td></tr>';
+    rendreListe('journal','logsBody','m-journal',lignes,cartes);
   }catch(e){toast(e.message,false);}
 }
 
