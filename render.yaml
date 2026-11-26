@@ -19,3 +19,9 @@ services:
         value: diassanaissiaka68@gmail.com
       - key: SMTP_PASS
         sync: false
+      # Sécurité admin :renseigner une valeur longue et aléatoire sur Render.
+      - key: ADMIN_JWT_SECRET
+        sync: false
+      # Premier compte à promouvoir SUPER_ADMIN (une seule fois).
+      - key: ADMIN_SUPER_EMAIL
+        value: admin@sirakele.com

@@ -259,6 +259,56 @@ function chargerDerniereVersion(){
     .catch(() => {});
 }
 
+/* === Statistiques réelles : événements enregistrés dans le backend === */
+const API_BASE = (C.api && C.api.proxyUrl) || 'https://sirakelen-api-proxy.diassanaissiaka68.workers.dev';
+function tracerEvenement(type, page){
+  try{
+    fetch(API_BASE + '/evenements', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type, page:page||location.hash||'/', plateforme:'web'}), keepalive:true}).catch(()=>{});
+  }catch(e){}
+}
+tracerEvenement('visite_site', location.hash || '/');
+window.addEventListener('hashchange', ()=>tracerEvenement('visite_page', location.hash || '/'));
+
+/* === Contenu éditable depuis l'administration (sans modifier ce fichier) === */
+let contenuSite = null;
+function chargerContenuSite(){
+  fetch(API_BASE + '/site/contenu')
+    .then(r => r.ok ? r.json() : null)
+    .then(d => {
+      if(!d) return;
+      contenuSite = d;
+      const t = d.textes || {};
+      // Textes de présentation
+      document.querySelectorAll('[data-cle]').forEach(el=>{
+        if(t[el.getAttribute('data-cle')]) el.innerHTML = t[el.getAttribute('data-cle')];
+      });
+      // Coordonnées
+      if(t['contact.email']) C.contact.email = t['contact.email'];
+      if(t['contact.whatsapp']) C.contact.whatsapp = t['contact.whatsapp'];
+      // Liens de téléchargement (remplacent la version configurable si défini)
+      if(t['download.androidUrl'] && latestVersion) latestVersion.apkUrl = t['download.androidUrl'];
+      // FAQ pilotée par le backend
+      const faq = d.faq || [];
+      const liste = document.getElementById('faqList');
+      if(liste && faq.length){
+        liste.innerHTML = faq.map(f=>'<details><summary>'+f.question+icon('i-plus')+'</summary><p>'+f.reponse+'</p></details>').join('');
+      }
+      // Actualités sur l'accueil
+      const news = d.actualites || [];
+      const section = document.getElementById('siteNews');
+      if(section && news.length){
+        section.style.display='block';
+        section.innerHTML = '<section><div class="container"><div class="section-head"><span class="section-label">Actualités</span><h2>Nouvelles de SiraKelen</h2></div><div class="grid-3">'+
+          news.slice(0,3).map(n=>'<div class="card"><h3>'+n.titre+'</h3><p style="color:var(--muted)">'+n.contenu.slice(0,160)+'</p><span class="small">'+new Date(n.datePublication||n.creeLe).toLocaleDateString('fr-FR')+'</span></div>').join('')+'</div></div></section>';
+      }
+      if(location.hash.includes('contact')) render();
+      if(location.hash.includes('telecharger')) render();
+    })
+    .catch(()=>{});
+}
+chargerContenuSite();
+
 function navigate(path){ location.hash = '#' + path; }
 
 function icon(id, cls){ return '<span class="icon '+(cls||'')+'"><svg><use href="#'+id+'"/></svg></span>'; }
@@ -289,8 +339,8 @@ function pageHome(){ return `
   <section class="hero"><div class="container hero-grid">
     <div>
       <span class="badge">${icon('i-pin')} COVOITURAGE AU MALI</span>
-      <h1>Partagez vos trajets, <em>simplement.</em></h1>
-      <p class="lead">SiraKelen vous connecte aux voisins qui vont dans la même direction. Publiez votre trajet, trouvez des partenaires compatibles et divisez vos frais à Bamako.</p>
+      <h1 data-cle="accueil.titre">Partagez vos trajets, <em>simplement.</em></h1>
+      <p class="lead" data-cle="accueil.description">SiraKelen vous connecte aux voisins qui vont dans la même direction. Publiez votre trajet, trouvez des partenaires compatibles et divisez vos frais à Bamako.</p>
       <div class="hero-buttons">
         <button class="btn btn-primary" onclick="navigate('/telecharger')">${icon('i-download')} Télécharger l’application</button>
         <a class="btn btn-outline" href="${C.webApp.url}" target="_blank" rel="noopener">${icon('i-globe')} Utiliser SiraKelen Web</a>
@@ -310,6 +360,8 @@ function pageHome(){ return `
       </div>
     </div>
   </div></section>
+
+  <div id="siteNews" style="display:none"></div>
 
   <section><div class="container">
     <div class="section-head"><span class="section-label">Découvrir</span><h2>Une application pensée pour vos trajets</h2><p>Publiez, trouvez et partagez — en quelques gestes.</p></div>
@@ -340,7 +392,7 @@ function pageAbout(){ return `
     <div class="section-head"><span class="section-label">À propos</span><h2>Le projet SiraKelen</h2></div>
     <div class="two-col">
       <div>
-        <p style="color:var(--muted);font-size:16px;margin-bottom:16px">SiraKelen est une application de covoiturage urbain conçue pour Bamako. Elle permet aux habitants de publier leurs déplacements et de trouver des partenaires qui vont dans la même direction.</p>
+        <p data-cle="apropos.texte" style="color:var(--muted);font-size:16px;margin-bottom:16px">SiraKelen est une application de covoiturage urbain conçue pour Bamako. Elle permet aux habitants de publier leurs déplacements et de trouver des partenaires qui vont dans la même direction.</p>
         <p style="color:var(--muted);font-size:16px;margin-bottom:16px">Le nom « SiraKelen » signifie « chemin clair / voie partagée ». L’application s’adresse à celles et ceux qui veulent se déplacer moins cher, plus simplement et en toute confiance.</p>
         <p style="color:var(--muted);font-size:16px">Le projet est développé avec Flutter (Android et Web) et un backend NestJS / PostgreSQL.</p>
       </div>
@@ -433,6 +485,7 @@ function downloadApk(){
   if(!url){ document.getElementById('downloadStatus').textContent='Lien de téléchargement non configuré.'; return; }
   const name = 'sirakelen-v'+v.version+'-release.apk';
   document.getElementById('downloadStatus').textContent='Téléchargement en cours… ('+name+')';
+  tracerEvenement('telechargement_apk', '/telecharger');
   const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
 }
 
@@ -474,9 +527,11 @@ function pageContact(){ return `
         </div>
         <div class="card" style="margin-top:16px">
           <h3 style="font-size:20px;font-weight:800;margin-bottom:14px">Questions fréquentes</h3>
+          <div id="faqList">
           <details><summary>L’application est-elle gratuite ?${icon('i-plus')}</summary><p>Oui, SiraKelen est gratuit à télécharger et à utiliser.</p></details>
           <details><summary>Comment installer l’APK ?${icon('i-plus')}</summary><p>Téléchargez l’APK depuis la page Télécharger, puis autorisez l’installation depuis des sources inconnues sur Android.</p></details>
           <details><summary>Puis-je utiliser SiraKelen sur ordinateur ?${icon('i-plus')}</summary><p>Oui, via la version Web accessible dans tout navigateur moderne.</p></details>
+          </div>
         </div>
       </div>
     </div>

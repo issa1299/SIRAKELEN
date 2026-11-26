@@ -66,6 +66,9 @@ async function bootstrap() {
   // --- Rate limiting strict sur auth (10 req/5min par IP) ---
   app.use('/auth', rateLimit(300_000, 10));
 
+  // --- Anti force brute sur la connexion administrateur (10 essais/5min) ---
+  app.use('/admin/login', rateLimit(300_000, 10));
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
