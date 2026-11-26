@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -67,10 +68,20 @@ class AppleLoginDto {
 }
 
 import { AuthService } from './auth.service';
+import { EmailService } from './email.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly emailService: EmailService,
+  ) {}
+
+  /** Diagnostic (sans secret) : quelle stratégie d'envoi d'email est active. */
+  @Get('diagnostic-email')
+  diagnosticEmail() {
+    return { strategie: this.emailService.getStrategie() };
+  }
 
   @Post('envoyer-code')
   @HttpCode(HttpStatus.OK)

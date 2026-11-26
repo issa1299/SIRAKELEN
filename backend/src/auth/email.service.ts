@@ -56,6 +56,13 @@ export class EmailService {
     }
   }
 
+  /** Stratégie active (sans exposer les secrets) — diagnostic. */
+  getStrategie(): 'gmail-api' | 'gmail-smtp' | 'dev' {
+    if (this.oauth2) return 'gmail-api';
+    if (this.transporter) return 'gmail-smtp';
+    return 'dev';
+  }
+
   async envoyerVerification(email: string, code: string): Promise<void> {
     const subject = 'Votre code SIRA KELEN : ' + code;
     const text = `SIRA KELEN - Votre code de vérification est : ${code}\n\nCode valable 5 minutes. Ne le partagez avec personne.`;
