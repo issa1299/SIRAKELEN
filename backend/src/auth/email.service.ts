@@ -26,14 +26,18 @@ export class EmailService {
     this.from = config.get<string>('SMTP_FROM') || `SIRA KELEN <${user}>`;
 
     if (user && pass) {
+      // Port 465 (SMTPS/SSL) : fonctionne sur Render, contrairement au 587
+      // (STARTTLS) qui est souvent bloqué par l'hébergeur.
       this.transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
         auth: { user, pass },
         connectionTimeout: this.timeoutMs,
         greetingTimeout: this.timeoutMs,
         socketTimeout: this.timeoutMs,
       });
-      this.logger.log('Gmail SMTP configuré (timeout ' + this.timeoutMs + 'ms)');
+      this.logger.log('Gmail SMTP configuré (smtp.gmail.com:465 SSL, timeout ' + this.timeoutMs + 'ms)');
     } else {
       this.logger.warn('[MODE DEV] SMTP non configuré — codes dans les logs');
     }
