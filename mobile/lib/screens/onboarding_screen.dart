@@ -20,21 +20,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final _slides = const [
     _SlideData(
-      image: 'assets/1.jpeg',
+      image: 'assets/1.webp',
       eyebrow: 'VOYAGEZ MIEUX. DÉPENSEZ MOINS.',
       title: 'Réduisez vos frais de transport au quotidien.',
       description:
           'Partagez les coûts de déplacement avec des personnes qui effectuent un trajet similaire au vôtre.',
     ),
     _SlideData(
-      image: 'assets/2.jpeg',
+      image: 'assets/2.webp',
       eyebrow: 'PUBLICATION SIMPLE. MATCHING INTELLIGENT.',
       title: 'Publiez votre trajet, nous trouvons les correspondances.',
       description:
           'Déposez un avis de déplacement en quelques secondes. Notre système identifie automatiquement les utilisateurs dont l\'itinéraire est compatible avec le vôtre.',
     ),
     _SlideData(
-      image: 'assets/3.jpeg',
+      image: 'assets/3.webp',
       eyebrow: 'SÉCURITÉ, CONFIANCE ET LIBERTÉ DE CHOIX.',
       title: 'Des trajets partagés en toute confiance.',
       description:

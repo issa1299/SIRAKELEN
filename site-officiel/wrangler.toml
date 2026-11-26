@@ -1,0 +1,7 @@
+# Site officiel SIRA KELEN (vitrine) — Cloudflare Pages gratuit
+# Déploiement : npx wrangler deploy  (depuis ce dossier)
+name = "sirakelen-site"
+compatibility_date = "2026-11-19"
+
+[assets]
+directory = "."
