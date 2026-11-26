@@ -241,9 +241,21 @@ const app = document.getElementById('app');
 // Dernière version active chargée depuis le backend (source de vérité).
 let latestVersion = null;
 function chargerDerniereVersion(){
-  fetch(C.api.url + '/versions/latest?plateforme=android')
+  // Proxy Cloudflare (même origine) — évite le CORS avec Render.
+  const apiBase = (C.api && C.api.proxyUrl) || 'https://sirakelen-api-proxy.diassanaissiaka68.workers.dev';
+  fetch(apiBase + '/versions/latest?plateforme=android')
     .then(r => r.ok ? r.json() : null)
-    .then(v => { if(v){ latestVersion = v; const section=document.getElementById('downloadPageContent'); if(section){ section.innerHTML = pageDownloadContent(); } } })
+    .then(v => {
+      if(v){
+        latestVersion = v;
+        // Exposer globalement pour les autres scripts / diagnostics
+        window.SIRAKELEN_LATEST_VERSION = v;
+        const section=document.getElementById('downloadPageContent');
+        if(section){ section.innerHTML = pageDownloadContent(); }
+        // Si on est sur la page Télécharger, re-rendre complètement
+        if(location.hash.includes('telecharger')){ render(); }
+      }
+    })
     .catch(() => {});
 }
 

@@ -26,8 +26,10 @@ window.SIRAKELEN_CONFIG = {
   },
 
   // === Backend API ===
+  // Le site utilise le proxy Cloudflare (même origine) pour éviter le CORS.
   api: {
-    url: 'https://sirakele-api.onrender.com',
+    url: 'https://sirakelen-api-proxy.diassanaissiaka68.workers.dev',
+    backendUrl: 'https://sirakele-api.onrender.com',
     healthUrl: 'https://sirakele-api.onrender.com/health',
   },
 

@@ -1,0 +1,8 @@
+# Proxy API Cloudflare Worker — évite les problèmes CORS entre le site vitrine et Render.
+# Déployer : cd site-officiel/api-proxy && npx wrangler deploy
+name = "sirakelen-api-proxy"
+main = "index.js"
+compatibility_date = "2026-11-19"
+
+[vars]
+BACKEND_URL = "https://sirakele-api.onrender.com"
