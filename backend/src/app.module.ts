@@ -11,6 +11,14 @@ import { ContactUrgence } from './contact-urgence/contact-urgence.entity';
 import { CodeVerification } from './auth/code-verification.entity';
 import { Message } from './messages/message.entity';
 import { AppVersion } from './versions/app-version.entity';
+import { AdminLog } from './admin/admin-log.entity';
+import { Evenement } from './evenements/evenement.entity';
+import { Notification } from './notifications/notification.entity';
+import { NotificationToken } from './notifications/notification-token.entity';
+import { SiteContenu } from './site-contenu/site-contenu.entity';
+import { SiteNews } from './site-contenu/site-news.entity';
+import { SiteFaq } from './site-contenu/site-faq.entity';
+import { PlateformeModule } from './plateforme.module';
 import { VersionsModule } from './versions/versions.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
@@ -34,7 +42,7 @@ import { MessagesModule } from './messages/messages.module';
             type: 'postgres' as const,
             url: databaseUrl,
             ssl: { rejectUnauthorized: false },
-            entities: [User, AvisDeplacement, Demande, Signalement, ContactUrgence, CodeVerification, Message, AppVersion],
+            entities: [User, AvisDeplacement, Demande, Signalement, ContactUrgence, CodeVerification, Message, AppVersion, AdminLog, Evenement, Notification, NotificationToken, SiteContenu, SiteNews, SiteFaq],
             synchronize: true,
           };
         }
@@ -60,6 +68,7 @@ import { MessagesModule } from './messages/messages.module';
     UploadModule,
     AdminModule,
     MessagesModule,
+    PlateformeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

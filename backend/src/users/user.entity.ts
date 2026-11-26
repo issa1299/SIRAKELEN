@@ -9,6 +9,14 @@ import {
 import { ContactUrgence } from '../contact-urgence/contact-urgence.entity';
 import { AvisDeplacement } from '../ads/avis-deplacement.entity';
 import { Demande } from '../demandes/demande.entity';
+import { AdminRole } from '../admin/admin-role.enum';
+
+/** État du compte (modération). */
+export enum StatutUtilisateur {
+  ACTIF = 'actif',
+  SUSPENDU = 'suspendu',
+  BANNI = 'banni',
+}
 
 @Entity('users')
 export class User {
@@ -38,6 +46,20 @@ export class User {
 
   @Column({ default: false })
   admin: boolean;
+
+  /** Rôle administrateur (null = simple utilisateur). */
+  @Column({ type: 'enum', enum: AdminRole, nullable: true })
+  adminRole: AdminRole | null;
+
+  /** État du compte pour la modération. */
+  @Column({ type: 'enum', enum: StatutUtilisateur, default: StatutUtilisateur.ACTIF })
+  statut: StatutUtilisateur;
+
+  @Column({ length: 200, nullable: true })
+  motifSuspension: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  suspenduLe: Date | null;
 
   @Column({ length: 120, nullable: true })
   motDePasse: string;
