@@ -25,21 +25,31 @@ C:\Users\USER\OneDrive\Documentos\Default Project\sirakele\release-apk-sirakelen
 
 Taille réelle : **~55,0 Mo** (build Release optimisé, jamais un debug).
 
+### État actuel (version 1.0.0)
+
+✅ Le **vrai APK Release** (54,97 Mo) est déjà publié sur GitHub Releases sous le nom `sirakelen-v1.0.0-release.apk`. L'ancien APK Debug (188 Mo) a été supprimé de la release. Le bouton du site pointe vers ce fichier release.
+
+Lien direct : `https://github.com/issa1299/SIRAKELEN/releases/latest/download/sirakelen-v1.0.0-release.apk`
+
 ### Pour publier une nouvelle version (procédure simple)
 
-1. **Uploader l'APK sur GitHub Releases** :
-   - Va sur https://github.com/issa1299/SIRAKELEN/releases
-   - « Draft a new release » → tag `v1.0.0`, titre `SiraKelen v1.0.0`
-   - Glisse le fichier `release-apk-sirakelen-v1.0.0.apk`
-   - **Publish release**
-
-2. **Mettre à jour `config.js`** (une seule ligne) :
-   ```js
-   apkUrl: 'https://github.com/issa1299/SIRAKELEN/releases/latest/download/sirakelen-v1.0.0-release.apk',
+1. **Construire l'APK release** :
+   ```bash
+   cd mobile
+   flutter build apk --release
    ```
-   (le nom du fichier attaché doit correspondre exactement)
+   Récupérer `build/app/outputs/flutter-apk/app-release.apk` ( Release, jamais Debug).
 
-3. **Mettre à jour les infos de version** dans `config.js` : `version`, `buildNumber`, `releaseDate`, `apkSizeMiB`, `apkFileName`.
+2. **Remplacer l'asset sur GitHub Releases** (API, avec un token GitHub) :
+   ```bash
+   # Supprimer l'ancien asset puis uploader le nouveau
+   # GET  https://api.github.com/repos/issa1299/SIRAKELEN/releases/latest
+   # DELETE https://api.github.com/repos/issa1299/SIRAKELEN/releases/assets/<ancien_id>
+   # POST  https://uploads.github.com/repos/issa1299/SIRAKELEN/releases/<release_id>/assets?name=sirakelen-vX.Y.Z-release.apk
+   ```
+   Ou manuellement dans l'interface GitHub : éditer la release, supprimer l'ancien APK, glisser le nouveau.
+
+3. **Mettre à jour `config.js`** (infos de version) : `version`, `buildNumber`, `releaseDate`, `apkFileName`, `apkSizeMiB`, et `apkUrl` si le nom du fichier change.
 
 4. **Redéployer le site** :
    ```bash
