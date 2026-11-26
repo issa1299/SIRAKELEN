@@ -26,6 +26,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _chargement = false;
   String? _erreur;
 
+  /// Google sur web nécessite un clientId OAuth (--dart-define=googleClientId).
+  static const _googleClientId = String.fromEnvironment('googleClientId');
+  bool get _googleDisponible => !kIsWeb || _googleClientId.isNotEmpty;
+
   @override
   void dispose() {
     _prenom.dispose();
@@ -82,10 +86,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _erreur = null;
     });
     try {
-      const googleClientId = String.fromEnvironment('googleClientId');
+      if (!_googleDisponible) {
+        setState(() {
+          _erreur = 'Connexion Google indisponible sur le web. Utilise ton email.';
+          _chargement = false;
+        });
+        return;
+      }
       final googleUser = await GoogleSignIn(
         scopes: ['email', 'profile'],
-        clientId: kIsWeb && googleClientId.isNotEmpty ? googleClientId : null,
+        clientId: kIsWeb ? _googleClientId : null,
       ).signIn();
       if (googleUser == null) {
         setState(() => _chargement = false);
@@ -267,10 +277,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _pastilleSocial(
-                            onTap: _chargement ? null : _signInWithGoogle,
-                            enfant: Image.asset('assets/googlelogo.webp', width: 22, height: 22),
-                          ),
+                          if (_googleDisponible)
+                            _pastilleSocial(
+                              onTap: _chargement ? null : _signInWithGoogle,
+                              enfant: Image.asset('assets/googlelogo.webp', width: 22, height: 22),
+                            ),
                           if (!kIsWeb &&
                               defaultTargetPlatform == TargetPlatform.iOS) ...[
                             const SizedBox(width: 14),

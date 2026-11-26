@@ -21,6 +21,13 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _erreur;
   bool _chargement = false;
 
+  /// Sur le web, Google Sign-In exige un clientId OAuth configuré via
+  /// --dart-define=googleClientId=... Sans clientId, le plugin plante
+  /// ("Null check operator used on a null value"). On masque donc le bouton
+  /// plutôt que d'afficher une action qui ne peut pas fonctionner.
+  static const _googleClientId = String.fromEnvironment('googleClientId');
+  bool get _googleDisponible => !kIsWeb || _googleClientId.isNotEmpty;
+
   @override
   void dispose() {
     _controller.dispose();
@@ -92,10 +99,16 @@ class _LoginScreenState extends State<LoginScreen> {
       _erreur = null;
     });
     try {
-      const googleClientId = String.fromEnvironment('googleClientId');
+      if (!_googleDisponible) {
+        setState(() {
+          _erreur = 'Connexion Google indisponible sur le web. Utilise ton email.';
+          _chargement = false;
+        });
+        return;
+      }
       final googleUser = await GoogleSignIn(
         scopes: ['email', 'profile'],
-        clientId: kIsWeb && googleClientId.isNotEmpty ? googleClientId : null,
+        clientId: kIsWeb ? _googleClientId : null,
       ).signIn();
       if (googleUser == null) {
         setState(() => _chargement = false);
@@ -309,10 +322,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _pastilleSocial(
-                            onTap: _chargement ? null : _signInWithGoogle,
-                            enfant: Image.asset('assets/googlelogo.webp', width: 22, height: 22),
-                          ),
+                          if (_googleDisponible)
+                            _pastilleSocial(
+                              onTap: _chargement ? null : _signInWithGoogle,
+                              enfant: Image.asset('assets/googlelogo.webp', width: 22, height: 22),
+                            ),
                           if (!kIsWeb &&
                               defaultTargetPlatform == TargetPlatform.iOS) ...[
                             const SizedBox(width: 14),
