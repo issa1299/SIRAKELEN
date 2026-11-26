@@ -201,12 +201,18 @@ export class AdminService {
   async activiteRecente() {
     const [utilisateurs, annonces, signalements, logs] = await Promise.all([
       this.userRepo.find({
-        select: ['id', 'prenom', 'nom', 'creeLe'] as any,
+        select: { id: true, prenom: true, nom: true, creeLe: true },
         order: { creeLe: 'DESC' },
         take: 5,
       }),
       this.adRepo.find({
-        select: ['id', 'depart', 'destination', 'statut', 'creeLe'] as any,
+        select: {
+          id: true,
+          depart: true,
+          destination: true,
+          statut: true,
+          creeLe: true,
+        },
         order: { creeLe: 'DESC' },
         take: 5,
       }),
@@ -217,7 +223,15 @@ export class AdminService {
       }),
       this.logRepo.find({ order: { creeLe: 'DESC' }, take: 10 }),
     ]);
-    return { utilisateurs, annonces, signalements, logs };
+    return {
+      utilisateurs,
+      annonces,
+      signalements: signalements.map((s) => ({
+        ...s,
+        auteur: s.auteur ? this.nettoyer(s.auteur as any) : null,
+      })),
+      logs,
+    };
   }
 
   // ------------------------------------------------------------------
@@ -419,6 +433,9 @@ export class AdminService {
       utilisateurSignale: s.utilisateurSignale
         ? this.nettoyer(s.utilisateurSignale as any)
         : null,
+      ad: s.ad
+        ? { ...s.ad, proprietaire: s.ad.proprietaire ? this.nettoyer(s.ad.proprietaire as any) : null }
+        : null,
     }));
   }
 
@@ -449,11 +466,15 @@ export class AdminService {
   // ------------------------------------------------------------------
 
   async findAllDemandes() {
-    return this.demandeRepo.find({
+    const demandes = await this.demandeRepo.find({
       relations: { ad: true, demandeur: true },
       order: { creeLe: 'DESC' },
       take: 500,
     });
+    return demandes.map((d) => ({
+      ...d,
+      demandeur: d.demandeur ? this.nettoyer(d.demandeur as any) : null,
+    }));
   }
 
   // ------------------------------------------------------------------

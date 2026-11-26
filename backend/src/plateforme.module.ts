@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdminModule } from './admin/admin.module';
+import { User } from './users/user.entity';
 
 import { Evenement } from './evenements/evenement.entity';
 import { EvenementsService } from './evenements/evenements.service';
@@ -25,6 +26,7 @@ import { SauvegardesController } from './sauvegardes/sauvegardes.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
+      User,
       Evenement,
       Notification,
       NotificationToken,
