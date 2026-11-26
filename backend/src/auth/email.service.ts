@@ -1,38 +1,31 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
-import { Resend } from 'resend';
 
 /**
- * Envoi des codes de verification par email.
+ * Envoi des codes de vérification par email via GMAIL SMTP uniquement.
  *
- * Stratégie (ordre de préférence) :
- *  1. Resend (API HTTPS) — recommandé sur Render : aucun port SMTP bloqué.
- *  2. Gmail SMTP — fallback local, avec timeout court pour ne jamais bloquer la réponse.
- *  3. Mode dev — code affiché dans les logs si aucun service n'est configuré.
+ * Un timeout court (8s) est appliqué à chaque envoi : sur Render, le port SMTP
+ * peut être lent/bloqué. Sans timeout, l'endpoint REST bloquait indéfiniment et
+ * le client affichait « Serveur en démarrage » en boucle.
  *
- * Dans TOUS les cas l'envoi est borné dans le temps : l'endpoint API répond
- * rapidement même si le fournisseur d'email est indisponible.
+ * Le code est de toute façon sauvegardé (hashé) en base AVANT l'envoi : même si
+ * Gmail échoue, l'endpoint répond vite et le code reste valable 5 minutes.
  */
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private readonly transporter?: nodemailer.Transporter;
-  private readonly resend?: Resend;
   private readonly from: string;
   private readonly timeoutMs = 8000;
 
   constructor(private readonly config: ConfigService) {
     const user = config.get<string>('SMTP_USER') || '';
     const pass = config.get<string>('SMTP_PASS') || '';
-    const resendKey = config.get<string>('RESEND_API_KEY') || '';
 
     this.from = config.get<string>('SMTP_FROM') || `SIRA KELEN <${user}>`;
 
-    if (resendKey) {
-      this.resend = new Resend(resendKey);
-      this.logger.log('Resend API configuré (envoi email HTTPS)');
-    } else if (user && pass) {
+    if (user && pass) {
       this.transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: { user, pass },
@@ -42,63 +35,40 @@ export class EmailService {
       });
       this.logger.log('Gmail SMTP configuré (timeout ' + this.timeoutMs + 'ms)');
     } else {
-      this.logger.warn('[MODE DEV] Aucun service email configuré — codes dans les logs');
+      this.logger.warn('[MODE DEV] SMTP non configuré — codes dans les logs');
     }
   }
 
   async envoyerVerification(email: string, code: string): Promise<void> {
-    const html = this.templateHtml(code);
-    const text = `SIRA KELEN - Votre code de vérification est : ${code}\n\nCode valable 5 minutes. Ne le partagez avec personne.`;
+    if (!this.transporter) {
+      this.logger.warn(`[MODE DEV] Code pour ${email} : ${code}`);
+      return;
+    }
 
     try {
-      if (this.resend) {
-        await this.withTimeout(
-          this.resend.emails.send({
-            from: this.from.includes('<')
-              ? this.from
-              : `SIRA KELEN <${this.from}>`,
-            to: [email],
-            subject: 'Votre code SIRA KELEN : ' + code,
-            html,
-            text,
-          }),
-          'Resend',
-        );
-        this.logger.log(`Email envoyé à ${email} (Resend)`);
-        return;
-      }
-
-      if (this.transporter) {
-        await this.withTimeout(
-          this.transporter.sendMail({
-            from: this.from,
-            to: email,
-            subject: 'Votre code SIRA KELEN : ' + code,
-            text,
-            html,
-          }),
-          'Gmail SMTP',
-        );
-        this.logger.log(`Email envoyé à ${email} (Gmail)`);
-        return;
-      }
-
-      // Mode dev : pas de service, on log le code pour permettre la connexion.
-      this.logger.warn(`[MODE DEV] Code pour ${email} : ${code}`);
+      await this.withTimeout(
+        this.transporter.sendMail({
+          from: this.from,
+          to: email,
+          subject: 'Votre code SIRA KELEN : ' + code,
+          text: `SIRA KELEN - Votre code de vérification est : ${code}\n\nCode valable 5 minutes. Ne le partagez avec personne.`,
+          html: this.templateHtml(code),
+        }),
+      );
+      this.logger.log(`Email envoyé à ${email} (Gmail SMTP)`);
     } catch (error: any) {
-      // Ne jamais faire échouer l'endpoint : le code est déjà en base,
-      // l'utilisateur peut réessayer ou le code est visible en dev.
-      this.logger.error(`Envoi email échoué: ${error?.message || error}`);
+      // Ne jamais faire échouer l'endpoint : le code est déjà en base.
+      this.logger.error(`Gmail SMTP échoué: ${error?.message || error}`);
       this.logger.warn(`[FALLBACK] Code pour ${email} : ${code}`);
     }
   }
 
-  /** borne une promesse dans le temps pour ne jamais bloquer l'endpoint. */
-  private async withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
+  /** Borne une promesse dans le temps pour ne jamais bloquer la réponse. */
+  private async withTimeout<T>(promise: Promise<T>): Promise<T> {
     let timer: NodeJS.Timeout;
     const timeout = new Promise<never>((_, reject) => {
       timer = setTimeout(
-        () => reject(new Error(`${label} timeout après ${this.timeoutMs}ms`)),
+        () => reject(new Error(`Gmail SMTP timeout après ${this.timeoutMs}ms`)),
         this.timeoutMs,
       );
     });
