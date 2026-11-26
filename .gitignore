@@ -14,3 +14,7 @@ build/
 backend/dist/
 
 backend/uploads/
+
+# APK release (hébergé sur GitHub Releases, pas dans le repo)
+release-apk-sirakelen-v*.apk
+*.apk
