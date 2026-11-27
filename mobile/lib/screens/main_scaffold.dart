@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../widgets/responsive_wrapper.dart';
+import 'conversations_screen.dart';
 import 'home_screen.dart';
 
 // Ecrans lourds charges a la demande (deferred loading).
@@ -29,7 +30,10 @@ class _MainScaffoldState extends State<MainScaffold> {
   Widget build(BuildContext context) {
     Widget corps;
     switch (_onglet) {
-      case 2:
+      case 1:
+        corps = ConversationsScreen(userId: widget.userId);
+        break;
+      case 3:
         corps = FutureBuilder<void>(
           future: profilDeferred.loadLibrary(),
           builder: (context, snapshot) {
@@ -73,7 +77,7 @@ class _MainScaffoldState extends State<MainScaffold> {
             child: BottomNavigationBar(
               currentIndex: _onglet,
               onTap: (i) async {
-                if (i == 1) {
+                if (i == 2) {
                   await publierDeferred.loadLibrary();
                   if (!mounted) return;
                   await Navigator.push(
@@ -102,6 +106,10 @@ class _MainScaffoldState extends State<MainScaffold> {
                     icon: Icon(Icons.home_outlined),
                     activeIcon: Icon(Icons.home_rounded),
                     label: 'Accueil'),
+                const BottomNavigationBarItem(
+                    icon: Icon(Icons.chat_bubble_outline_rounded),
+                    activeIcon: Icon(Icons.chat_bubble_rounded),
+                    label: 'Messages'),
                 const BottomNavigationBarItem(
                     icon: Icon(Icons.add_circle_outline_rounded),
                     activeIcon: Icon(Icons.add_circle_rounded),

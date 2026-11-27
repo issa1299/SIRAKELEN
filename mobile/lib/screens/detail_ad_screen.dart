@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/api_service.dart';
 import '../services/whatsapp_helper.dart';
+import '../widgets/mini_trajet_map.dart';
 import '../widgets/responsive_wrapper.dart';
 import 'profil_autre_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -160,30 +161,8 @@ class _DetailAdScreenState extends State<DetailAdScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            // Map placeholder
-            Container(
-              height: 120,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFF5F3EE), Color(0xFFEDE9E0)],
-                ),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: kBorder),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.map_outlined, color: kTextSecondary.withAlpha(100), size: 36),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Carte à venir',
-                      style: TextStyle(fontSize: 12, color: kTextSecondary.withAlpha(150)),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            // Carte réelle de l'itinéraire (OSM + trajet OSRM).
+            _carteTrajet(),
             const SizedBox(height: 16),
             // Recap rows
             _recapRow(Icons.route_rounded, 'Trajet', '${_ad!['depart']} → ${_ad!['destination']}'),
@@ -344,6 +323,40 @@ class _DetailAdScreenState extends State<DetailAdScreen> {
             ),
           ],
         ),
+        ),
+      ),
+    );
+  }
+
+  Widget _carteTrajet() {
+    final depLat = (_ad!['departLat'] as num?)?.toDouble();
+    final depLng = (_ad!['departLng'] as num?)?.toDouble();
+    final arrLat = (_ad!['arriveeLat'] as num?)?.toDouble();
+    final arrLng = (_ad!['arriveeLng'] as num?)?.toDouble();
+    final hasCoords = depLat != null &&
+        depLng != null &&
+        arrLat != null &&
+        arrLng != null;
+    if (hasCoords) {
+      return MiniTrajetMap(ad: _ad!, height: 140);
+    }
+    return Container(
+      height: 120,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F3EE),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: kBorder),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.map_outlined,
+                color: kTextSecondary.withAlpha(120), size: 32),
+            const SizedBox(height: 6),
+            Text('Coordonnées indisponibles pour ce trajet',
+                style: TextStyle(fontSize: 12, color: kTextSecondary)),
+          ],
         ),
       ),
     );

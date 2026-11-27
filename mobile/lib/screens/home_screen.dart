@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/api_service.dart';
+import '../services/notification_read_service.dart';
 import '../services/trip_selection.dart';
 import '../widgets/empty_home.dart';
 import '../widgets/hero_trip_card.dart';
@@ -38,6 +39,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _trajets = [];
   List<Map<String, dynamic>> _demandesRecues = [];
+  int _nbNonLus = 0;
   bool _chargement = true;
   String? _erreur;
   TrajetEnVedetteResult? _vedette;
@@ -79,6 +81,9 @@ class _HomeScreenState extends State<HomeScreen> {
         _vedette = vedette;
         _chargement = false;
       });
+      final nonLues =
+          await NotificationReadService.nonLues(_demandesRecues);
+      if (mounted) setState(() => _nbNonLus = nonLues.length);
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -122,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return '${jours[m.weekday - 1]} ${m.day} ${mois[m.month - 1]}';
   }
 
-  int get _nbATraiter => _demandesRecues.length;
+  int get _nbATraiter => _nbNonLus;
 
   Widget _sectionTitle(String title, {int? count}) {
     return Padding(
@@ -370,7 +375,55 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 14),
+
+              // Accès permanent à tous les trajets disponibles.
+              InkWell(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ParcourirAdsScreen(userId: widget.userId),
+                  ),
+                ),
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: kBorder),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: kOrangeLight,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.explore_rounded,
+                            color: kOrange, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Parcourir tous les trajets disponibles',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: kTextPrimary,
+                          ),
+                        ),
+                      ),
+                      Icon(Icons.chevron_right_rounded,
+                          color: kTextSecondary, size: 20),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
 
               // ===== Chargement / Erreur =====
               if (_chargement) ...[
