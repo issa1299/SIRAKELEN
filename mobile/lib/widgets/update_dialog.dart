@@ -3,10 +3,12 @@
 /// - Bouton Télécharger : ouvre l'URL de l'APK Release dans le navigateur.
 /// - Bouton Plus tard : uniquement si la mise à jour est facultative.
 /// - Si obligatoire : la fenêtre ne peut pas être fermée (barrierDismissible: false).
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../main.dart';
 import '../services/update_service.dart';
+import 'update_reload_stub.dart' if (dart.library.html) 'update_reload_web.dart';
 
 class UpdateDialog extends StatelessWidget {
   final AppVersionInfo version;
@@ -28,6 +30,11 @@ class UpdateDialog extends StatelessWidget {
   }
 
   Future<void> _telecharger() async {
+    if (kIsWeb) {
+      // Sur Web, la mise à jour est déjà déployée : on recharge la page.
+      await rechargerApplication();
+      return;
+    }
     final url = version.apkUrl;
     if (url == null || url.isEmpty) return;
     final uri = Uri.parse(url);
@@ -145,8 +152,8 @@ class UpdateDialog extends StatelessWidget {
             Navigator.pop(context, true);
             _telecharger();
           },
-          icon: const Icon(Icons.download_rounded, size: 18),
-          label: const Text('Télécharger'),
+          icon: Icon(kIsWeb ? Icons.refresh_rounded : Icons.download_rounded, size: 18),
+          label: Text(kIsWeb ? 'Recharger' : 'Télécharger'),
         ),
       ],
     );

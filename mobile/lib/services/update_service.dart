@@ -106,7 +106,11 @@ class UpdateService {
     return false;
   }
 
+  /// Le suffixe "+N" est un numéro de build, pas un segment de version :
+  /// "1.0.0+2" doit se comparer comme "1.0.0".
   static List<int> _parties(String v) => v
+      .split('+')
+      .first
       .split(RegExp(r'[^0-9]+'))
       .where((s) => s.isNotEmpty)
       .map((s) => int.tryParse(s) ?? 0)
