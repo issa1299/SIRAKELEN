@@ -7,8 +7,8 @@ import 'package:sirakele/widgets/update_dialog.dart';
 AppVersionInfo fakeVersion({bool obligatoire = false, String plateforme = 'android'}) {
   return AppVersionInfo(
     id: 'test-id-$obligatoire-$plateforme',
-    version: '1.0.1',
-    buildNumber: 2,
+    version: '1.0.2',
+    buildNumber: 3,
     plateforme: plateforme,
     apkUrl: 'https://example.test/app.apk',
     tailleOctets: 57640386,
@@ -89,8 +89,8 @@ void main() {
     final premiere = fakeVersion();
     final suivante = AppVersionInfo(
       id: 'autre-id',
-      version: '1.0.2',
-      buildNumber: 3,
+      version: '1.0.3',
+      buildNumber: 4,
       plateforme: 'android',
       apkUrl: 'https://example.test/app.apk',
       notes: 'Autre version',
@@ -105,14 +105,14 @@ void main() {
       ),
     ));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Version 1.0.1'), findsOneWidget);
+    expect(find.textContaining('Version 1.0.2'), findsOneWidget);
     await tester.tap(find.text('Plus tard'));
     await tester.pumpAndSettle();
 
     courante = suivante;
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
-    expect(find.textContaining('Version 1.0.2'), findsOneWidget);
+    expect(find.textContaining('Version 1.0.3'), findsOneWidget);
   });
 
   testWidgets('web : dialogue propose Recharger et non Télécharger (widget Android testé)',

@@ -57,12 +57,12 @@ class AppVersionInfo {
 }
 
 class UpdateService {
-  /// Version installée (sync avec pubspec.yaml : 1.0.0+1).
+  /// Version installée (sync avec pubspec.yaml : 1.0.1+2).
   ///
-  /// À mettre à jour en même temps que pubspec.yaml lors d'uneRelease :
-  /// `version: 1.0.1+2` → versionInstallee = '1.0.1', buildInstalle = 2.
-  static const String versionInstallee = '1.0.0';
-  static const int buildInstalle = 1;
+  /// À mettre à jour en même temps que pubspec.yaml lors d'une release :
+  /// `version: X.Y.Z+N` → versionInstallee = 'X.Y.Z', buildInstalle = N.
+  static const String versionInstallee = '1.0.1';
+  static const int buildInstalle = 2;
 
   /// Récupère la dernière version active pour la plateforme courante.
   static Future<AppVersionInfo?> verifierDerniereVersion() async {

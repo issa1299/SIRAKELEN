@@ -10,8 +10,8 @@ import 'package:sirakele/widgets/update_dialog.dart';
 
 AppVersionInfo versionWeb() => AppVersionInfo(
       id: 'web-test',
-      version: '1.0.1',
-      buildNumber: 2,
+      version: '1.0.2',
+      buildNumber: 3,
       plateforme: 'web',
       apkUrl: null,
       notes: 'Nouveautés Web',
